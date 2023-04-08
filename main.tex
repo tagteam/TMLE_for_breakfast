@@ -1,0 +1,130 @@
+\documentclass{article}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage{dsfont}
+\newcommand{\A}[1]{A(#1)}
+\renewcommand{\L}[1]{L(#1)}
+\newcommand{\Y}[1]{Y(#1)}
+\newcommand{\C}[1]{C(#1)}
+\newcommand{\Ytilde}[1]{\tilde{Y}(#1)}
+\newcommand{\X}[1]{X(#1)}
+\newcommand{\Ystar}[2]{Y^{(#1)}(#2)}
+\newcommand{\Asubs}[2]{A_{#1}(#2)}
+\newcommand{\Lsubs}[2]{L_{#1}(#2)}
+\newcommand{\Ysubs}[2]{Y_{#1}(#2)}
+\newcommand{\Csubs}[2]{C_{#1}(#2)}
+\newcommand{\Ytsubs}[2]{\tilde{Y}_{#1}(#2)}
+\newcommand{\F}[2]{\mathcal{F}_{#1(#2)}}
+\newcommand{\Lbar}[1]{\tilde{L}(#1)}
+\newcommand{\Abar}[1]{\tilde{A}(#1)}
+\newcommand{\modelx}{\ensuremath{\tilde{\mathcal{P}}}}
+\renewcommand{\P}{\ensuremath{\operatorname{P}}}
+\renewcommand{\d}{\ensuremath{\mathrm{d}}}
+\title{TMLE for breakfast}
+\author{Emilie Wessel S{\o}gaard \& Thomas Alexander Gerds}
+\date{March 2023}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+We denote the observed data by $\textbf{X}=(L,A,Y)\sim \P_X\in\modelx $. We assume that the model \modelx\ is dominated by a \(\sigma-\)finite measure $\mu$ and use the notation \(\P_X(\d x)\) for the Radon-Nikodym derivative of the probability measure induced by \(X\). For a measurable function \(f\) of the data we use the notation 
+$$\P f=\int f(x)P(\d x).$$ 
+We denote the (conditional) distributions by
+\begin{align*}
+    Q_Y(\d y\mid a,l)&=\P_{Y\mid A, L}(\d y\mid A=a, L = l)\\
+    G_A(\d a\mid l)&=\P_{A\mid L}(\d a\mid L = l)\\
+    Q_L(\d l)&=\P_L(\d l),
+\end{align*}
+and we recall that we may factorize $\P$ as 
+$$\P(dx)=Q_Y(dy\mid a,l)G_A(da\mid l)Q_L(dl).$$
+Then we may write 
+$$\P f=Q_LG_AQ_Yf=\int\int\int f(x)Q_Y(dy\mid a,l)G_A(da\mid l)Q_L(dl),$$
+using standard operator notation.
+\section{One time point, no censoring}
+We consider the data, $\textbf{X}=(X_1,X_2,X_3)=(\L{0},\A{0},\Y{1})\sim \P\in\mathcal{P}$. As before, we assume that the model is dominated by a measure, \(\mu\), and has a Radon-Nikodym density such that $\P=\frac{d\P}{d\mu}$. The outcome, $Y(1)\in\{0,1,2\}$, is a discrete time multi-state process, where a value of two indicates a competing risk event. 
+Our target parameter is the intervention-specific average treatment effect given by
+$$\psi(\tilde{P})=\tilde{P}(\Ystar{1}{1}=1)-\tilde{P}(\Ystar{1}{0}=1),$$
+where $\Ystar{1}{1}$ and $\Ystar{0}{1}$ are counterfactuals, and $(\L{0},\Ystar{1}{1},\Ystar{0}{1})\sim\tilde{P}\in\tilde{\mathcal{P}}$. We are considering the simple case of degenerate interventions, where the treatment is set to either one or zero for every time point. However, the following computations generalize to all kinds of static and dynamic regimes. A dynamic regime is a collection of deterministic functions for assigning treatment as a function of the past $L$ nodes. We let $G^*_{\A{0}}(da\mid l)$ denote counterfactual the distribution of $\A{0}$, which in our case is just the degenerate distribution, $\delta_d(a)=\mathds{1}\{a=d\}$, for $d$ equal to one, respectively, zero. We wish to express the target parameter, $\psi(\tilde{P})$, as a functional of the distribution, $P$, in order to suggest useful estimators, i.e., we want to find $\theta$ such that $\psi(\tilde{P})=\theta(P)$. Since the marginal distribution of $\L{0}$ does not change going from the observational world to the counterfactual, we have that
+\begin{align*}
+    \tilde{P}(\Ystar{1}{1}=1)&=\int\tilde{P}(\Ystar{1}{1}=1\mid \L{0}=l)P_{\L{0}}(dl)\\
+    &=\int\tilde{P}(\Ystar{1}{1}=1\mid \A{0}=a,\L{0}=l)G^*_{\A{0}}(da)P_{\L{0}}(dl)\\
+    &=\int P(\Y{1}=1\mid \A{0}=a,\L{0}=l)G^*_{\A{0}}(da)P_{\L{0}}(dl)\\
+    &=\int Q_{\Y{1}}(1\mid a,l)G^*_{\A{0}}(da)Q_{\L{0}}(dl)=Q_{\L{0}}G^*_{\A{0}}Q_{\Y{1}}f,
+\end{align*}
+for $f(\textbf{X})=\mathds{1}\{\Y{1}=1\}$, using the notation which was previously introduced. Observe that the second equality is true assuming no unmeasured confounders, and the third equality follows from the consistency assumption. If we assume positivity of the propensity score, $G_{\A{0}}(1\mid l)=P_{\A{0}\mid \L{0}}(\A{0}=1\mid \L{0}=l)$, we moreover obtain that
+\begin{align*}
+    \int Q_{\Y{1}}(1\mid a,l)G^*_{\A{0}}(da)Q_{\L{0}}(l)=&\int\frac{Q_{\Y{1}}(1,a\mid l)}{G_{\A{0}}(a\mid l)}G^*_{\A{0}}(da)Q_{\L{0}}(dl)\\
+    =&\int\frac{Q_{\Y{1}}(1,1\mid l)}{G_{\A{0}}(1\mid l)}(da)Q_{\L{0}}(dl).
+\end{align*}
+The calculations above give rise to two different estimators, which are as follows.
+\begin{align*}
+    &\frac{1}{n}\sum_{i=1}^n\hat{Q}_{\Y{1}}(1\mid 1,\Lsubs{i}{0})\tag{G-formula}\\
+    &\frac{1}{n}\sum_{i=1}^n\frac{\mathds{1}\{\Ysubs{i}{1}=1\}\Asubs{i}{0}}{\hat{G}_{\Asubs{i}{0}}(1\mid \Lsubs{i}{0})}.\tag{IPTW}
+\end{align*}
+\section{One time point with censoring}
+In addition to previous assumptions, we now assume conditionally independent right-censoring given by the censoring variable, $\C{1}\in\{0,1\},$ where a value of zero indicates that the event has been censored. The observed outcome is thus given by $\Ytilde{1}=\C{1}\Y{1}$. If we assume positivity of the conditional censoring distribution, $G_{\C{1}}(1\mid a,l)=P_{\C{1}\mid \A{0},\L{0}}(\C{1}=1\mid \A{0}=a, \L{0}=l)$, we obtain by computations similar to previous ones,
+\begin{align*}
+    \tilde{P}(\Ystar{1}{1}=1)&=\int Q_{\Y{1}}(1\mid a,l)G^*_{\A{0}}(da)Q_{\L{0}}(dl)\\
+    &=\int\frac{G_{\C{1}}(1\mid a,l)}{G_{\C{1}}(1\mid a,l)}Q_{\Y{1}}(1\mid a,l)G^*_{\A{0}}(da)Q_{\L{0}}(dl)\\
+    &=\int\frac{Q_{\Ytilde{1}}(1\mid a,l)}{G_{\C{1}}(1\mid a,l)}G^*_{\A{0}}(da)Q_{\L{0}}(dl)\\
+    &=\int\frac{Q_{\Ytilde{1},\A{0}}(1,a\mid l)}{G_{\C{1}}(1\mid a,l)G_{\A{0}}(1\mid l)}G^*_{\A{0}}(da)Q_{\L{0}}(dl)\\
+    &=\int\frac{Q_{\Ytilde{1},\A{0}}(1,1\mid l)}{G_{\C{1}}(1\mid 1,l)G_{\A{0}}(1\mid l)}Q_{\L{0}}(dl),
+\end{align*}
+where the second equality follows from the assumption on conditional independent censoring. This gives rise to the estimator,
+\begin{align*}
+    &\frac{1}{n}\sum_{i=1}^n\frac{\mathds{1}\{\Ytsubs{i}{1}=1\}\Asubs{i}{0}}{\hat{G}_{\C{1}}(1\mid 1,\Lsubs{i}{0})\hat{G}_{\A{0}}(1\mid \Lsubs{i}{0})}.\tag{IPCW}
+\end{align*}
+\section{Multiple time points, no censoring}
+We consider data, $\textbf{X}=(\L{0},\A{0},\Y{1},\L{1},\A{1},\Y{2}).$ We will use the notation, $\textbf{X}=(X_1,...,X_6)$ for ease of notation. We denote the history of a variable by an overbar, e.g., $$\bar{A}(1)=(\L{0},\A{0},\Y{1},\L{1},\A{1})=(X_1,...,X_5)=\bar{X}_5.$$ We use $\mathcal{F}$ to denote the filtration with respect to a given variable, e.g., $\F{Y}{2}=(\L{0},\A{0},\Y{1},\L{1},\A{1})$. Recall that we may factorize the density as 
+\begin{align*}
+dP_{\textbf{X}}=&dP_{\Y{2}\mid \F{Y}{2}}dP_{\A{1}\mid \F{A}{1}}dP_{\L{1}\mid \F{L}{1}}dP_{\Y{1}\mid \F{Y}{1}}dP_{\A{0}\mid \F{A}{0}}dP_{\L{0}}\\
+=&Q_{\Y{2}}G_{\A{1}}Q_{\L{1}}Q_{\Y{1}}G_{\A{0}}Q_{\L{0}},
+\end{align*}
+using the notation from before. We furthermore recall the notation,
+\begin{align*}
+    Pf&=\int f(x) dP(x)\\&=\iiint\!\!\!\iiint f(x) Q_{\Y{2}}(dy\mid \bar{X}_5)G_{\A{1}}(da\mid \bar{X}_4)\cdots Q_{\L{0}}(dl)\\&=Q_{\L{0}}G_{\A{0}}Q_{\Y{1}}Q_{\L{1}}G_{\A{1}}Q_{\Y{2}}f,
+\end{align*}
+for some function of the data, $f(\textbf{X}).$ Using that we may factorize the distribution as, $\tilde{P}_{\Lbar{1}}(dx)=\tilde{P}_{\L{1}\mid \F{L}{1}}\tilde{P}_{\Y{1}\mid \F{Y}{1}}\tilde{P}_{\A{0}\mid \F{A}{0}}\tilde{P}_{\L{0}}=Q_{\L{1}}Q_{\Y{1}}G^*_{\A{0}}Q_{\L{0}}$, since the intervention only changes the distribution of the $A$ nodes, we obtain that
+\begin{align*}
+    \tilde{P}(\Ystar{1}{2}=1)=&\int\tilde{P}(\Ystar{1}{2}=1\mid\Lbar{1} = l)\tilde{P}_{\Lbar{1}}(dx_4)\\
+    =&\iiiint\tilde{P}(\Ystar{1}{2}=1\mid\Lbar{1} = l)\\
+    &\times Q_{\L{1}}(dl_1\mid x_3)Q_{\Y{1}}(dy_1\mid x_2)G^*_{\A{0}}(da_0\mid x_1)Q_{\L{0}}(dl_0)\\
+    =&\iiint\!\!\!\iint\tilde{P}(\Ystar{1}{2}=1\mid\Abar{1}=a,\Lbar{1} = l)\\
+    &\times G^*_{\A{1}}(da_1\mid x_4)Q_{\L{1}}(dl_1\mid x_3)Q_{\Y{1}}(dy_1\mid x_2)G^*_{\A{0}}(da_0\mid x_1)Q_{\L{0}}(dl_0)\\
+    =&\iiint\!\!\!\iint P(\Y{2}=1\mid\Abar{1}=a,\Lbar{1} = l)\\
+    &\times G^*_{\A{1}}(da_1\mid x_4)Q_{\L{1}}(dl_1\mid x_3)Q_{\Y{1}}(dy_1\mid x_2) G^*_{\A{0}}(da_0\mid x_1)Q_{\L{0}}(dl_0)\\
+    =&\iiint\!\!\!\iint  Q_{\Y{2}}(1\mid a, l)\\
+    &\times G^*_{\A{1}}(da_1\mid x_4)Q_{\L{1}}(dl_1\mid x_3)Q_{\Y{1}}(dy_1\mid x_2) G^*_{\A{0}}(da_0\mid x_1)Q_{\L{0}}(dl_0)\\
+    =&Q_{\L{0}}G^*_{\A{0}}Q_{\Y{1}}Q_{\L{1}}G^*_{\A{1}}Q_{\Y{2}}f,
+    \end{align*}
+    for $f = \mathds{1}\{\Y{2}=1\}$. This is the basic idea of sequential regression, which we will now explain for the more general setting. 
+    \subsection{Sequential regression}
+    Suppose we are given data, $\textbf{X}=(\A{0},\L{0},\Y{1},...,\A{K},\L{K},\Y{K+1})$. Let $t\in\tau\subseteq\{1,...,K+1\}$ be the set of time points of interest. Often, our interest lies with the last time point in which case, $\tau=\{K+1\}$. As implied by the computations above, $P(\Ystar{d}{t}=1)$ can be identified through a sequence of recursively defined conditional expectations as we will now define. The first step of sequential regression is to regress $\Y{t}$, for $t\in\tau$, on the observed past covariates, but with intervention nodes set based on the intervention rule, to obtain 
+    \begin{align*}
+        Q_t^{d,t}:=&P(\Y{t}=1\mid \Lbar{t-1},\Abar{t-1}=d_{\Lbar{t-1}})\\
+        =&\int f(x)Q_{\Y{t}}(dy_t\mid \bar{x}_{3t-1})=Q_{\Y{t}}f,\tag{Step 1}
+    \end{align*} 
+    for $f(\textbf{X})=\mathds{1}\{\Y{t}=1\}$ and a dynamic regime, $d$ (e.g., $d$ equal to one, respectively, zero). We use the notation, $d_{\Lbar{t-1}}$, to emphasize that the deterministic functions for assigning treatment at time $t$ is given as a function of the past $L$ nodes, i.e., $\Lbar{t-1}$. Observe that we used that $Y(t)$ is the $3t$'th node, thus $\mathcal{F}_{\Y{t}}=\bar{X}_{3t-1}$. The next step is then to regress this quantity on observed past covariates up to time $t-2$ (again with intervention nodes set based on rule $d$) to obtain
+    \begin{align*}
+        Q_{t-1}^{d,t}:=&P(Q_{t}^d=1\mid \Lbar{t-2},\Abar{t-2}=d_{\Lbar{t-2}})\\
+        =&\int Q_t^{d,t}\tilde{P}_{\Lbar{t-1},\Abar{t-1}\mid \Lbar{t-2},\Abar{t-2}}(dx)\\
+        =&\iiint Q_t^{d,t}G^*_{\A{t-1}}(da_{t-1})Q_{\L{t-1}}(dl_{t-1}\mid \bar{x}_{4(t-1)-1})Q_{\Y{t-1}}(dy_{t-1}\mid \bar{x}_{3(t-1)-1})\\
+        =&\iiiint f(x) Q_{\Y{t}}(dy_t\mid \bar{x}_{3t-1})G^*_{\A{t-1}}(da_{t-1})\\
+        &\times Q_{\L{t-1}}(dl_{t-1}\mid \bar{x}_{4(t-1)-1})Q_{\Y{t-1}}(dy_{t-1}\mid \bar{x}_{3(t-1)-1})\\
+        =&Q_{\Y{t-1}}Q_{\L{t-1}}G^*_{\A{t-1}}Q_{\Y{t}}f.\tag{Step 2}
+    \end{align*}
+    This corresponds to taking the conditional expectation of $Q_t^{d,t}$ with respect to $(\Lbar{t-2},\Abar{t-2}=d_{\Lbar{t-2}})$. Continuing this way we obtain $Q_k^{d,t}$ for $k=1,...,t-1,$
+    where
+    \begin{align*}
+        Q_k^{d,t}=Q_{\Y{k}}Q_{\L{k}}G^*_{\A{k}}\cdots Q_{\Y{t-1}}Q_{\L{t-1}}G^*_{\A{t-1}}Q_{\Y{t}}f.
+    \end{align*}
+    The last step is then obtained by 
+    \begin{align*}
+        Q_0^{t,d}:=&\int Q_1^{d,t}\tilde{P}_{\L{0},\A{0}}=\int Q_1^{d,t}G^*_{\A{0}}(da_0)Q_{\L{0}}(dl_0)\\
+        =&Q_{\L{0}}G^*_{\A{0}}Q_{\Y{1}}Q_{\L{1}}G^*_{\A{1}}\cdots Q_{\Y{t-1}}Q_{\L{t-1}}G^*_{\A{t-1}}Q_{\Y{t}}f.
+    \end{align*}
+    Following previous computations, assuming unmeasured confounders and a positive probability of following rule $d$, we can show that $P(\Ystar{d}{t}=1)=Q_0^{d,t}$, which justifies the sequential regression.
+\end{document}
