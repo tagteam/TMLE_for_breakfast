@@ -34,18 +34,21 @@
 
 \section{Introduction}
 
-There is no gentle introduction to longitudinal TMLE. Here is one for the rough and tough.
-
+There is no gentle introduction to longitudinal TMLE. Here is one for
+the rough and tough. This document has a focus on the application of
+longitudinal TMLE to register data.
 \section{Notation}
 
-We consider a random vector $\X=(L,A,Y)$ which consists of an outcome
-variable \(Y\), a treatment variable \(A\), and a vector of covariates
-\(L\). We denote by \(\distx\) the joint probability measure induced
-by \(X\) and assume that $\P_X\in\modelx $ where \modelx\ is an
-otherwise unspecified model which is dominated by a \(\sigma-\)finite
-measure $\mu$. We use the notation \(\P_X(\d x)\) for the Radon-Niko\d
-ym derivative of the joint distribution with respect to \(\mu\). With
-the following notation for the conditional distributions
+\subsection{Conditional distributions}
+
+In order to introduce our notation, we consider a simple setting
+without longitudinal structure where $\X=(L,A,Y)$ is a random vector
+which consists of an outcome variable \(Y\), a treatment variable
+\(A\), and a vector of covariates \(L\). We denote \(\distx\) for the
+joint probability measure induced by \(X\) and assume that
+$\P_X\in\modelx $ where \modelx\ is an otherwise unspecified model
+which is dominated by a \(\sigma-\)finite measure $\mu$. With the
+following notation for the conditional distributions
 \begin{align*}
     Q_Y(\d y\mid a,l)&=\P_{Y\mid A, L}(\d y\mid A=a, L = l)\\
     G_A(\d a\mid l)&=\P_{A\mid L}(\d a\mid L = l),\\
@@ -53,17 +56,43 @@ the following notation for the conditional distributions
 \end{align*}
 the joint distribution $\distx$ factorizes
 \begin{equation*}\distx(dx)=Q_Y(\d y\mid a,l)G_A(\d a\mid l)Q_L(\d l).\end{equation*}
-For any measurable function \(f\) of the data we use the notation
+For any measurable function \(f\) of the data we use the notation for
+the expected value of \(f\) under \(\distx\):
 \begin{equation*}
-\P f=\int f(x)P(\d x)
+\distx f=\int f(x)\distx(\d x). 
 \end{equation*}
-and then using standard operator notation we also write 
+We also extend this compact operator notation to conditional
+distributions and write
 \begin{equation*}
-\P f=Q_LG_AQ_Yf=\int\int\int f(x)Q_Y(\d y\mid a,l)G_A(\d a\mid l)Q_L(\d l).
+\distx f=Q_LG_AQ_Yf=\int\int\int f(x)Q_Y(\d y\mid a,l)G_A(\d a\mid l)Q_L(\d l).
 \end{equation*}
+
+\subsection{Longitudinal data structures}
+
+Consider a longitudinal setting with \(K\) time points
+\(\{0=t_0 < t_1 < \cdots < t_K\}\) such that the observed data are
+$\textbf{X}=(\L{0},\A{0},\Y{1},\L{1},\A{1},\dots,\Y{K})$.  Now
+\(\Y{k}\) is the value of a stochastic outcome process \(\Y{t}\) at
+time \(t_k\). Throughout we assume that the state space of the process
+\(Y\) is \(\{0,1\}\) such that \(\Y{t}=0\) means that the outcome
+event has not yet occurred at time \(t\) and \(\Y{t}=1\) that the
+outcome event has occured at some point between time \(0\) and time
+\(t\). For a specific component of the covariate process \(\L{t}\)
+which represent the onset of a comorbidity we also set the state space
+to \(\{0,1\}\) such that \(\(\L{t}=1\)\) means that the comorbidity
+has occurred in the time interval \([s,t]\) where \(s<0\) such that
+\(t_K\le -s\). The latter is to ensure that the history of \(L\) at
+time \(t_0\) is as long as the history of \(L\) at time \(t_K\) and
+hence at any time in between as well.
+
 \section{One time point, no censoring}
-We consider the data, $\textbf{X}=(X_1,X_2,X_3)=(\L{0},\A{0},\Y{1})\sim \P\in\mathcal{P}$. As before, we assume that the model is dominated by a measure, \(\mu\), and has a Radon-Niko\d ym density such that $\P=\frac{d\P}{d\mu}$. The outcome, $Y(1)\in\{0,1,2\}$, is a discrete time multi-state process, where a value of two indicates a competing risk event. 
-Our target parameter is the intervention-specific average treatment effect given by
+
+We consider the data, $\textbf{X}=(X_1,X_2,X_3)=(\L{0},\A{0},\Y{1})\sim \distx\in\mathcal{P}$. 
+The outcome, $Y(1)\in\{0,1,2\}$, is a discrete
+time multi-state process, where a value of two indicates a competing
+risk event.
+Our target parameter is the intervention-specific average
+treatment effect given by
 $$\psi(\tilde{P})=\tilde{P}(\Ystar{1}{1}=1)-\tilde{P}(\Ystar{1}{0}=1),$$
 where $\Ystar{1}{1}$ and $\Ystar{0}{1}$ are counterfactuals, and $(\L{0},\Ystar{1}{1},\Ystar{0}{1})\sim\tilde{P}\in\tilde{\mathcal{P}}$. We are considering the simple case of degenerate interventions, where the treatment is set to either one or zero for every time point. However, the following computations generalize to all kinds of static and \d ynamic regimes. A \d ynamic regime is a collection of deterministic functions for assigning treatment as a function of the past $L$ nodes. We let $G^*_{\A{0}}(\d a\mid l)$ denote counterfactual the distribution of $\A{0}$, which in our case is just the degenerate distribution, $\delta_d(a)=\mathds{1}\{a=d\}$, for $d$ equal to one, respectively, zero. We wish to express the target parameter, $\psi(\tilde{P})$, as a functional of the distribution, $P$, in order to suggest useful estimators, i.e., we want to find $\theta$ such that $\psi(\tilde{P})=\theta(P)$. Since the marginal distribution of $\L{0}$ does not change going from the observational world to the counterfactual, we have that
 \begin{align*}
