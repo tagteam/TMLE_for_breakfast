@@ -125,7 +125,7 @@ for some function of the data, $f(\textbf{X}).$ Using that we may factorize the 
         Q_t^{d,t}:=&P(\Y{t}=1\mid \Lbar{t-1},\Abar{t-1}=d_{\Lbar{t-1}})\\
         =&\int f(x)Q_{\Y{t}}(\d y_t\mid \bar{x}_{3t-1})=Q_{\Y{t}}f,\tag{Step 1}
     \end{align*} 
-    for $f(\textbf{X})=\mathds{1}\{\Y{t}=1\}$ and a \d ynamic regime, $d$ (e.g., $d$ equal to one, respectively, zero). We use the notation, $d_{\Lbar{t-1}}$, to emphasize that the deterministic functions for assigning treatment at time $t$ is given as a function of the past $L$ nodes, i.e., $\Lbar{t-1}$. Observe that we used that $Y(t)$ is the $3t$'th node, thus $\mathcal{F}_{\Y{t}}=\bar{X}_{3t-1}$. The next step is then to regress this quantity on observed past covariates up to time $t-2$ (again with intervention nodes set based on rule $d$) to obtain
+    for $f(\textbf{X})=\mathds{1}\{\Y{t}=1\}$ and a dynamic regime, $d$ (e.g., $d$ equal to one, respectively, zero). We use the notation, $d_{\Lbar{t-1}}$, to emphasize that the deterministic functions for assigning treatment at time $t$ is given as a function of the past $L$ nodes, i.e., $\Lbar{t-1}$. Observe that we used that $Y(t)$ is the $3t$'th node, thus $\mathcal{F}_{\Y{t}}=\bar{X}_{3t-1}$. The next step is then to regress this quantity on observed past covariates up to time $t-2$ (again with intervention nodes set based on rule $d$) to obtain
     \begin{align*}
         Q_{t-1}^{d,t}:=&P(Q_{t}^d=1\mid \Lbar{t-2},\Abar{t-2}=d_{\Lbar{t-2}})\\
         =&\int Q_t^{d,t}\tilde{P}_{\Lbar{t-1},\Abar{t-1}\mid \Lbar{t-2},\Abar{t-2}}(dx)\\
