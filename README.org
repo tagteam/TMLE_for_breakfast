@@ -1,0 +1,32 @@
+This is a two day meeting gathering the statisticians of the REDDIE
+work package. The course is generally about using modern causal
+inference to emulate a hypothetical trial into register data, and
+specifically about how to use LTMLE for the analysis of the such a
+hypothetical trial. The meeting schedules a series of 20 minute long
+lectures which are interrupted by R practicals using simulated
+data. There is plenty of time for group and subgroup discussions.
+
+The meeting will take place at Østerfarimagsgade 5, 1014 Copenhagen in
+room CSS 7.0.8. 
+
+* Schedule 
+
+** Day 1, May 22, 10 am to 4 pm
+
+*** Real randomized trials in diabetes (Bochra) 
+
+*** Design of an emulated trial using modern causal inference (Thomas)
+
+*** Roadmap of statistical learning, G and Q (Alessandra)
+
+*** From register data to covariates, treatment, outcomes (Christian)
+
+** Day 2, May 23, 9 am to 3 pm 
+
+*** Sequential outcome regression (Emilie)
+
+*** Propensity of treatment, censoring, competing risks (Alessandra)
+
+*** LTMLE update step, the fluctuation model (Mark)
+
+*** Interpretation and limitations (Thomas)
