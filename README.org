@@ -11,12 +11,20 @@
 The purpose of this workshop is to gather researchers of REDDIE WP4
 who are interested in emulating a diabetes target trial in register
 data. Specifically, we will work with an augmented version of the
-R-package =ltmle=.
+R-package =ltmle=. 
 
 The meeting is organized as a mixture of 20 minute talks, a lot of
 time for discussion, and hands-on programming in R. 
 
-* Program
+* Venue
+
+University of Copenhagen                  
+Øster Farimagsgade 5 B, DK-1014 Copenhagen K, Denmark  
+Room: CSS 7.0.08
+https://biostat.ku.dk/maps/
+http://app.mapsindoors.net/ku/index.html
+
+* Program 
 
 ** Day 1, May 22, 10 am to 4 pm
 
@@ -38,7 +46,7 @@ time for discussion, and hands-on programming in R.
 
 ** Day 2, May 23, 9 am to 3 pm 
 
-- 9:00-9:20 :: Sequential outcome regression (Emilie Wessel \(\textrm{S{\o}gaard}\))
+- 9:00-9:20 :: Sequential outcome regression (Emilie Wessel Søgaard)
 - 9:20-9:40 :: Discussion
 - 9:40-10:20 :: R-coding: LTMLE (I)
 - 10:20-10:35 :: Coffee break
