@@ -10,7 +10,7 @@
 
 The purpose of this workshop is to gather researchers of REDDIE WP4
 who are interested in emulating a diabetes target trial in register
-data. Specifically, we will work with (a modified copy of) the
+data. Specifically, we will work with an augmented version of the
 R-package =ltmle=.
 
 The meeting is organized as a mixture of 20 minute talks, a lot of
