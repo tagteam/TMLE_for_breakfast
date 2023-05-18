@@ -1,32 +1,57 @@
-This is a two day meeting gathering the statisticians of the REDDIE
-work package. The course is generally about using modern causal
-inference to emulate a hypothetical trial into register data, and
-specifically about how to use LTMLE for the analysis of the such a
-hypothetical trial. The meeting schedules a series of 20 minute long
-lectures which are interrupted by R practicals using simulated
-data. There is plenty of time for group and subgroup discussions.
+#+TITLE: REDDIE WP4 meeting -- LTMLE for breakfast
+#+Date: May 22-23, 2023
+#+LaTeX_CLASS: org-article
+#+OPTIONS: toc:nil
+#+LaTeX_HEADER:\author{Section of Biostatistics, University of Copenhagen}
+#+LaTeX_HEADER:\usepackage{authblk}
+#+LaTeX_HEADER:\usepackage{natbib}
+#+setupfile:~/emacs-genome/snps/org-templates/setup-all-purpose.org
+#+superman-export-target: pdf
+* Welcome
 
-The meeting will take place at Østerfarimagsgade 5, 1014 Copenhagen in
-room CSS 7.0.8. 
+The purpose of this workshop is to gather researchers of REDDIE WP4
+who are interested in emulating a diabetes target trial in register
+data. Specifically, we will work with (a modified copy of) the
+R-package =ltmle= [fn:1].
 
-* Schedule 
+The meeting is organized as a mixture of 20 minute talks, a lot of
+time for discussion, and hands-on programming in R. 
+
+* Program
 
 ** Day 1, May 22, 10 am to 4 pm
 
-*** Real randomized trials in diabetes (Bochra) 
-
-*** Design of an emulated trial using modern causal inference (Thomas)
-
-*** Roadmap of statistical learning, G and Q (Alessandra)
-
-*** From register data to covariates, treatment, outcomes (Christian)
+- 10:00-10:05 :: Hello (Christian Torp-Pedersen)
+- 10:05-10:25 :: Real randomized trials in diabetes (Bochra Jamal Zareini)
+- 10:25-10:40 :: Discussion 
+- 10:40-11:00 :: R-coding: Data preparation (I)
+- 11:00-11:20 :: Coffee break
+- 11:20-11:40 :: Design of an emulated trial using modern causal inference (Thomas Alexander Gerds)
+- 11:40-12:00 :: Discussion
+- 12:00-13:00 :: Lunch break
+- 13:00-13:20 :: Roadmap of statistical learning, G and Q (Alessandra Meddis)
+- 13:20-13:40 :: Discussion
+- 13:40-14:15 :: R-coding: Data preparation (II)
+- 14:15-14:30 :: Coffee break  
+- 14:30-14:50 :: From register data to covariates, treatment, outcomes (Christian Torp-Pedersen)
+- 14:50-15:10 :: Discussion
+- 15:10-16:00 :: R-coding: Data preparation (III)  
 
 ** Day 2, May 23, 9 am to 3 pm 
 
-*** Sequential outcome regression (Emilie)
-
-*** Propensity of treatment, censoring, competing risks (Alessandra)
-
-*** LTMLE update step, the fluctuation model (Mark)
-
-*** Interpretation and limitations (Thomas)
+- 9:00-9:20 :: Sequential outcome regression (Emilie Wessel \(\textrm{S{\o}gaard}\))
+- 9:20-9:40 :: Discussion
+- 9:40-10:20 :: R-coding: LTMLE (I)
+- 10:20-10:35 :: Coffee break
+- 10:35-11:20 :: R-coding: LTMLE (II) 
+- 11:20-11:40 :: Propensity of treatment, censoring, competing risks (Alessandra Meddis)
+- 11:40-12:00 :: Discussion
+- 12:00-13:00 :: Lunch break  
+- 13:00-13:20 :: LTMLE update step, the fluctuation model (Mark Bech Knudsen)
+- 13:20-13:40 :: Discussion
+- 13:40-13:55 :: Coffee break  
+- 13:55-14:30 :: R-coding: LTMLE (III) 
+- 14:30-14:50 :: Challenges and limitations (Thomas Alexander Gerds)
+- 14:50-15:00 :: Good bye (Christian Torp-Pedersen)
+  
+[fn:1] https://www.jstatsoft.org/article/view/v081i01
