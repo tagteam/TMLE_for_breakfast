@@ -1,0 +1,77 @@
+#+TITLE: REDDIE WP4 meeting -- Exercises 
+#+Date: May 23, 2023
+#+LaTeX_CLASS: org-article
+#+OPTIONS: toc:nil
+#+LaTeX_HEADER:\author{Section of Biostatistics, University of Copenhagen}
+#+LaTeX_HEADER:\usepackage{authblk}
+#+LaTeX_HEADER:\usepackage{natbib}
+#+setupfile:~/emacs-genome/snps/org-templates/setup-all-purpose.org
+
+* Exercise 1 (~40 minutes)
+
+The aim of the excersise is to run LTMLE on simulated data where we
+focus on the structure of the input and the output of the function
+=Ltmle=.
+
+** Load the R-code
+
+The R-code for the praticals are distributed across different folders:
+- =Ltmle/R= the modified Ltmle package
+- =Ltmle/R= augmentation functions
+- =Exercises/functions= simulation functions
+
+
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
+library(data.table)
+library(lava)
+try(setwd("~/research/Methods/TMLE_for_breakfast/"),silent=TRUE)
+try(setwd("Your/Path/To/TMLE_for_breakfast/"),silent=TRUE)
+library(targets)
+for (f in list.files("./Ltmle/R/",pattern = "R$",full.names = TRUE)){source(f)}
+for (f in list.files("./Ltmle/augmentation/",pattern = "R$",full.names = TRUE)){source(f)}
+for (f in list.files("./Exercises/functions/",pattern = "R$",full.names = TRUE)){source(f)}
+#+END_SRC
+
+
+** Simulate data readily in wide format
+
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
+d <- simulate_rdata(n = 7800)
+outcome_data <- d[,c("pnr",grep("Y|C|D",names(d), value = TRUE)), with = FALSE]
+treatment_data <- d[,c("pnr",grep("A",names(d), value = TRUE)), with = FALSE]
+baseline_data <- d[,.(pnr,V)]
+timevar_data <- d[,c("pnr",grep("L",names(d), value = TRUE)), with = FALSE]
+#+END_SRC
+
+** Prepare the data for LTMLE
+
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
+pl <- prepare_data(outcome_data = list("Y"=outcome_data),
+                   regimen_data = list("A"=treatment_data),
+                   baseline_data = baseline_data,
+                   timevar_data = timevar_data,
+                   time_horizon = 2,
+                   deterministic.Q.function = NULL,
+                   name_outcome = "Y",
+                   name_regimen = "A",
+                   name_censoring = NULL,
+                   censored_label = "0",
+                   name_comp.event = NULL,
+                   abar = list(c(1,1),c(0,0)))
+#+END_SRC
+
+** Run LTMLE and check output format
+
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+pl$verbose=FALSE
+fit <- do.call(Ltmle, pl)
+#+END_SRC
+
+
+
+** See what happens when running LTMLE
+
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+pl$verbose=TRUE
+fit <- do.call(Ltmle, pl)
+#+END_SRC
