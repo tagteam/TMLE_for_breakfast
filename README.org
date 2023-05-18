@@ -21,8 +21,8 @@ time for discussion, and hands-on programming in R.
 University of Copenhagen                  
 Øster Farimagsgade 5 B, DK-1014 Copenhagen K, Denmark  
 Room: CSS 7.0.08
-https://biostat.ku.dk/maps/
-http://app.mapsindoors.net/ku/index.html
+- https://biostat.ku.dk/maps/
+- http://app.mapsindoors.net/ku/index.html
 
 * Program 
 
