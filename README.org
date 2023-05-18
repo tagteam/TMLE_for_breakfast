@@ -6,13 +6,12 @@
 #+LaTeX_HEADER:\usepackage{authblk}
 #+LaTeX_HEADER:\usepackage{natbib}
 #+setupfile:~/emacs-genome/snps/org-templates/setup-all-purpose.org
-#+superman-export-target: pdf
 * Welcome
 
 The purpose of this workshop is to gather researchers of REDDIE WP4
 who are interested in emulating a diabetes target trial in register
 data. Specifically, we will work with (a modified copy of) the
-R-package =ltmle= [fn:1].
+R-package =ltmle=.
 
 The meeting is organized as a mixture of 20 minute talks, a lot of
 time for discussion, and hands-on programming in R. 
@@ -53,5 +52,7 @@ time for discussion, and hands-on programming in R.
 - 13:55-14:30 :: R-coding: LTMLE (III) 
 - 14:30-14:50 :: Challenges and limitations (Thomas Alexander Gerds)
 - 14:50-15:00 :: Good bye (Christian Torp-Pedersen)
-  
-[fn:1] https://www.jstatsoft.org/article/view/v081i01
+
+* References
+
+- https://www.jstatsoft.org/article/view/v081i01
