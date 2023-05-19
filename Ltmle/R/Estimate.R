@@ -35,11 +35,11 @@ Estimate <- function(inputs,
                     m <- ltmle.glm.fit(y = Y.subset, x = X.subset,
                                        family = family, weights = observation.weights.subset,
                                        offset = offst, intercept = intercept)
-                    if (inputs$verbose){ message("Fitted coefs: ")
+                    ## if (inputs$verbose){ message("Fitted coefs: ")
                         ## browser()
                         ## print(paste("Sample size: ",m$n))
                         ## print(coef(m))
-                    }
+                    ## }
                     m$terms <- tf
                     predicted.values <- predict(m,newdata = newdata,type = type)
                 }, GetWarningsToSuppress())

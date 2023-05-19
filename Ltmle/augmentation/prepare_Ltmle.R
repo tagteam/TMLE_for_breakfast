@@ -13,8 +13,11 @@ prepare_Ltmle <- function(regimen_data,
                           Markov = NULL,
                           abar = list(rep(1,time_horizon),rep(0,time_horizon)),
                           deterministic.Q.function = NULL,
+                          gcomp = FALSE,
+                          iptw.only = FALSE,
                           SL.library = "glm",
                           SL.cvControl = NULL,
+                          gbounds = c(0,1),
                           test = FALSE,
                           verbose = FALSE) {
   
@@ -74,16 +77,15 @@ prepare_Ltmle <- function(regimen_data,
     }
   }
   
-  det.Q.function = NULL
-  if(length(deterministic.Q.function)>0){
-    det.Q.function = deterministic.Q.function
-  }
-  if(length(deterministic.Q.function)==0&length(name_comp.event)>0){
-    if(length(grep(name_comp.event, names(ltmle_data$data), value = TRUE))>0){
-      det.Q.function = dq
+    det.Q.function = NULL
+    if(length(deterministic.Q.function)>0){
+        det.Q.function = deterministic.Q.function
     }
-  }
-  
+    if(length(deterministic.Q.function)==0&&length(name_comp.event)>0){
+        if(length(grep(name_comp.event, names(ltmle_data$data), value = TRUE))>0){
+            det.Q.function = dq
+        }
+    }
     out <- list(data = ltmle_data$data[],
                 Qform = formulas$Qform,
                 gform = formulas$gform,
@@ -96,9 +98,12 @@ prepare_Ltmle <- function(regimen_data,
                 abar = abar,
                 deterministic.Q.function = det.Q.function,
                 SL.library=SL.library,
-                SL.cvControl = SL.cvControl,
+                gcomp = gcomp,
+                gbounds = gbounds,
+                iptw.only = iptw.only,
                 verbose = verbose,
                 info = list(outcome = name_outcome,
+                            comprisk = name_comp.event,
                             regimen = name_regimen,
                             baseline = subset_data$baseline,
                             timevar = subset_data$timevar,
@@ -115,6 +120,8 @@ prepare_Ltmle <- function(regimen_data,
                                              "whereas, in general, the regimen depends observed covariates from previous time intervals",
                                              "since we do not know which observation happens first within the same time interval"))
                 )
+    if (length(SL.cvControl)>0)
+        out <- c(out,list(SL.cvControl = SL.cvControl))
     class(out) <- "prepare_Ltmle"
     out
 }

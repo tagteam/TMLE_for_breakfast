@@ -9,6 +9,10 @@ Ltmle <- function (data, Anodes, Cnodes = NULL, Lnodes = NULL, Ynodes,
     for (f in list.files("./Ltmle/R/",pattern = ".R$",full.names = TRUE)) {
         source(f)
     }
+    for (f in list.files("./Ltmle/augmentation/",pattern = ".R$",full.names = TRUE)) {
+        source(f)
+    }
+    ## output <- NULL
     data <- CheckData(data)
     msm.inputs <- GetMSMInputsForLtmle(data, abar, rule, gform)
     inputs <- CreateInputs(data = data, Anodes = Anodes, Cnodes = Cnodes,
@@ -25,6 +29,7 @@ Ltmle <- function (data, Anodes, Cnodes = NULL, Lnodes = NULL, Ynodes,
                            id = id,verbose=verbose)
     result <- LtmleFromInputs(inputs)
     result$call <- match.call()
+    ## result$descriptive <- output
     class(result) <- "Ltmle"
     return(result)
 }

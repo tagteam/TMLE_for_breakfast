@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: May 19 2023 (16:43) 
 ## Version: 
-## Last-Updated: May 19 2023 (17:12) 
+## Last-Updated: May 19 2023 (19:27) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 4
+##     Update #: 7
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -14,9 +14,9 @@
 #----------------------------------------------------------------------
 ## 
 ### Code:
-summary.Ltmle <- function(object,...){
+summary.Ltmle <- function(object,estimator = ifelse(object$gcomp, "gcomp", "tmle"),...){
     if (length(object$estimates)>0){
-        x = summary.ltmle(object)
+        x = summary.ltmle(object,estimator = estimator)
         risk = with(x$treatment,data.table(Target_parameter = "Risk",
                                            Estimator = x$estimator,
                                            estimate = estimate,
@@ -26,8 +26,7 @@ summary.Ltmle <- function(object,...){
                                            pvalue = pvalue))
         risk
     }else{
-        x = summary.ltmleEffectMeasures(object)
-        x$call = NULL
+        x = summary.ltmleEffectMeasures(object,estimator = estimator)
         ate = with(x$effect.measures$ATE,data.table(Target_parameter = "ATE",
                                                     Estimator = x$estimator,
                                                     estimate = estimate,

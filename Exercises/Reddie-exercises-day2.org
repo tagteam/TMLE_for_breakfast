@@ -47,16 +47,11 @@ timevar_data <- d[,c("pnr",grep("L",names(d), value = TRUE)), with = FALSE]
 
 ** Prepare the data for LTMLE
 
-#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes  
+#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
 pl <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 3,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",abar = list(c(1,1,1),c(0,0,0)))
 pl
 #+END_SRC
 
-#+RESULTS[(2023-05-19 16:02:52) f79f13d1e7725d4f9c5647f78b43cbb73cda215d]:
-:results:
-
-Object ready for analysis with Ltmle.
-:end:
 
 ** Run LTMLE and check output format
 
@@ -128,4 +123,91 @@ pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                       abar = list(rep(1,10),rep(0,10)),
                       verbose=TRUE)
 fit10 <- do.call(Ltmle, pl10)
+#+END_SRC
+
+** Increase the sample size (second R-chunk) and re-run everything
+
+* Exercise 2 (~45 minutes)
+
+** Estimate the target parameter using sequential regression G-formula
+
+#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
+pl10.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
+                      regimen_data = list("A"=treatment_data),
+                      baseline_data = baseline_data,
+                      timevar_data = timevar_data,
+                      time_horizon = 10,
+                      deterministic.Q.function = NULL,
+                      name_outcome = "Y",
+                      name_regimen = "A",
+                      name_censoring = "C",
+                      censored_label = "0",
+                      name_comp.event = "D",
+                      SL.library="glmnet",
+                      gcomp=TRUE,
+                      SL.cvControl=list(selector="min",alpha=0),
+                      abar = list(rep(1,10),rep(0,10)),
+                      verbose=TRUE)
+fit10.g <- do.call(Ltmle, pl10.g)
+summary(fit10.g)
+#+END_SRC
+
+* Exercise 3 (~35 minutes)
+
+** Estimate the target parameter using inverse treatment/censoring weighting
+
+#+BEGIN_SRC R  :results output drawer :exports code  :session *R* :cache yes  
+pl10.iptw <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 10,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",iptw.only=TRUE,abar = list(rep(1,10),rep(0,10)),verbose=FALSE)
+fit10.iptw <- do.call(Ltmle, pl10.iptw)
+summary(fit10.iptw,estimator="iptw")
+#+END_SRC
+
+#+RESULTS[(2023-05-19 19:29:35) cbba5adce42c0ef7882452ae8341d5fb6f6d3a05]:
+:results:
+   Target_parameter Estimator  estimate   std.err      lower     upper       pvalue
+1:              ATE      iptw 0.2653226 0.1104770 0.04879168 0.4818535 0.0163231181
+2:     RelativeRisk      iptw 3.4191176 0.3161168 1.84007256 6.3532090 0.0001006524
+:end:
+
+** Use ltmle defaul g-bounds
+
+#+BEGIN_SRC R  :results output drawer :exports code  :session *R* :cache yes  
+pl10.iptw.bounded <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
+                                   regimen_data = list("A"=treatment_data),
+                                   baseline_data = baseline_data,
+                                   timevar_data = timevar_data,
+                                   time_horizon = 10,
+                                   deterministic.Q.function = NULL,
+                                   name_outcome = "Y",
+                                   name_regimen = "A",
+                                   name_censoring = "C",
+                                   censored_label = "0",
+                                   name_comp.event = "D",
+                                   SL.library="glm",
+                                   iptw.only=FALSE,
+                                   gbounds=c(0.3,.7),
+                                   abar = list(rep(1,10),rep(0,10)),
+                                   verbose=FALSE)
+fit10.iptw.bounded <- do.call(Ltmle, pl10.iptw.bounded)
+summary(fit10.iptw.bounded,estimator="iptw")
+summary(fit10.iptw.bounded,estimator="tmle")
+#+END_SRC
+
+#+RESULTS[(2023-05-19 19:37:27) 03882b7bd61bfb8bb6e8b2b3f3555c1c47502246]:
+:results:
+[1] 0.3 0.7
+Warning message:
+In CheckForVarianceWarning(inputs, g.ratio) :
+  Variance estimate is based on influence curve only, which may be significantly anticonservative because your data appears to contain positivity violations. Robust variance estimate is not currently available with deterministic.Q.function but this will be addressed in a future release.
+   Target_parameter Estimator  estimate    std.err     lower     upper       pvalue
+1:              ATE      iptw 0.2653226 0.01457696 0.2367523 0.2938929 5.020909e-74
+2:     RelativeRisk      iptw 3.4191176 0.12271074 2.6882055 4.3487617 1.263550e-23
+:end:
+
+** Use LASSO instead of unpenalized logistic regression
+
+#+BEGIN_SRC R  :results output drawer :exports code  :session *R* :cache yes  
+pl10.iptw <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 10,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glmnet",iptw.only=TRUE,SL.cvControl=list(selector="min",alpha=0),abar = list(rep(1,10),rep(0,10)),verbose=FALSE)
+fit10.iptw <- do.call(Ltmle, pl10.iptw)
+summary(fit10.iptw,estimator="iptw")
 #+END_SRC

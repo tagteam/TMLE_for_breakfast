@@ -1,10 +1,9 @@
 LtmleFromInputs <- function (inputs)
 {
-    if (inputs$verbose){
-        message("LtmleFromInputs: -> LtmleMSMFromInputs ...")
-    }
     msm.result <- LtmleMSMFromInputs(inputs)
-    if (inputs$verbose){ message("LtmleFromInputs: transforming results ...")}
+    if (inputs$verbose){
+        message("LtmleFromInputs: preparing results.")
+    }
     num.regimes <- dim(inputs$regimes)[3]
     stopifnot(num.regimes %in% 1:2)
     if (num.regimes == 2) {
@@ -14,7 +13,7 @@ LtmleFromInputs <- function (inputs)
     names(msm.result$beta.iptw) <- names(msm.result$beta) <- NULL
     iptw <- plogis(msm.result$beta.iptw)
     iptw.list <- list(iptw.estimate = iptw, iptw.IC = iptw *
-        (1 - iptw) * msm.result$IC.iptw[, 1])
+                                                (1 - iptw) * msm.result$IC.iptw[, 1])
     r <- list()
     if (inputs$iptw.only) {
         tmle <- NA
@@ -36,7 +35,7 @@ LtmleFromInputs <- function (inputs)
     }
     r$cum.g <- AsMatrix(msm.result$cum.g[, , 1])
     r$cum.g.unbounded <- AsMatrix(msm.result$cum.g.unbounded[,
-        , 1])
+                                                           , 1])
     r$cum.g.used <- AsMatrix(msm.result$cum.g.used[, , 1])
     r$gcomp <- inputs$gcomp
     r$fit <- msm.result$fit

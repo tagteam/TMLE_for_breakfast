@@ -21,7 +21,7 @@ MainCalcs <- function (inputs){
         fixed.tmle <- list(cum.g.used = array(NA, dim = dim(g.list$cum.g)))
     }
     else {
-        if (inputs$verbose){ message("MainCalcs: calculating fixed time TMLE  ...")}
+        if (inputs$verbose){ message("MainCalcs: calculating TMLE update of Q.")}
         for (j in 1:num.final.Ynodes) {
             fixed.tmle <- FixedTimeTMLE(inputs, nodes = SubsetNodes(inputs$all.nodes,
                 final.Ynode = inputs$final.Ynodes[j]), msm.weights = drop3(all.msm.weights[,
@@ -40,7 +40,7 @@ MainCalcs <- function (inputs){
                 fit = fit, variance.estimate = NULL, beta.iptw = iptw$beta,
                 IC.iptw = iptw$IC, Qstar = Qstar, cum.g.used = fixed.tmle$cum.g.used))
         }
-        if (inputs$verbose){ message("MainCalcs: fitting pooled MSM  ...")}
+        ## if (inputs$verbose){ message("MainCalcs: fitting pooled MSM.")}
         fitted.msm <- FitPooledMSM(inputs$working.msm, Qstar,
             inputs$combined.summary.measures, all.msm.weights *
                 inputs$observation.weights)
