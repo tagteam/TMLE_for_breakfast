@@ -11,7 +11,7 @@
 
 The aim of the excersise is to run LTMLE on simulated data where we
 focus on the structure of the input and the output of the function
-=Ltmle=.
+=Ltmle= which uses our augmented version of the =ltmle= package.
 
 ** Load the R-code
 
@@ -33,37 +33,30 @@ for (f in list.files("./Exercises/functions/",pattern = "R$",full.names = TRUE))
 #+END_SRC
 
 
-
 ** Simulate data in wide format
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
-d <- simulate_rdata(n = 7800)
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+set.seed(20230523)
+d <- simulate_rdata(n = 780)
 outcome_data <- d[,c("pnr",grep("Y|C|D",names(d), value = TRUE)), with = FALSE]
 treatment_data <- d[,c("pnr",grep("A",names(d), value = TRUE)), with = FALSE]
 baseline_data <- d[,.(pnr,V)]
 timevar_data <- d[,c("pnr",grep("L",names(d), value = TRUE)), with = FALSE]
 #+END_SRC
 
-#+RESULTS:
 
 ** Prepare the data for LTMLE
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
-pl <- prepare_data(outcome_data = list("Y"=outcome_data),
-                   regimen_data = list("A"=treatment_data),
-                   baseline_data = baseline_data,
-                   timevar_data = timevar_data,
-                   time_horizon = 3,
-                   deterministic.Q.function = NULL,
-                   name_outcome = "Y",
-                   name_regimen = "A",
-                   name_censoring = "C",
-                   censored_label = "0",
-                   name_comp.event = "D",
-                   abar = list(c(1,1,1),c(0,0,0)))
+#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes  
+pl <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 3,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",abar = list(c(1,1,1),c(0,0,0)))
+pl
 #+END_SRC
 
-#+RESULTS:
+#+RESULTS[(2023-05-19 16:02:52) f79f13d1e7725d4f9c5647f78b43cbb73cda215d]:
+:results:
+
+Object ready for analysis with Ltmle.
+:end:
 
 ** Run LTMLE and check output format
 
@@ -75,6 +68,8 @@ pl1[["info"]]=NULL
 pl1[["verbose"]]=NULL
 fit <- do.call(Ltmle, pl)
 fit1 <- do.call(ltmle::ltmle, pl1)
+pl1$abar=c(1,1,1)
+fit1 <- do.call(ltmle::ltmle, pl1)
 print(fit)
 names(fit)
 summary(fit)
@@ -85,4 +80,52 @@ summary(fit)
 #+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
 pl$verbose=TRUE
 fit <- do.call(Ltmle, pl)
+#+END_SRC
+
+** One treatment regimen at a time
+
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+pl$verbose=FALSE
+pl$abar=c(1,1,1)
+fit <- do.call(Ltmle, pl)
+summary(fit)
+#+END_SRC
+
+** Increase number of time points
+
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
+                    regimen_data = list("A"=treatment_data),
+                    baseline_data = baseline_data,
+                    timevar_data = timevar_data,
+                    time_horizon = 10,
+                    deterministic.Q.function = NULL,
+                    name_outcome = "Y",
+                    name_regimen = "A",
+                    name_censoring = "C",
+                    censored_label = "0",
+                    name_comp.event = "D",
+                    abar = list(rep(1,10),rep(0,10)))
+fit10 <- do.call(Ltmle, pl10)
+#+END_SRC
+
+** Penalized regression
+
+#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
+                      regimen_data = list("A"=treatment_data),
+                      baseline_data = baseline_data,
+                      timevar_data = timevar_data,
+                      time_horizon = 10,
+                      deterministic.Q.function = NULL,
+                      name_outcome = "Y",
+                      name_regimen = "A",
+                      name_censoring = "C",
+                      censored_label = "0",
+                      name_comp.event = "D",
+                      SL.library="glmnet",
+                      SL.cvControl=list(selector="undersmooth",alpha=0.5),
+                      abar = list(rep(1,10),rep(0,10)),
+                      verbose=TRUE)
+fit10 <- do.call(Ltmle, pl10)
 #+END_SRC
