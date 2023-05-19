@@ -124,7 +124,7 @@ pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                       censored_label = "0",
                       name_comp.event = "D",
                       SL.library="glmnet",
-                      SL.cvControl=list(selector="undersmooth",alpha=0.5),
+                      SL.cvControl=list(selector="min",alpha=0),
                       abar = list(rep(1,10),rep(0,10)),
                       verbose=TRUE)
 fit10 <- do.call(Ltmle, pl10)
