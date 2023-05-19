@@ -9,9 +9,6 @@ ltmle <- function (data, Anodes, Cnodes = NULL, Lnodes = NULL, Ynodes,
     stop("Use Ltmle instead.")
     require(matrixStats)
     if (verbose) message("Loading ltmle functions ...")
-    for (f in list.files("z:/Workdata/706582/Andrew Mertens/targets_diabetes_dementia/functions/Ltmle/R/",pattern = ".R$",full.names = TRUE)) {
-        source(f)
-    }
     if (verbose) message("Checking data ...")
     data <- CheckData(data)
     if (verbose) message("Creating inputs ...")

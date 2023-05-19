@@ -33,7 +33,8 @@ for (f in list.files("./Exercises/functions/",pattern = "R$",full.names = TRUE))
 #+END_SRC
 
 
-** Simulate data readily in wide format
+
+** Simulate data in wide format
 
 #+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
 d <- simulate_rdata(n = 7800)
@@ -43,6 +44,8 @@ baseline_data <- d[,.(pnr,V)]
 timevar_data <- d[,c("pnr",grep("L",names(d), value = TRUE)), with = FALSE]
 #+END_SRC
 
+#+RESULTS:
+
 ** Prepare the data for LTMLE
 
 #+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
@@ -50,26 +53,34 @@ pl <- prepare_data(outcome_data = list("Y"=outcome_data),
                    regimen_data = list("A"=treatment_data),
                    baseline_data = baseline_data,
                    timevar_data = timevar_data,
-                   time_horizon = 2,
+                   time_horizon = 3,
                    deterministic.Q.function = NULL,
                    name_outcome = "Y",
                    name_regimen = "A",
-                   name_censoring = NULL,
+                   name_censoring = "C",
                    censored_label = "0",
-                   name_comp.event = NULL,
-                   abar = list(c(1,1),c(0,0)))
+                   name_comp.event = "D",
+                   abar = list(c(1,1,1),c(0,0,0)))
 #+END_SRC
+
+#+RESULTS:
 
 ** Run LTMLE and check output format
 
 #+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
 pl$verbose=FALSE
 fit <- do.call(Ltmle, pl)
+pl1=pl
+pl1[["info"]]=NULL
+pl1[["verbose"]]=NULL
+fit <- do.call(Ltmle, pl)
+fit1 <- do.call(ltmle::ltmle, pl1)
+print(fit)
+names(fit)
+summary(fit)
 #+END_SRC
 
-
-
-** See what happens when running LTMLE
+** See what happens while LTMLE is running
 
 #+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
 pl$verbose=TRUE
