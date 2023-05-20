@@ -234,6 +234,9 @@ the regression models in a more flexible way.
 
 ** Penalized regression
 
+- LASSO: alpha = 1
+- rigde: alpha = 0
+- elastic net: 0< alpha < 1 
 
 #+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes
 pl10.penal <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
@@ -263,4 +266,5 @@ summary(fit10.penal)
 
 ** Super learner library
 
+- Check out the examples here: [[https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjy2cSdooT_AhVvposKHcWiBV8QFnoECCgQAQ&url=https%3A%2F%2Fsi.biostat.washington.edu%2Fsites%2Fdefault%2Ffiles%2Fmodules%2Flab3.pdf&usg=AOvVaw0LBOUH9f7dCyfSZYy3ay0W][Benkeser 2018]]
 - Use different libraries and see how the ltmle results change.
