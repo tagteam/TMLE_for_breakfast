@@ -33,8 +33,8 @@ prepare_Ltmle <- function(regimen_data,
                                   name_censoring = name_censoring, name_comp.event = name_comp.event)
     ## Change data to fit into ltmle constraints; Censored should be factor with levels "uncensored" and "censored",
     ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
-
-    ltmle_data = get_ltmle_data(subset_data$data, time_horizon = time_horizon,
+    ltmle_data = get_ltmle_data(work_data = subset_data$data,
+                                time_horizon = time_horizon,
                                 name_outcome = name_outcome,
                                 name_baseline_covariates = subset_data$baseline, # Important to use covariates from subset data as
                                 name_time_covariates = subset_data$timevar,      # constant variables has been removed
@@ -43,7 +43,6 @@ prepare_Ltmle <- function(regimen_data,
                                 censored_label = censored_label,
                                 name_comp.event = name_comp.event,
                                 order_YC = order_YC)
-    print(names(ltmle_data$data))    
     formulas = get_formulas(time_horizon = time_horizon,
                             ltmle_data = ltmle_data,
                             name_outcome = subset_data$outcome,
@@ -105,7 +104,7 @@ prepare_Ltmle <- function(regimen_data,
                             baseline = subset_data$baseline,
                             timevar = subset_data$timevar,
                             subset_label = subset_data$subset_label,
-                            order = merged_data$order,
+                            order_YC = order_YC,
                             time_interval = paste0("The length of the intervals is ", time_interval_width_months, " months"),
                             constants = subset_data$constant_message,
                             Markov = ifelse(length(subset_data$Markov)>0, paste(c("The following time variables are assumed to have the Markov property

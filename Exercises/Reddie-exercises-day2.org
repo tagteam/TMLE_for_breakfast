@@ -54,7 +54,7 @@ pl
 
 ** Run LTMLE and check output format
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
 fit <- do.call(Ltmle, pl)
 print(fit)
 names(fit)
@@ -63,14 +63,14 @@ summary(fit)
 
 ** See what happens while LTMLE is running
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
 pl$verbose=TRUE
 fit <- do.call(Ltmle, pl)
 #+END_SRC
 
 ** One treatment regimen at a time
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
 pl$verbose=FALSE
 pl$abar=c(1,1,1)
 fit <- do.call(Ltmle, pl)
@@ -79,7 +79,7 @@ summary(fit)
 
 ** Increase number of time points
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
 pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                     regimen_data = list("A"=treatment_data),
                     baseline_data = baseline_data,
@@ -93,12 +93,13 @@ pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                     name_comp.event = "D",
                     abar = list(rep(1,10),rep(0,10)))
 fit10 <- do.call(Ltmle, pl10)
+summary(fit10)
 #+END_SRC
 
 ** Penalized regression
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
-pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
+#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
+pl10.penal <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                       regimen_data = list("A"=treatment_data),
                       baseline_data = baseline_data,
                       timevar_data = timevar_data,
@@ -113,14 +114,42 @@ pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                       SL.cvControl=list(selector="min",alpha=0),
                       abar = list(rep(1,10),rep(0,10)),
                       verbose=TRUE)
-fit10 <- do.call(Ltmle, pl10)
+fit10.penal <- do.call(Ltmle, pl10.penal)
+summary(fit10.penal)
 #+END_SRC
 
-** Increase the sample size (second R-chunk) and re-run everything
+** Further exercises
+
+- Increase the sample size (second R-chunk) and re-run everything
+- Add random noise baseline variables until =glm= breaks down but =glmnet= still runs.
+- Change the value of alpha which controls the transition from LASSO to ridge via elastic net
+
 
 * Exercise 2 (~45 minutes)
 
-** Estimate the target parameter using sequential regression G-formula
+The aim of the excersise is to run LTMLE on simulated data where we
+focus on the sequential regression (g-formula).
+
+** Estimate using sequential regression G-formula with 1 time point
+
+#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
+pl1.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 1,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",gcomp=TRUE,order_YC=FALSE,SL.cvControl=list(selector="min",alpha=0),abar = list(rep(1,1),rep(0,1)),verbose=TRUE)
+fit1.g <- do.call(Ltmle, pl1.g)
+summary(fit1.g)
+#+END_SRC
+
+** Estimate G-formula manually with 1 time point
+
+#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
+pl1.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 1,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glmnet",gcomp=TRUE,SL.cvControl=list(selector="min",alpha=0),abar = list(rep(1,1),rep(0,1)),verbose=TRUE)
+test <- glm(Y_1~A_0+L_0+V,data=pl1.g$data,family="binomial")
+glm.Y1 <- glm(Y_1~A_0+L_0+V,data=pl1.g$data[C_1=="uncensored"],family="binomial")
+summary(fit1.g)
+#+END_SRC
+
+
+
+** Estimate using sequential regression G-formula with 10 time points
 
 #+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
 pl10.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
@@ -142,6 +171,8 @@ pl10.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
 fit10.g <- do.call(Ltmle, pl10.g)
 summary(fit10.g)
 #+END_SRC
+
+
 
 * Exercise 3 (~35 minutes)
 

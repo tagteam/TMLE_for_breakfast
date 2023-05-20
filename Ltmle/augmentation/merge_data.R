@@ -70,8 +70,6 @@ merge_data <- function(time_horizon,
   list(data = work_data[],
        name_baseline_covariates = name_baseline_covariates,
        name_time_covariates = name_time_covariates,
-       name_regimen = regimen_name,
-       order = ifelse(order_YC,"The events variables are ordered by: outcome, censoring",
-                      "The event variables are ordered by: censoring, outcome"))
+       name_regimen = regimen_name)
 }
 

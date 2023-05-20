@@ -3,7 +3,7 @@
 #
 ltmle.glm.fit <- function (x, y, weights, family, offset, intercept) {
     ## print(table(y))
-    ## print("fit")
+    ## print(colnames(y))
     if (all(weights==1)||is.null(weights)){
         try.speedglm <- try({
             m <- speedglm::speedglm.wfit(y = y,

@@ -315,15 +315,16 @@ Estimate <- function(inputs,
             multiple.Qstar) {
             Y.subset <- Y[single.subs]
             if (anyNA(Y.subset)){
-                stop("Estimate: Missing values in outcome data.")
+                stop("Estimate: Missing values in data.")
             }
         }
         if (!all(deterministic.list.newdata$is.deterministic |
                  deterministic.g.list.newdata$is.deterministic)) {
             if (is.null(fit.and.predict) || multiple.Qstar || multiple.subs) {
-                ## print("fit.and.predict");print(is.null(fit.and.predict))
-                ## print("multiple.Qstar");print(multiple.Qstar)
-                ## print("multiple.subs");print(multiple.subs)
+                ## if(names(data)[cur.node] == "Y_1") {
+                ## print(names(data)[cur.node])
+                ## }
+                if(inputs$verbose)message("Regressing ",names(data)[cur.node]," on history with ",NROW(Y.subset)," observations")
                 fit.and.predict <- FitAndPredict()
                 m <- fit.and.predict$m
                 predicted.values[, regime.index] <- fit.and.predict$predicted.values

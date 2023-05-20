@@ -44,7 +44,6 @@ FixedTimeTMLE <-
                         " observations.")
                 ## output = c(output,list(data.table(Outcome = names(data)[cur.node],Atrisk = sum(subs))))
             }
-            ## browser()
             Q.est <- Estimate(inputs, form = inputs$Qform[LYnode.index],
                               Qstar.kplus1 = if (LYnode.index == length(nodes$LY))
                                                  Qstar.kplus1[, 1]
