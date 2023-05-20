@@ -1,3 +1,21 @@
-* Download
+* Download the repository
 
+If you have =git= installed on your computer, clone the repository
+from github, conveniently directly from Rstudio by creating a new
+project (File -> New Project) from Version Control with Reposity URL:
+
+https://github.com/tagteam/TMLE_for_breakfast
+
+Alternatively, you can clone the repo from a terminal 
+
+#+BEGIN_SRC sh
+git clone git@github.com:tagteam/TMLE_for_breakfast.git
+#+END_SRC
+
+Otherwise, if you do not have =git= installed, download the zip
+archive with all files from
+
+https://github.com/tagteam/TMLE_for_breakfast/tree/main
+
+Then, create a new Rstudio project in the unpacked folder. 
 

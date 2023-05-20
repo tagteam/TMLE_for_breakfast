@@ -18,45 +18,42 @@ prepare_Ltmle <- function(regimen_data,
                           SL.library = "glm",
                           SL.cvControl = NULL,
                           gbounds = c(0,1),
-                          test = FALSE,
                           verbose = FALSE) {
-  
-  ## Merge all data and order in correct order
-  merged_data = merge_data(time_horizon = time_horizon, regimen_data = regimen_data, outcome_data = outcome_data, baseline_data = baseline_data, 
-                           timevar_data = timevar_data, name_outcome = name_outcome, name_regimen = name_regimen, 
-                           name_censoring = name_censoring, censored_label = censored_label, name_comp.event = name_comp.event,
-                           order_YC = order_YC, test = test)
-  
-  ## Subsetting the data; This returns data in correct order according to time and without constant nodes
-  subset_data = get_subset_data(work_data = merged_data$data, time_horizon = time_horizon,
-                                subset_id = subset_id, subset_label = subset_label, Markov = Markov,
-                                name_outcome = name_outcome, name_regimen = merged_data$name_regimen,
-                                name_baseline_covariates = merged_data$name_baseline_covariates, 
-                                name_time_covariates = merged_data$name_time_covariates, 
-                                name_censoring = name_censoring, name_comp.event = name_comp.event)
-  
-  ## Change data to fit into ltmle constraints; Censored should be factor with levels "uncensored" and "censored",
-  ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
-  ltmle_data = get_ltmle_data(subset_data$data, time_horizon = time_horizon,
-                              name_outcome = name_outcome,
-                              name_baseline_covariates = subset_data$baseline, # Important to use covariates from subset data as
-                              name_time_covariates = subset_data$timevar,      # constant variables has been removed
-                              name_regimen = subset_data$regimen,
-                              name_censoring = name_censoring,
-                              censored_label = censored_label,
-                              name_comp.event = name_comp.event,
-                              order_YC = order_YC)
-  
-  formulas = get_formulas(time_horizon = time_horizon,
-                          work_data = ltmle_data$data,
-                          name_outcome = subset_data$outcome,
-                          name_baseline_covariates = subset_data$baseline,
-                          name_time_covariates = subset_data$timevar,
-                          name_regimen = subset_data$regimen,
-                          name_censoring = name_censoring,
-                          name_comp.event = name_comp.event,
-                          Markov = subset_data$Markov,
-                          constant_variables = subset_data$constant_variables)
+    ## Merge all data and order in correct order
+    merged_data = merge_data(time_horizon = time_horizon, regimen_data = regimen_data, outcome_data = outcome_data, baseline_data = baseline_data, 
+                             timevar_data = timevar_data, name_outcome = name_outcome, name_regimen = name_regimen, 
+                             name_censoring = name_censoring, censored_label = censored_label, name_comp.event = name_comp.event,
+                             order_YC = order_YC, test = test)
+    ## Subsetting the data; This returns data in correct order according to time and without constant nodes
+    subset_data = get_subset_data(work_data = merged_data$data, time_horizon = time_horizon,
+                                  subset_id = subset_id, subset_label = subset_label, Markov = Markov,
+                                  name_outcome = name_outcome, name_regimen = merged_data$name_regimen,
+                                  name_baseline_covariates = merged_data$name_baseline_covariates, 
+                                  name_time_covariates = merged_data$name_time_covariates, 
+                                  name_censoring = name_censoring, name_comp.event = name_comp.event)
+    ## Change data to fit into ltmle constraints; Censored should be factor with levels "uncensored" and "censored",
+    ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
+
+    ltmle_data = get_ltmle_data(subset_data$data, time_horizon = time_horizon,
+                                name_outcome = name_outcome,
+                                name_baseline_covariates = subset_data$baseline, # Important to use covariates from subset data as
+                                name_time_covariates = subset_data$timevar,      # constant variables has been removed
+                                name_regimen = subset_data$regimen,
+                                name_censoring = name_censoring,
+                                censored_label = censored_label,
+                                name_comp.event = name_comp.event,
+                                order_YC = order_YC)
+    print(names(ltmle_data$data))    
+    formulas = get_formulas(time_horizon = time_horizon,
+                            ltmle_data = ltmle_data,
+                            name_outcome = subset_data$outcome,
+                            name_baseline_covariates = subset_data$baseline,
+                            name_time_covariates = subset_data$timevar,
+                            name_regimen = subset_data$regimen,
+                            name_censoring = name_censoring,
+                            name_comp.event = name_comp.event,
+                            Markov = subset_data$Markov,
+                            constant_variables = subset_data$constant_variables)
   
   if(length(name_regimen)==2) {abar = list(rep(1:0,time_horizon - 1),rep(0:1,time_horizon - 1))}
   

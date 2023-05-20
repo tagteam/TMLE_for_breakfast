@@ -20,7 +20,7 @@ The R-code for the praticals are distributed across different folders:
 - =Ltmle/R= augmentation functions
 - =Exercises/functions= simulation functions
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
+#+BEGIN_SRC R  :results silent :exports code  :session *R* :cache yes  
 library(data.table)
 library(lava)
 try(setwd("~/research/Methods/TMLE_for_breakfast/"),silent=TRUE)
@@ -34,7 +34,7 @@ for (f in list.files("./Exercises/functions/",pattern = "R$",full.names = TRUE))
 
 ** Simulate data in wide format
 
-#+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
 set.seed(20230523)
 d <- simulate_rdata(n = 780)
 outcome_data <- d[,c("pnr",grep("Y|C|D",names(d), value = TRUE)), with = FALSE]
@@ -46,8 +46,8 @@ timevar_data <- d[,c("pnr",grep("L",names(d), value = TRUE)), with = FALSE]
 
 ** Prepare the data for LTMLE
 
-#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
-pl <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 3,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",abar = list(c(1,1,1),c(0,0,0)))
+#+BEGIN_SRC R  :results silent :exports code  :session *R* :cache yes  
+pl <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 3,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",order_YC=TRUE,abar = list(c(1,1,1),c(0,0,0)))
 pl
 #+END_SRC
 
@@ -55,15 +55,7 @@ pl
 ** Run LTMLE and check output format
 
 #+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes
-pl$verbose=FALSE
 fit <- do.call(Ltmle, pl)
-pl1=pl
-pl1[["info"]]=NULL
-pl1[["verbose"]]=NULL
-fit <- do.call(Ltmle, pl)
-fit1 <- do.call(ltmle::ltmle, pl1)
-pl1$abar=c(1,1,1)
-fit1 <- do.call(ltmle::ltmle, pl1)
 print(fit)
 names(fit)
 summary(fit)

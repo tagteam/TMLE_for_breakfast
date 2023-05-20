@@ -314,8 +314,9 @@ Estimate <- function(inputs,
         if (regime.index == first.regime || multiple.subs ||
             multiple.Qstar) {
             Y.subset <- Y[single.subs]
-            if (anyNA(Y.subset))
-                stop("NA in Estimate")
+            if (anyNA(Y.subset)){
+                stop("Estimate: Missing values in outcome data.")
+            }
         }
         if (!all(deterministic.list.newdata$is.deterministic |
                  deterministic.g.list.newdata$is.deterministic)) {

@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: May 19 2023 (16:43) 
 ## Version: 
-## Last-Updated: May 19 2023 (19:27) 
+## Last-Updated: May 20 2023 (10:40) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 7
+##     Update #: 11
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -17,7 +17,7 @@
 summary.Ltmle <- function(object,estimator = ifelse(object$gcomp, "gcomp", "tmle"),...){
     if (length(object$estimates)>0){
         x = summary.ltmle(object,estimator = estimator)
-        risk = with(x$treatment,data.table(Target_parameter = "Risk",
+        risk = with(x$treatment,data.table(Target_parameter = "Risk(A=1)",
                                            Estimator = x$estimator,
                                            estimate = estimate,
                                            std.err = std.dev,
@@ -27,6 +27,22 @@ summary.Ltmle <- function(object,estimator = ifelse(object$gcomp, "gcomp", "tmle
         risk
     }else{
         x = summary.ltmleEffectMeasures(object,estimator = estimator)
+        treatment <- with(x$effect.measures$treatment,
+                          data.table(Target_parameter = "Risk(A=1)",
+                                     Estimator = x$estimator,
+                                     estimate = estimate,
+                                     std.err = std.dev,
+                                     lower = CI[[1]],
+                                     upper = CI[[2]],
+                                     pvalue = pvalue))
+        control <- with(x$effect.measures$control,
+                        data.table(Target_parameter = "Risk(A=0)",
+                                   Estimator = x$estimator,
+                                   estimate = estimate,
+                                   std.err = std.dev,
+                                   lower = CI[[1]],
+                                   upper = CI[[2]],
+                                   pvalue = pvalue))
         ate = with(x$effect.measures$ATE,data.table(Target_parameter = "ATE",
                                                     Estimator = x$estimator,
                                                     estimate = estimate,
@@ -41,7 +57,7 @@ summary.Ltmle <- function(object,estimator = ifelse(object$gcomp, "gcomp", "tmle
                                                   lower = CI[[1]],
                                                   upper = CI[[2]],
                                                   pvalue = pvalue))
-        out = rbind(ate,rr)
+        out = rbind(treatment,control,ate,rr)
         out
     }
 }

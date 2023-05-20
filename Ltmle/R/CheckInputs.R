@@ -59,8 +59,13 @@ CheckInputs <-
     }
     if (length(gform) > 0) {
         if (is.character(gform)) {
-            if (length(gform) != length(nodes$AC))
-                stop("length(gform) != length(c(Anodes, Cnodes))")
+            if (length(gform) != length(nodes$AC)){
+                stop(paste0("length(gform) != length(c(Anodes, Cnodes))",
+                            "\n   gform: ",
+                            paste0(gform,collapse = "\n          "),
+                            "\nAC nodes: ",
+                            paste0(names(data)[nodes$AC],collapse = ", ")))
+            }
             for (i in 1:length(gform)) {
                 if (LhsVars(gform[i]) != names(data)[nodes$AC[i]]) {
                     stop("The LHS of gform[", i, "] should be the name of the ",
@@ -103,7 +108,9 @@ CheckInputs <-
         if (!is.character(Qform))
             stop("Qform should be a character vector")
         if (length(Qform) != length(nodes$LY))
-            stop("length of Qform is not equal to number of L/Y nodes")
+            stop(paste0("length of Qform is not equal to number of L/Y nodes\n",
+                        "  Qforms: ",paste0(names(Qform),collapse = ", "),"\n",
+                        "LY nodes: ",paste0(names(data)[nodes$LY],collapse = ", ")))
         for (i in 1:length(Qform)) {
             if (length(names(Qform[i])) == 0)
                 stop("Each element of Qform must be named. The name must match the name of the corresponding L/Y node in data.")
