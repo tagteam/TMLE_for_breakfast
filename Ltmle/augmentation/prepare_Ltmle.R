@@ -54,7 +54,9 @@ prepare_Ltmle <- function(regimen_data,
                             Markov = subset_data$Markov,
                             constant_variables = subset_data$constant_variables)
   
-  if(length(name_regimen)==2) {abar = list(rep(1:0,time_horizon - 1),rep(0:1,time_horizon - 1))}
+    if(length(name_regimen)==2) {
+        abar = list(rep(1:0,time_horizon - 1),rep(0:1,time_horizon - 1))
+    }
   
   dq <- function(data, current.node, nodes, called.from.estimate.g){
     death.index <- grep(paste0(name_comp.event, "_"),names(data))
@@ -98,11 +100,13 @@ prepare_Ltmle <- function(regimen_data,
                 gbounds = gbounds,
                 iptw.only = iptw.only,
                 verbose = verbose,
-                info = list(outcome = name_outcome,
+                info = list(time_grid = seq(0,time_horizon,1),
+                            outcome = name_outcome,
                             comprisk = name_comp.event,
                             regimen = name_regimen,
                             baseline = subset_data$baseline,
                             timevar = subset_data$timevar,
+                            Dnodes = intersect(paste0(name_comp.event,"_",0:time_horizon),names(ltmle_data$data)),
                             subset_label = subset_data$subset_label,
                             order_YC = order_YC,
                             time_interval = paste0("The length of the intervals is ", time_interval_width_months, " months"),

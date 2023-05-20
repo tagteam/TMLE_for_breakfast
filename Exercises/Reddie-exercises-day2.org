@@ -9,9 +9,15 @@
 
 * Exercise 1 (~40 minutes)
 
-The aim of the excersise is to run LTMLE on simulated data where we
+The aim of the excersise is to run LTMLE on simulated data with a
 focus on the structure of the input and the output of the function
-=Ltmle= which uses our augmented version of the =ltmle= package.
+=Ltmle=. =Ltmle= implements our augmented version of the =ltmle=
+package. The augmentation consists of:
+
+- data preparation functions
+- more explicit warnings about the data setup
+- a direct implementation og =glmnet= to learn all models without the superlearner package
+- augmented output with print and summary methods
 
 ** Load the R-code
 
@@ -20,7 +26,7 @@ The R-code for the praticals are distributed across different folders:
 - =Ltmle/R= augmentation functions
 - =Exercises/functions= simulation functions
 
-#+BEGIN_SRC R  :results silent :exports code  :session *R* :cache yes  
+#+BEGIN_SRC R  :results output drawer :exports code  :session *R* :cache yes  
 library(data.table)
 library(lava)
 try(setwd("~/research/Methods/TMLE_for_breakfast/"),silent=TRUE)
@@ -31,10 +37,9 @@ for (f in list.files("./Ltmle/augmentation/",pattern = "R$",full.names = TRUE)){
 for (f in list.files("./Exercises/functions/",pattern = "R$",full.names = TRUE)){source(f)}
 #+END_SRC
 
-
 ** Simulate data in wide format
 
-#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes
 set.seed(20230523)
 d <- simulate_rdata(n = 780)
 outcome_data <- d[,c("pnr",grep("Y|C|D",names(d), value = TRUE)), with = FALSE]
@@ -43,18 +48,28 @@ baseline_data <- d[,.(pnr,V)]
 timevar_data <- d[,c("pnr",grep("L",names(d), value = TRUE)), with = FALSE]
 #+END_SRC
 
-
 ** Prepare the data for LTMLE
 
-#+BEGIN_SRC R  :results silent :exports code  :session *R* :cache yes  
-pl <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 3,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",order_YC=TRUE,abar = list(c(1,1,1),c(0,0,0)))
+#+BEGIN_SRC R  :results output drawer :exports code  :session *R* :cache yes  
+pl <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
+                    regimen_data = list("A"=treatment_data),
+                    baseline_data = baseline_data,
+                    timevar_data = timevar_data,
+                    time_horizon = 3,
+                    deterministic.Q.function = NULL,
+                    name_outcome = "Y",
+                    name_regimen = "A",
+                    name_censoring = "C",
+                    censored_label = "0",
+                    name_comp.event = "D",
+                    order_YC=FALSE,
+                    abar = list(c(1,1,1),c(0,0,0)))
 pl
 #+END_SRC
 
-
 ** Run LTMLE and check output format
 
-#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes
 fit <- do.call(Ltmle, pl)
 print(fit)
 names(fit)
@@ -63,14 +78,14 @@ summary(fit)
 
 ** See what happens while LTMLE is running
 
-#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes
 pl$verbose=TRUE
 fit <- do.call(Ltmle, pl)
 #+END_SRC
 
-** One treatment regimen at a time
+** Only one treatment regimen at a time
 
-#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes
 pl$verbose=FALSE
 pl$abar=c(1,1,1)
 fit <- do.call(Ltmle, pl)
@@ -79,7 +94,7 @@ summary(fit)
 
 ** Increase number of time points
 
-#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
+#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes
 pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                     regimen_data = list("A"=treatment_data),
                     baseline_data = baseline_data,
@@ -93,12 +108,134 @@ pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                     name_comp.event = "D",
                     abar = list(rep(1,10),rep(0,10)))
 fit10 <- do.call(Ltmle, pl10)
-summary(fit10)
+x=summary(fit10)
+x
 #+END_SRC
+
+** Plot over time
+
+Vary the =time_horizon= between 1 and 10 and collect the results in a
+=data.table= or =data.frame=. Then plot the average risks for the
+treated and the untreated in the different hypothetical trials
+corresponding to staying on treatment (off treatment) for
+=time_horizon= years.
+
+*** Hint:
+#+BEGIN_SRC R  :results output raw  :exports none  :session *R* :cache no  
+foreach (t =1:10,.combine="rbind")%do%{
+ # prepare data
+ # run Ltmle()
+ # output summary()
+})
+#+END_SRC
+
+* Exercise 2 (~45 minutes)
+
+The aim of the excersise is to run LTMLE on simulated data where we
+focus on the sequential regression (g-formula) and the IPTW formula.
+
+** Estimate using sequential regression G-formula with 1 time point
+
+#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
+pl1.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 1,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",gcomp=TRUE,order_YC=FALSE,SL.cvControl=list(selector="min",alpha=0),abar = list(rep(1,1),rep(0,1)),verbose=FALSE)
+fit1.g <- do.call(Ltmle, pl1.g)
+summary(fit1.g)
+#+END_SRC
+
+** Estimate G-formula manually with 1 time point
+
+#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
+pl1.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 1,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glmnet",gcomp=TRUE,SL.cvControl=list(selector="min",alpha=0),abar = list(rep(1,1),rep(0,1)),verbose=FALSE)
+outcome_regression <- glm(Y_1~A_0+L_0+V,data=pl1.g$data[C_1=="uncensored"],family="binomial")
+# copy data and set static treatment
+data_treated <- pl1.g$data[C_1=="uncensored"]
+data_treated[,A_0:=1]
+data_control <- pl1.g$data[C_1=="uncensored"]
+data_control[,A_0:=0]
+# predict and average
+Manual <- data.table(Risk_Treated=mean(predict(outcome_regression,newdata=data_treated,type="response")),
+                     Risk_Control=mean(predict(outcome_regression,newdata=data_control,type="response")))
+Manual[, ATE:=Risk_Control- Risk_Treated]
+Manual[]
+#+END_SRC
+
+** Estimate IPTW manually with 1 time point
+
+#+BEGIN_SRC R  :results output raw  :exports none  :session *R* :cache no  
+# Can you do this?
+#+END_SRC
+
+** Compare sequential regression with IPTW and TMLE using 10 time points
+
+#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
+pl10 <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
+                      regimen_data = list("A"=treatment_data),
+                      baseline_data = baseline_data,
+                      timevar_data = timevar_data,
+                      time_horizon = 10,
+                      deterministic.Q.function = NULL,
+                      name_outcome = "Y",
+                      name_regimen = "A",
+                      name_censoring = "C",
+                      censored_label = "0",
+                      name_comp.event = "D",
+                      SL.library="glm",
+                      gcomp=FALSE,
+                      abar = list(rep(1,10),rep(0,10)),
+                      verbose=FALSE)
+# copy that
+pl10.g <- pl10
+pl10.g[["gcomp"]] <- TRUE
+# run tmle and iptw
+fit10.tmle <- do.call(Ltmle, pl10)
+# run gcomp
+fit10.g <- do.call(Ltmle, pl10.g)
+# compare results
+summary(fit10.tmle,estimator="tmle")
+summary(fit10.tmle,estimator="iptw")
+summary(fit10.g)
+#+END_SRC
+
+
+** Looking into the box
+
+The fitted ltmle objects contain all nuisance parameter models as part
+of the output. For example, are all g-models where treatment or
+censoring nodes are outcome available:
+
+#+BEGIN_SRC R  :results silent  :exports none  :session *R* :cache no  
+fit10.tmle$fit$g
+#+END_SRC
+
+Check if you can retrace one of these models, e.g., the model with
+=C_8= as outcome, but without using the =Ltmle= function only the
+prepared data object.
+
+** Use argument g-bounds of ltmle
+
+Check what the =gbounds= argument does.
+
+#+BEGIN_SRC R  :results output drawer :exports code  :session *R* :cache yes  
+pl10.iptw.unbounded <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 10,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",iptw.only=FALSE,gbounds=c(0,1),abar = list(rep(1,10),rep(0,10)),verbose=FALSE)
+pl10.iptw.bounded <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 10,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",iptw.only=FALSE,gbounds=c(0.3,.7),abar = list(rep(1,10),rep(0,10)),verbose=FALSE)
+fit10.iptw.unbounded <- do.call(Ltmle, pl10.iptw.unbounded)
+fit10.iptw.bounded <- do.call(Ltmle, pl10.iptw.bounded)
+summary(fit10.iptw.unbounded,estimator="iptw")
+summary(fit10.iptw.bounded,estimator="iptw")
+summary(fit10.iptw.unbounded,estimator="tmle")
+summary(fit10.iptw.bounded,estimator="tmle")
+#+END_SRC
+
+* Exercise 3 (~35 minutes)
+
+The aim of this exercise is to use penalized regressions instead of
+unpenalized =glm= and then to specify a super learner library to fit
+the regression models in a more flexible way.
 
 ** Penalized regression
 
-#+BEGIN_SRC R  :results silent  :exports code  :session *R* :cache yes
+
+#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes
 pl10.penal <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                       regimen_data = list("A"=treatment_data),
                       baseline_data = baseline_data,
@@ -113,83 +250,10 @@ pl10.penal <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                       SL.library="glmnet",
                       SL.cvControl=list(selector="min",alpha=0),
                       abar = list(rep(1,10),rep(0,10)),
-                      verbose=TRUE)
+                      verbose=FALSE)
 fit10.penal <- do.call(Ltmle, pl10.penal)
 summary(fit10.penal)
 #+END_SRC
-
-
-* Exercise 2 (~45 minutes)
-
-The aim of the excersise is to run LTMLE on simulated data where we
-focus on the sequential regression (g-formula).
-
-** Estimate using sequential regression G-formula with 1 time point
-
-#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
-pl1.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 1,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",gcomp=TRUE,order_YC=FALSE,SL.cvControl=list(selector="min",alpha=0),abar = list(rep(1,1),rep(0,1)),verbose=TRUE)
-fit1.g <- do.call(Ltmle, pl1.g)
-summary(fit1.g)
-#+END_SRC
-
-** Estimate G-formula manually with 1 time point
-
-#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
-pl1.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 1,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glmnet",gcomp=TRUE,SL.cvControl=list(selector="min",alpha=0),abar = list(rep(1,1),rep(0,1)),verbose=TRUE)
-test <- glm(Y_1~A_0+L_0+V,data=pl1.g$data,family="binomial")
-glm.Y1 <- glm(Y_1~A_0+L_0+V,data=pl1.g$data[C_1=="uncensored"],family="binomial")
-summary(fit1.g)
-#+END_SRC
-
-
-
-** Estimate using sequential regression G-formula with 10 time points
-
-#+BEGIN_SRC R  :results output :exports code  :session *R* :cache yes  
-pl10.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
-                      regimen_data = list("A"=treatment_data),
-                      baseline_data = baseline_data,
-                      timevar_data = timevar_data,
-                      time_horizon = 10,
-                      deterministic.Q.function = NULL,
-                      name_outcome = "Y",
-                      name_regimen = "A",
-                      name_censoring = "C",
-                      censored_label = "0",
-                      name_comp.event = "D",
-                      SL.library="glmnet",
-                      gcomp=TRUE,
-                      SL.cvControl=list(selector="min",alpha=0),
-                      abar = list(rep(1,10),rep(0,10)),
-                      verbose=TRUE)
-fit10.g <- do.call(Ltmle, pl10.g)
-summary(fit10.g)
-#+END_SRC
-
-
-** Estimate the target parameter using inverse treatment/censoring weighting
-
-#+BEGIN_SRC R  :results silent :exports code  :session *R* :cache yes  
-pl10.iptw <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 10,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",iptw.only=TRUE,abar = list(rep(1,10),rep(0,10)),verbose=FALSE)
-fit10.iptw <- do.call(Ltmle, pl10.iptw)
-summary(fit10.iptw,estimator="iptw")
-#+END_SRC
-
-
-** Use argument g-bounds of ltmle
-
-#+BEGIN_SRC R  :results silent :exports code  :session *R* :cache yes  
-pl10.iptw.unbounded <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 10,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",iptw.only=FALSE,gbounds=c(0,1),abar = list(rep(1,10),rep(0,10)),verbose=FALSE)
-pl10.iptw.bounded <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 10,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glm",iptw.only=FALSE,gbounds=c(0.3,.7),abar = list(rep(1,10),rep(0,10)),verbose=FALSE)
-fit10.iptw.unbounded <- do.call(Ltmle, pl10.iptw.unbounded)
-fit10.iptw.bounded <- do.call(Ltmle, pl10.iptw.bounded)
-summary(fit10.iptw.unbounded,estimator="iptw")
-summary(fit10.iptw.bounded,estimator="iptw")
-summary(fit10.iptw.unbounded,estimator="tmle")
-summary(fit10.iptw.bounded,estimator="tmle")
-#+END_SRC
-
-* Exercise 3 (~35 minutes)
 
 ** Compare gcomp, iptw, tmle
 
@@ -197,3 +261,6 @@ summary(fit10.iptw.bounded,estimator="tmle")
 - Add random noise baseline variables until =glm= breaks down but =glmnet= still runs.
 - Change the value of alpha which controls the transition from LASSO to ridge via elastic net
 
+** Super learner library
+
+- Use different libraries and see how the ltmle results change.

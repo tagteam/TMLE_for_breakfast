@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: May 19 2023 (15:57) 
 ## Version: 
-## Last-Updated: May 20 2023 (11:41) 
+## Last-Updated: May 20 2023 (14:55) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 31
+##     Update #: 48
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -20,45 +20,26 @@ print.prepare_Ltmle <- function(x,...){
                    "The event variables are ordered by: censoring, outcome")
     cat(order,"\n")
     cat("Sum of treated and number of events by time: \n\n")
-    outcomes = x$data[,lapply(.SD,sum,na.rm = TRUE),.SDcols = x$Ynodes]
-    outcomes = melt(outcomes,measure.vars = names(outcomes),variable.name = "Time",value.name = "Outcome")
-    outcomes[,Time := sapply(strsplit(as.character(Time),"_"),"[",2)]
-    treated = x$data[,lapply(.SD,sum,na.rm = TRUE),.SDcols = x$Anodes]
-    treated = melt(treated,measure.vars = names(treated),variable.name = "Time",value.name = "Treatment")
-    treated[,Time := sapply(strsplit(as.character(Time),"_"),"[",2)]
-    X = merge(treated,outcomes,by = "Time",all = TRUE)
-    X[Time == 0,Outcome := 0]
-    X[,NumberAtrisk := rep(NROW(x$data),length(Time))-cumsum(Outcome)]
+    Time = x$info$time_grid
+    Treat = c(sapply(x$Anodes,function(a){sum(x$data[[a]],na.rm = TRUE)}),NA)
+    Out = c(0,sapply(x$Ynodes,function(y){sum(x$data[[y]],na.rm = TRUE)}))
+    N = NROW(x$data) -cumsum(Out)
     if (length(x$Cnodes)>0){
-        censored = x$data[,lapply(.SD,function(x){sum(x == "censored",na.rm = TRUE)}),.SDcols = x$Cnodes]
-        censored = melt(censored,measure.vars = names(censored),variable.name = "Time",value.name = "Censored")
-        censored[,Time := sapply(strsplit(as.character(Time),"_"),"[",2)]
-        X = censored[X,on = "Time"]
-        if (x$info$order_YC){
-            X[Time == 0,Censored := 0]
-        }else{
-            X[,Censored := c(Censored[-1],NA)]
-        }
-        X[Time == max(Time),Censored := NA]
-        X[,NumberAtrisk := NumberAtrisk-cumsum(Censored)]
+        if (x$info$order_YC)
+            Cens = c(0,sapply(x$Cnodes,function(c){sum(x$data[[c]] == "censored",na.rm = TRUE)}),NA)
+        else
+            Cens = c(0,sapply(x$Cnodes,function(c){sum(x$data[[c]] == "censored",na.rm = TRUE)}))
+        N = N-cumsum(Cens)
     }
-    has_competing = (length(x$info$comprisk)>0
-        &&
-        length(grep(paste0("^",x$info$comprisk,"_"),x$info$Lnodes)>0))
-    if (has_competing){
-        comprisk = x$data[,lapply(.SD,sum,na.rm = TRUE),.SDcols = grep(x$info$comprisk,names(x$data),value = TRUE)]
-        comprisk = melt(comprisk,measure.vars = names(comprisk),variable.name = "Time",value.name = "CompetingEvents")
-        comprisk[,Time := sapply(strsplit(as.character(Time),"_"),"[",2)]
-        X = comprisk[X,on = "Time"]
-        X[Time == 0,CompetingEvents := 0]
-        X[,NumberAtrisk := NumberAtrisk-cumsum(CompetingEvents)]
+    if (length(x$info$Dnodes)>0){
+        CR = c(0,sapply(x$info$Dnodes,function(d){sum(x$data[[d]],na.rm = TRUE)}),NA)
+        N = N-cumsum(CR)
     }
-    vars = c("Time","NumberAtrisk","Treatment","Outcome")
-    if(has_competing){vars = c(vars,"CompetingEvents")}
-    if(length(x$Cnodes)>0){vars = c(vars,"Censored")}
-    setcolorder(X,vars)
-    print(X)
-    invisible(X)
+    X = data.table(Time = Time,NumberAtrisk = N,Treat = Treat,Outcome = Out)
+    if (length(x$info$Dnodes)>0){X[,CompetingEvents := CR]}
+    if (length(x$Cnodes)>0){X[,Censored := Cens]}
+    print(X[])
+    invisible(X[])
 }
 
 ######################################################################
