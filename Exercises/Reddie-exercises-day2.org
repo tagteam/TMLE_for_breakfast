@@ -20,7 +20,6 @@ The R-code for the praticals are distributed across different folders:
 - =Ltmle/R= augmentation functions
 - =Exercises/functions= simulation functions
 
-
 #+BEGIN_SRC R  :results output raw  :exports code  :session *R* :cache yes  
 library(data.table)
 library(lava)
@@ -162,12 +161,6 @@ fit10.iptw <- do.call(Ltmle, pl10.iptw)
 summary(fit10.iptw,estimator="iptw")
 #+END_SRC
 
-#+RESULTS[(2023-05-19 19:29:35) cbba5adce42c0ef7882452ae8341d5fb6f6d3a05]:
-:results:
-   Target_parameter Estimator  estimate   std.err      lower     upper       pvalue
-1:              ATE      iptw 0.2653226 0.1104770 0.04879168 0.4818535 0.0163231181
-2:     RelativeRisk      iptw 3.4191176 0.3161168 1.84007256 6.3532090 0.0001006524
-:end:
 
 ** Use ltmle defaul g-bounds
 

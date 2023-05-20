@@ -58,7 +58,7 @@ Room: CSS 7.0.08
 - 13:20-13:40 :: Discussion
 - 13:40-13:55 :: Coffee break  
 - 13:55-14:30 :: R-coding: LTMLE (III) 
-- 14:30-14:50 :: Challenges and limitations (Thomas Alexander Gerds)
+- 14:30-14:50 :: Super learner: advantages and pitfalls (Thomas Alexander Gerds)
 - 14:50-15:00 :: Good bye (Christian Torp-Pedersen)
 
 * References
