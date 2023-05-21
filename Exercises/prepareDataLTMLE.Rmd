@@ -1,0 +1,296 @@
+---
+title: "LTMLE data preparation"
+date: "19-05-2023"
+---
+
+This provides a simulated example to prepare what could be real data for a TMLE analysios.
+
+All analyses are based on R and primarily using data.table for data management
+
+The assumption is that the real raw data are found in several tables representing
+diagnoses, personal data, prescriptions and outcomes.  So, for a starter we need to
+create som simulated data for exercises representing such tables.
+
+```{r}
+library(heaven)
+library(data.table)
+library(ltmle)
+set.seed(35)
+```
+# Step 1 - Create data for exercise
+
+## Create a population
+For some relation to reality we will create a population that has an age exceeding 50 years
+in 2010.  
+```{r}
+n <- 100
+population <- data.table(ID=1:n, birthDate=as.Date("2010-01-01")-(50*365+sample(1:6000,n)))
+```
+We assume that 20 percent die between 2010 and the following 4 years - our competing risk
+```{r}
+population[,dead:=sample(0:1,n,replace=TRUE,prob=c(0.8,0.2))]
+population[dead==1,death:=as.Date("2010-01-01")+sample(1:1460,1,replace=FALSE)]
+```
+At baseline (2010-01-01) a single baseline variable is present - this is continuous and 
+represents BMI
+```{r}
+population[,BMI:=sample(25:35,n,replace = TRUE)]
+```
+
+## Diagnoses representing outcome
+We assume that a separate register provides diagnoses of patients in the study.
+In reality the diagnoses would be ICD codes, but for ease we translate to diseases.
+To match reality there are several (1,2) codes for some diseases. We introduce Myocardial
+Infarction, Heart Failure and Renal Disease. The created data also contain various not of value for us.
+```{r}
+diagnoses <- simAdmissionData(n,m=5,c("MI","HF1","HF2","RD1","RD2"),startDate = "2000-01-01")
+setnames(diagnoses,c("ID","someNumber","admission","discharge","otherDate","diagnosis","someNumber2"))
+```
+
+## Treatment with various drugs
+We provide the possibility of GLP1 therapy to patients
+We also provide the possibility of drugs with ATC codes C02A and C07FB  - which are helpful for 
+identifying hypertension at least in Danish registers - providing two are used.
+In this example patients can only develop hypertension after trial inclusion providing a time dependent 
+comorbidity
+```{r}
+drugs <- simPrescriptionData(n,max.prescriptions = 50,packages=
+          list("GLP1"=list(c(1,90)),"C02A"=list(c(1,90)),"C07FB"=list(c(1,90))),max.packages=2,
+         startDate="2010-01-01")
+
+setnames(drugs,c("ID","drug","prescriptionDate","strength","packageSize","numberPackages"))
+```
+
+# Step 2 - Arranging data
+
+## Find comorbidity presence prior to entry
+In this example all patients enter the study on "2010-01-01"
+```{r}
+morblist <- list(
+  MI="MI",
+  HF=c("HF1","HF2"),
+  RD=c("RD1","RD2")
+)
+diagnoses2 <- findCondition(data=diagnoses,
+                            vars="diagnosis",
+                            keep=c("ID","admission"),
+                            conditions=morblist,
+                            match="start",
+                            condition.name="morbidity")
+setkeyv(diagnoses2,c("ID","morbidity","admission"))
+priorDiagnoses <- diagnoses2[admission<as.Date("2010-01-01")]
+priorDiagnoses <- priorDiagnoses[,.SD[1],by=c("ID","morbidity")]
+priorDiagnoses[,presence:=fifelse(is.na(admission),0,1)]
+priorDiagnoses <- dcast(priorDiagnoses,ID~morbidity,value.var="presence")
+priorDiagnoses[is.na(priorDiagnoses),] <- 0  
+# We assume that RD in the past is a different covariate than RD over time and give it a new name
+setnames(priorDiagnoses,"RD","renal")
+```
+## Find date of comorbidity after entry
+RD is considered a time dependent comorbidity
+HF and AMI is a combined cardiovascular endpoint to be examined
+```{r}
+timeDependent <- diagnoses2[admission>as.Date("2010-01-01")]
+timeDependent[morbidity %in% c("MI","HF"),morbidity:="outcome"]
+setkeyv(timeDependent,c("ID","morbidity","admission"))
+timeDependent <- timeDependent[,.SD[1],by=c("ID","morbidity")]
+timeDependent <- dcast(timeDependent,ID~morbidity,value.var="admission")
+```
+## Find date of hypertension defined as the first quater where two
+antihypertensives have been claimed for two consecutive quaters
+```{r}
+hypertension <- hypertensionMedication(data=drugs,
+                                       vars=c("ID","drug","prescriptionDate")
+                                       )
+hypertension[,numDrugs:=NULL]
+```
+# Create the tables necessary for final data preparation
+## ID and start date
+```{r}
+base <- data.table(ID=1:n,startDate=as.Date("2010-01-01"))
+```
+## Table of fixed variables at baseline
+```{r}
+fixed <- merge(population[,.(ID,birthDate)],priorDiagnoses,all.x=TRUE,by="ID")
+fixed[,age:=as.numeric((as.Date("2010-01-01")-birthDate)/365.25)]
+fixed[,birthDate:=NULL]
+fixed[is.na(fixed),] <- 0  
+```
+## Table of variables that change only once - including outcome
+At this stage we also add a censoring date among patients without outcome or competing risk
+
+```{r}
+timeDependent2 <- Reduce(function(x,y){merge(x,y,all=TRUE,by="ID")},
+                        list(timeDependent,hypertension,population[,.(ID,death)]))
+timeDependent2[is.na(death) & is.na(outcome),censor:=as.Date("2010-01-01")+sample(1:2000,1)]
+```
+For these simulated data we need an extra step because patients can only achive on of the
+possibilities of censoring, outcome and death
+```{r}
+timeDependent2[!is.na(outcome),':='(censor=NA,death=NA)]
+timeDependent2[!is.na(censor),death:=NA]
+```
+
+
+
+## Table of variables that can change multiple times - GLP1 treatment
+
+In this case the simple decision is made that any prescription of GLP1 ensures
+continuous treatment for 180 days
+
+For use in following function overlap of treatment periods is not allowed within 
+ID and drug.  Further the variable "value" is set to one representing that we in
+this example regard treatment with GLP1 is qualitative 0/1
+```{r}
+timeVarCov <- drugs[drug=="GLP1",.(ID,drug,prescriptionDate)]
+timeVarCov[,endDate:=prescriptionDate+180]
+setkeyv(timeVarCov,c("ID","prescriptionDate"))
+timeVarCov[,prescriptionDate:=fifelse(!is.na(shift(endDate)) & prescriptionDate<shift(endDate),shift(endDate),prescriptionDate)]
+timeVarCov <- timeVarCov[endDate>prescriptionDate]
+timeVarCov[,value:=1]
+```
+
+# Prepare for LTMLE
+LTMLE operates with a sequence of time periods all of equal length. Even though 
+individuals may experience the event or be censored early, all individuals need
+information for variables during the whole time of follow-up. Therefore, the first
+step is to fix the end time of the analysis. 
+
+For this example, we chose four time intervals of 365 days.
+
+During the data preparation below, records are split into multiple records and 
+to avoid confusion with the original entry into analysis, a new variable is 
+defined informing the start date.
+
+
+```{r}
+base[,':='(inn=startDate,out=startDate+4*365)]
+```
+## Splitting
+The following steps have the purpose of defining levels of variables in each of 
+the defined time periods. To start this proces all records are split according 
+to timing of change in variable status. The order of splitting is not important.
+
+The first step is splitting by all variables that change only once. 
+This is performed with the heaven::splitTwo function that needs the original 
+base data and a "splitting guide" which is the dataset with dates where variables
+that change only once are held.
+
+```{r echo=TRUE}
+longSplit <- splitTwo(indat=base,
+                      splitdat=timeDependent2,
+                      invars=c('ID','inn','out'),
+                      splitvars = c('ID','RD','outcome','hypertension','death','censor'))
+```
+
+Next the data is split by the time dependent variables with potentially multiple
+changes during the study. We use the function heaven::splitFromTo.
+
+```{r echo=TRUE}
+longSplit <- splitFromTo(indat=longSplit,
+                         splitdat=timeVarCov,
+                         invars=c('ID','inn','out'),
+                         splitvars = c('ID','prescriptionDate','endDate','value','drug'))
+```
+
+Finally, the data is split by the selected time periods, in the current case
+four periods of 365 days. The new value 'period' contains the period number. This uses
+heaven::splitSeq.
+
+```{r echo=TRUE}
+longSplit <- splitSeq(indat=longSplit,
+                      invars=c('ID','inn','out'),
+                      varname = 'startDate', # intervals since inclusion in study
+                      splitvector= c(-1,365,730,1095,1460), # four periods of 180 days
+                      format = "vector",
+                      value="period")
+```
+## Summarize in periods
+With the splitting complete, all information for each selected equally sized time period 
+(in the example four) is separated.
+
+The next step is then to summarize information by 'period'. 
+
+The outcomes (event, censoring, competing risk) should be the maximal outcome for each period since an outcome event is coded "1" as opposed to "0" when not occurring.  
+
+For other variables, it is dependent on a discussion whether to choose the entry values
+for each period or choose any indication of exposure during the period. For this
+example the entry value is chosen for each period for covariates. 
+
+Importantly, the data structure for running LTMLE requires that when an event has
+happened during a period, the value of that event needs to be carried forward to the
+rest of periods until end of observation time.  
+
+For the calculations, the covariates (as opposed to outcomes) need to be moved 
+one period back in time. This ensures that covariate values are always prior to outcome. 
+Conceptually covariate values can be viewed as the last value during the preceding time period.
+
+```{r echo=TRUE}
+setkeyv(longSplit,c("ID","period","inn"))
+# Max value of outcomes in each period
+longSplit[,':='(outcome=max(outcome),censor=max(censor),death=max(death)),by=c("ID","period")] 
+setkeyv(longSplit,c("ID","inn"))
+# Choose first record for each ID/period
+aggrSplit <- longSplit[,.SD[1],by=c("ID","period")]
+aggrSplit[,GLP1:=as.numeric(GLP1)]
+# Make relation between censor, outcome and death possible - not relevant for REAL data
+
+# shift covariates one period back 
+aggrSplit_cov <- aggrSplit[,.(ID,period,GLP1,RD,hypertension)]
+aggrSplit_cov[,period:=period-1]
+aggrSplit_out <- aggrSplit[,.(ID,period,death,censor,outcome)]
+```
+
+## Transpose to wide format
+```{r echo=TRUE}
+wideSplit_cov <- dcast(aggrSplit_cov,ID~period,value.var = c("GLP1","RD","hypertension"))
+wideSplit_out <- dcast(aggrSplit_out,ID~period,value.var = c("death","censor","outcome"))
+wideSplit <- cbind(wideSplit_cov,wideSplit_out[,ID:=NULL])
+# Finally add the baseline covariates
+wideSplit <- merge(fixed,wideSplit,by="ID")
+```
+# Deterministic Q-function
+
+The deterministic Q function can be employed for a variety of purposes. Centrally 
+for our example, it interprets the "death" covariate as a competing risk.
+
+```{r, echo=T}
+det.Q.function<-function(data, current.node, nodes, called.from.estimate.g){
+    compete.index <- grep("death",names(data))
+    ## if(length(compete.index)==0) det <- list(rep(TRUE,NROW(data)),Q.value=0)
+    ## stop("No compete/terminal event node found")
+    hist.compete.index <- compete.index[compete.index < current.node]
+    if(length(hist.compete.index)==0)
+      return(NULL)
+    else{
+      is.deterministic <- Reduce("+",lapply(data[,hist.compete.index,drop=FALSE],
+                                            function(dd){x=dd;x[is.na(dd)] <- 0;x}))>=1
+      is.deterministic[is.na(is.deterministic)] <- FALSE
+      list(is.deterministic=is.deterministic, Q.value=0)
+    }
+}
+```
+
+#LTMLE
+What is left is to run the LTMLE analysis, and more information on this function exists: 
+https://cran.r-project.org/web/packages/ltmle/ltmle.pdf
+
+```{r echo=TRUE}
+Anodes <- sort(grep("^GLP",names(wideSplit))) #treatment nodes
+Lnodes <- sort(c(grep("HF",names(wideSplit)),grep("MI",names(wideSplit)),
+                 grep("renal",names(wideSplit)),grep("^hypertension_",names(wideSplit)),
+                 grep("^death",names(wideSplit)),grep("^RD_",names(wideSplit))))
+Ynodes <- sort(grep("^outcome",names(wideSplit))) #outcome
+Cnodes <- sort(grep("^censor",names(wideSplit))) #censor
+    
+fit <- ltmle(wideSplit,Anodes=Anodes, 
+          Lnodes=Lnodes, 
+          Ynodes=Ynodes,
+          Cnodes=Cnodes,
+          abar=c(1,1,1,1),
+          deterministic.Q.function = det.Q.function, #defined above
+          survivalOutcome = TRUE)
+
+print(summary(fit))
+```
+
