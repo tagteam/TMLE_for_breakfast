@@ -151,9 +151,9 @@ summary(fit1.g)
 pl1.g <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),regimen_data = list("A"=treatment_data),baseline_data = baseline_data,timevar_data = timevar_data,time_horizon = 1,deterministic.Q.function = NULL,name_outcome = "Y",name_regimen = "A",name_censoring = "C",censored_label = "0",name_comp.event = "D",SL.library="glmnet",gcomp=TRUE,SL.cvControl=list(selector="min",alpha=0),abar = list(rep(1,1),rep(0,1)),verbose=FALSE)
 outcome_regression <- glm(Y_1~A_0+L_0+V,data=pl1.g$data[C_1=="uncensored"],family="binomial")
 # copy data and set static treatment
-data_treated <- pl1.g$data[C_1=="uncensored"]
+data_treated <- copy(pl1.g$data)
 data_treated[,A_0:=1]
-data_control <- pl1.g$data[C_1=="uncensored"]
+data_control <- copy(pl1.g$data)
 data_control[,A_0:=0]
 # predict and average
 Manual <- data.table(Risk_Treated=mean(predict(outcome_regression,newdata=data_treated,type="response")),
