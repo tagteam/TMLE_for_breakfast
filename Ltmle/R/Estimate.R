@@ -321,8 +321,9 @@ Estimate <- function(inputs,
         if (!all(deterministic.list.newdata$is.deterministic |
                  deterministic.g.list.newdata$is.deterministic)) {
             if (is.null(fit.and.predict) || multiple.Qstar || multiple.subs) {
-                ## if(names(data)[cur.node] == "Y_1") {
-                ## print(names(data)[cur.node])
+                ## if(names(data)[cur.node] == "Y_3") {
+                    ## browser()
+                    ## print(names(data)[cur.node])
                 ## }
                 if(inputs$verbose)message("Regressing ",names(data)[cur.node]," on history with ",NROW(Y.subset)," observations")
                 fit.and.predict <- FitAndPredict()

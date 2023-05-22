@@ -37,6 +37,7 @@ for (f in list.files("./Ltmle/augmentation/",pattern = "R$",full.names = TRUE)){
 for (f in list.files("./Exercises/functions/",pattern = "R$",full.names = TRUE)){source(f)}
 #+END_SRC
 
+
 ** Simulate data in wide format
 
 #+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes
@@ -47,6 +48,7 @@ treatment_data <- d[,c("pnr",grep("A",names(d), value = TRUE)), with = FALSE]
 baseline_data <- d[,.(pnr,V)]
 timevar_data <- d[,c("pnr",grep("L",names(d), value = TRUE)), with = FALSE]
 #+END_SRC
+
 
 ** Prepare the data for LTMLE
 
@@ -66,6 +68,20 @@ pl <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
                     abar = list(c(1,1,1),c(0,0,0)))
 pl
 #+END_SRC
+
+#+RESULTS[(2023-05-22 08:26:47) e9a1743347c3cf8f7b1c6512435f8abace1063d6]:
+:results:
+
+Prepared data for analysis with Ltmle.
+The event variables are ordered by: censoring, outcome 
+Sum of treated and number of events by time: 
+
+   Time NumberAtrisk Treat Outcome CompetingEvents Censored
+1:    0          780   113       0               0        0
+2:    1          716   198      14               2       48
+3:    2          631   107      18               9       58
+4:    3           NA    NA      22              NA       46
+:end:
 
 ** Run LTMLE and check output format
 
