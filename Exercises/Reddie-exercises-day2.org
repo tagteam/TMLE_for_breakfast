@@ -69,19 +69,6 @@ pl <- prepare_Ltmle(outcome_data = list("Y"=outcome_data),
 pl
 #+END_SRC
 
-#+RESULTS[(2023-05-22 08:26:47) e9a1743347c3cf8f7b1c6512435f8abace1063d6]:
-:results:
-
-Prepared data for analysis with Ltmle.
-The event variables are ordered by: censoring, outcome 
-Sum of treated and number of events by time: 
-
-   Time NumberAtrisk Treat Outcome CompetingEvents Censored
-1:    0          780   113       0               0        0
-2:    1          716   198      14               2       48
-3:    2          631   107      18               9       58
-4:    3           NA    NA      22              NA       46
-:end:
 
 ** Run LTMLE and check output format
 
