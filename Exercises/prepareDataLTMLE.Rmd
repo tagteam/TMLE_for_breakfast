@@ -12,7 +12,7 @@ diagnoses, personal data, prescriptions and outcomes.  So, for a starter we need
 create som simulated data for exercises representing such tables.
 
 ```{r}
-library(heaven)
+library(heaven) # devtools::install_github("tagteam/heaven")
 library(data.table)
 library(ltmle)
 set.seed(35)
