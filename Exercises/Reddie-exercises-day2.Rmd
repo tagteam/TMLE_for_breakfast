@@ -1,7 +1,3 @@
----
-# YAML header created by ox-ravel
-date: May 23, 2023
----
 
 
 # Exercise 1 (~40 minutes)
@@ -24,17 +20,6 @@ The R-code for the praticals are distributed across different folders:
 -   `Ltmle/R` the modified Ltmle package
 -   `Ltmle/R` augmentation functions
 -   `Exercises/functions` simulation functions
-
-```{r   }
-library(data.table)
-library(lava)
-try(setwd("~/research/Methods/TMLE_for_breakfast/"),silent=TRUE)
-try(setwd("Your/Path/To/TMLE_for_breakfast/"),silent=TRUE)
-library(targets)
-for (f in list.files("./Ltmle/R/",pattern = "R$",full.names = TRUE)){source(f)}
-for (f in list.files("./Ltmle/augmentation/",pattern = "R$",full.names = TRUE)){source(f)}
-for (f in list.files("./Exercises/functions/",pattern = "R$",full.names = TRUE)){source(f)} 
-```
 
 
 ## Simulate data in wide format
@@ -129,6 +114,14 @@ corresponding to staying on treatment (off treatment) for
 
 ### Hint:
 
+```{r   }
+foreach (t =1:10,.combine="rbind")%do%{
+ # prepare data
+ # run Ltmle()
+ # output summary()
+}) 
+```
+
 
 # Exercise 2 (~45 minutes)
 
@@ -164,6 +157,10 @@ Manual[]
 
 
 ## Estimate IPTW manually with 1 time point
+
+```{r   }
+# Can you do this? 
+```
 
 
 ## Compare sequential regression with IPTW and TMLE using 10 time points
