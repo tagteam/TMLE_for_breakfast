@@ -21,6 +21,17 @@ The R-code for the praticals are distributed across different folders:
 -   `Ltmle/R` augmentation functions
 -   `Exercises/functions` simulation functions
 
+```{r   }
+library(data.table)
+library(lava)
+try(setwd("~/research/Methods/TMLE_for_breakfast/"),silent=TRUE)
+try(setwd("Your/Path/To/TMLE_for_breakfast/"),silent=TRUE)
+library(targets)
+for (f in list.files("./Ltmle/R/",pattern = "R$",full.names = TRUE)){source(f)}
+for (f in list.files("./Ltmle/augmentation/",pattern = "R$",full.names = TRUE)){source(f)}
+for (f in list.files("./Exercises/functions/",pattern = "R$",full.names = TRUE)){source(f)} 
+```
+
 
 ## Simulate data in wide format
 

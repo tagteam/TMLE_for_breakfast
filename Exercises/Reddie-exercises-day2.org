@@ -1,7 +1,3 @@
-#+LaTeX_CLASS: org-article
-#+OPTIONS: toc:nil
-#+LaTeX_HEADER:\author{Section of Biostatistics, University of Copenhagen}
-#+LaTeX_HEADER:\usepackage{authblk}
 #+LaTeX_HEADER:\usepackage{natbib}
 #+setupfile:~/emacs-genome/snps/org-templates/setup-all-purpose.org
 
@@ -23,7 +19,8 @@ The R-code for the praticals are distributed across different folders:
 - =Ltmle/R= the modified Ltmle package
 - =Ltmle/R= augmentation functions
 - =Exercises/functions= simulation functions
-#+BEGIN_SRC R  :results silent :exports code  :session *R* :cache yes :eval (never-plain-export)  
+
+#+BEGIN_SRC R  :results output drawer  :exports code  :session *R* :cache yes :eval (never-plain-export)  
 library(data.table)
 library(lava)
 try(setwd("~/research/Methods/TMLE_for_breakfast/"),silent=TRUE)
