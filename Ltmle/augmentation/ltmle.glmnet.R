@@ -22,12 +22,17 @@ ltmle.glmnet <- function(Y,
     if (length(selector)>0&&selector=="undersmooth")
         uoh <- try(fit <- glmnet::glmnet(X,Y,weights = obsWeights,lambda = NULL,alpha = alpha,nlambda = nlambda,trace.it = 0L,family=FAM,...))
     else{
-        # make sure that 
-        if (any(duplicated(id))){
+        # make sure that
+        if (length(id)>0 && any(duplicated(id))){
+            print("Ho")
             id_data=data.table(id=id)
-            foldid_data=data.table(id=unique(id),foldid=sample(1:nfolds,size=length(unique(id)),replace=TRUE))
-            foldid=foldid_data[id_data,on="id"]
+            foldid_data=data.table(id=unique(id),
+                                   foldid=sample(1:nfolds,
+                                                 size=length(unique(id)),
+                                                 replace=TRUE))
+            foldid=foldid_data[id_data,on="id"]$foldid
         }else{
+            print("Hi")
             foldid=sample(1:nfolds,size=length(id),replace=TRUE)
         }
         uoh <- try(fit <- glmnet::cv.glmnet(x = X,
