@@ -65,34 +65,6 @@ prepare_Ltmle <- function(regimen_data,
         else
             abar <- list(rep(1,time_horizon), rep(0,time_horizon))
     }
-    ## Deterministic Q function -- creates function indicating that competing risk event means that no event can happen
-    dq <- function(data, current.node, nodes, called.from.estimate.g){
-        death.index <- grep(paste0(name_comp.event, "_"),names(data))
-        if(length(death.index)==0)stop("No death/terminal event node found")
-        hist.death.index <- death.index[death.index < current.node]
-        if(length(hist.death.index)==0)
-            return(NULL)
-        else{
-            is.deterministic <- Reduce("+",lapply(data[,hist.death.index,drop=FALSE],
-                                                  function(dd){x=dd;x[is.na(dd)] <- 0;x}))>=1
-            # should be unnecessary to exclude those who readily
-            # have a missing value for death, but it does not hurt either
-            is.deterministic[is.na(is.deterministic)] <- FALSE
-            list(is.deterministic=is.deterministic, Q.value=0)
-        }
-    }
-
-    ## Make sure that competing risk and deterministic.Q.function agree
-    det.Q.function = NULL
-    if(length(deterministic.Q.function)>0){
-        det.Q.function = deterministic.Q.function
-    }
-    if(length(deterministic.Q.function)==0&length(name_comp.event)>0){
-        if(length(grep(name_comp.event, names(ltmle_data$data), value = TRUE))>0){
-            det.Q.function = dq
-        }
-    }
-
     ## Message about the time interval
     time_interval = NULL
     list(data = ltmle_data$data[],
@@ -105,7 +77,7 @@ prepare_Ltmle <- function(regimen_data,
          Ynodes = ltmle_data$Ynodes,
          survivalOutcome = TRUE,
          abar = abar,
-         deterministic.Q.function = det.Q.function,
+         deterministic.Q.function = deterministic.Q.function,
          SL.library = SL.library,
          info = list(outcome = name_outcome,
                      regimen = name_regimen,
@@ -118,7 +90,7 @@ prepare_Ltmle <- function(regimen_data,
                      at.risk = ltmle_data$at.risk,
                      constant_variables= subset_data$constant_variables,
                      Markov = Markov)
-                     ## formulas = paste("The Anode at time 0 depends on Lnodes at time 0,",
-                                      ## "whereas the Anode at time k depends on Lnodes and Anodes up to time k-1"))
          )
 }
+
+
