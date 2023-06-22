@@ -21,8 +21,27 @@ ltmle.glmnet <- function(Y,
     FAM <- ifelse(length(unique(Y))>2,"gaussian","binomial")
     if (length(selector)>0&&selector=="undersmooth")
         uoh <- try(fit <- glmnet::glmnet(X,Y,weights = obsWeights,lambda = NULL,alpha = alpha,nlambda = nlambda,trace.it = 0L,family=FAM,...))
-    else
-        uoh <- try(fit <- glmnet::cv.glmnet(x = X,y = Y,weights = obsWeights,lambda = NULL,type.measure = loss,nfolds = nfolds,family = FAM,alpha = alpha,nlambda = nlambda,...))
+    else{
+        # make sure that 
+        if (any(duplicated(id))){
+            id_data=data.table(id=id)
+            foldid_data=data.table(id=unique(id),foldid=sample(1:nfolds,size=length(unique(id)),replace=TRUE))
+            foldid=foldid_data[id_data,on="id"]
+        }else{
+            foldid=sample(1:nfolds,size=length(id),replace=TRUE)
+        }
+        uoh <- try(fit <- glmnet::cv.glmnet(x = X,
+                                            y = Y,
+                                            weights = obsWeights,
+                                            lambda = NULL,
+                                            type.measure = loss,
+                                            nfolds = nfolds,
+                                            foldid=foldid,
+                                            family = FAM,
+                                            alpha = alpha,
+                                            nlambda = nlambda,
+                                            ...))
+    }
     if (inherits(uoh,"try-error")) #browser()
         stop("ltmle.glmnet could not fit")
     if (length(selector)>0&&selector=="undersmooth"){
