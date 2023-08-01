@@ -12,21 +12,19 @@ prepare_Ltmle <- function(regimen_data,
                           name_comp.event = "Dead",
                           Markov = NULL,
                           abar,
-                          deterministic.Q.function = NULL,
-                          SL.library,
-                          test = FALSE) {
+                          test = FALSE,...) {
     ## Merge all data and order in correct order
-    merged_data = merge_data(time_horizon = time_horizon,
-                             regimen_data = regimen_data,
-                             outcome_data = outcome_data,
-                             baseline_data = baseline_data,
-                             timevar_data = timevar_data,
-                             name_outcome = name_outcome,
-                             name_regimen = name_regimen,
-                             name_censoring = name_censoring,
-                             censored_label = censored_label,
-                             name_comp.event = name_comp.event,
-                             test = test)
+    merged_data = merge_and_sort_data(time_horizon = time_horizon,
+                                      regimen_data = regimen_data,
+                                      outcome_data = outcome_data,
+                                      baseline_data = baseline_data,
+                                      timevar_data = timevar_data,
+                                      name_outcome = name_outcome,
+                                      name_regimen = name_regimen,
+                                      name_censoring = name_censoring,
+                                      censored_label = censored_label,
+                                      name_comp.event = name_comp.event,
+                                      test = test)
 
     ## Subsetting the data; This returns data in correct order according to time and without constant nodes
     subset_data = get_subset_data(work_data = merged_data$data,
@@ -61,10 +59,11 @@ prepare_Ltmle <- function(regimen_data,
     ## abar
     if (missing(abar)){
         if(length(name_regimen)==2) {
-            abar = list(rep(1:0,time_horizon - 1),rep(0:1,time_horizon - 1))}
+            abar <- list(rep(1:0,max(time_horizon)),rep(0:1,max(time_horizon)))}
         else
-            abar <- list(rep(1,time_horizon), rep(0,time_horizon))
+            abar <- list(rep(1,max(time_horizon)), rep(0,max(time_horizon)))
     }
+
     ## Message about the time interval
     time_interval = NULL
     list(data = ltmle_data$data[],
@@ -73,24 +72,21 @@ prepare_Ltmle <- function(regimen_data,
          estimate.time = FALSE,
          Anodes = ltmle_data$Anodes,
          Cnodes = ltmle_data$Cnodes,
+         Dnodes = ltmle_data$Dnodes,
          Lnodes = ltmle_data$Lnodes,
          Ynodes = ltmle_data$Ynodes,
-         survivalOutcome = TRUE,
          abar = abar,
-         deterministic.Q.function = deterministic.Q.function,
-         SL.library = SL.library,
+         time_horizon = time_horizon,
          info = list(outcome = name_outcome,
                      regimen = name_regimen,
                      baseline = subset_data$name_baseline_covariates,
                      timevar = merged_data$name_time_covariates,
                      subset_label = subset_data$subset_label,
                      order = merged_data$order,
-                     time_horizon = time_horizon,
+                     time_horizon = max(time_horizon),
                      time_interval = time_interval,
                      at.risk = ltmle_data$at.risk,
                      constant_variables= subset_data$constant_variables,
-                     Markov = Markov)
-         )
+                     Markov = Markov),
+         ...)
 }
-
-

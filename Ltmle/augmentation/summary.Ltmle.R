@@ -1,8 +1,8 @@
 summary.Ltmle <- function(object,estimator,...){
     if (missing(estimator))
         if (object$gcomp) estimator = "gcomp" else estimator = "tmle"
-    summary_ltmle <- function (object, estimator = ifelse(object$gcomp, "gcomp", "tmle"),
-              ...)
+    MySummaryLtmle <- function (object, estimator = ifelse(object$gcomp, "gcomp", "tmle"),
+                                ...)
     {
         IC.variance <- var(object$IC[[estimator]])
         if (estimator == "tmle" && !is.null(object$variance.estimate)) {
@@ -38,15 +38,29 @@ summary.Ltmle <- function(object,estimator,...){
                                pvalue=pvalue))
     }
     if (length(object$estimates)>0){
-        x=summary_ltmle(object,estimator=estimator)
+        x=MySummaryLtmle(object,estimator=estimator)
         risk = summi(x=x$treatment,"Risk(A=1)")
         risk
     }else{
-        x= summary.ltmleEffectMeasures(object,estimator=estimator)
-        treatment = summi(x=x$effect.measures$treatment,"Risk(A=1)")
-        control = summi(x=x$effect.measures$control,"Risk(A=0)")
+        x=summary.ltmleEffectMeasures(object,estimator=estimator)
+        # check if outcome is continuous (else the estimate is called risk)
+        if ("estimate"%in%names(x$effect.measures$treatment)){
+            name_treatment="estimate"
+            name_control="estimate"
+        } else{
+            name_treatment="Risk(A=1)"
+            name_control="Risk(A=0)"
+        }
+        treatment = summi(x=x$effect.measures$treatment,target=name_treatment)
+        treatment$Target_parameter="Mean(A=1)"
+        control = summi(x=x$effect.measures$control,target=name_control)
+        control$Target_parameter="Mean(A=0)"
         ate = summi(x=x$effect.measures$ATE,"ATE")
-        RR = summi(x=x$effect.measures$RR,"RelativeRisk")
+        if ("RR"%in%names(x$effect.measures)){
+            RR = summi(x=x$effect.measures$RR,"Ratio")
+        }else{
+            RR=NULL
+        }
         out=rbind(treatment,control,ate,RR)
         out
     }
