@@ -12,7 +12,6 @@ function (Qstar.kplus1, logitQ, combined.summary.measures, cum.g,
     stacked.summary.measures <- apply(combined.summary.measures, 
         2, rbind)
     subs.vec <- uncensored & !is.deterministic & as.vector(intervention.match)
-    ## print(head(cum.g))
     weight.vec <- numeric(n * num.regimes)
     weight.vec[subs.vec] <- (observation.weights * as.vector(msm.weights)/as.vector(cum.g))[subs.vec]
     if (anyNA(weight.vec)) 

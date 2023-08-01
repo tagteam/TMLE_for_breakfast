@@ -1,4 +1,4 @@
-CreateInputs <- function (data, Anodes, Cnodes, Lnodes, Ynodes, survivalOutcome,
+CreateInputs <- function(data, Anodes, Cnodes, Dnodes, Lnodes, Ynodes, survivalOutcome,
     Qform, gform, gbounds, Yrange, deterministic.g.function,
     SL.library, SL.cvControl, regimes, working.msm, summary.measures,
     final.Ynodes, stratify, msm.weights, estimate.time, gcomp,
@@ -25,7 +25,7 @@ CreateInputs <- function (data, Anodes, Cnodes, Lnodes, Ynodes, survivalOutcome,
         regimes <- regimes * 1
         message("abar or regimes was passed as logical and was converted to numeric")
     }
-    all.nodes <- CreateNodes(data, Anodes, Cnodes, Lnodes, Ynodes)
+    all.nodes <- CreateNodes(data, Anodes, Cnodes, Dnodes, Lnodes, Ynodes)
     Qform <- CreateLYNodes(data, all.nodes, check.Qform = TRUE,
         Qform = Qform)$Qform
     data <- ConvertCensoringNodes(data, Cnodes, has.deterministic.functions = !is.null(deterministic.g.function) &&
@@ -54,7 +54,8 @@ CreateInputs <- function (data, Anodes, Cnodes, Lnodes, Ynodes, survivalOutcome,
         observation.weights <- rep(1, nrow(data))
     if (is.matrix(gform)) {
         if (num.regimes > 1 && variance.method != "ic")
-            stop("If there is more than one regime (using ltmle with list abar or ltmleMSM) and numeric gform and variance.method != 'ic', then gform must be an array, not a matrix.")
+            stop("If there is more than one regime (using ltmle with list abar or ltmleMSM) 
+                 and numeric gform and variance.method != 'ic', then gform must be an array, not a matrix.")
         gform <- array(gform, dim = c(nrow(gform), ncol(gform),
             num.regimes))
     }

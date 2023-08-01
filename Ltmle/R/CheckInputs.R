@@ -22,6 +22,8 @@ CheckInputs <-
         stop("Anodes must be in increasing order")
     if (is.unsorted(nodes$C, strictly = TRUE))
         stop("Cnodes must be in increasing order")
+    if (is.unsorted(nodes$D, strictly = TRUE))
+        stop("Dnodes must be in increasing order")
     if (is.unsorted(nodes$L, strictly = TRUE))
         stop("Lnodes must be in increasing order")
     if (is.unsorted(nodes$Y, strictly = TRUE))
@@ -32,17 +34,21 @@ CheckInputs <-
         if (max(nodes$L) > max(nodes$Y))
             stop("Lnodes are not allowed after the final Y node")
     }
-    all.nodes <- c(nodes$A, nodes$C, nodes$L, nodes$Y)
+    if (length(nodes$D) > 0) {
+      if (max(nodes$D) > max(nodes$Y))
+        stop("Dnodes are not allowed after the final Y node")
+    }
+    all.nodes <- c(nodes$A, nodes$C, nodes$D, nodes$L, nodes$Y)
     if (length(all.nodes) > length(unique(all.nodes)))
-        stop("A node cannot be listed in more than one of Anodes, Cnodes, Lnodes, Ynodes",
+        stop("A node cannot be listed in more than one of Anodes, Cnodes, Dnodes, Lnodes, Ynodes",
              "\nThe following variables are listed in more than one Xnodes list:\n",
              paste0(names(data)[all.nodes[duplicated(all.nodes)]],collapse=", "))
     if (is.null(nodes$Y))
         stop("Ynodes cannot be null")
     if (length(nodes$AC) > 0 && !all(sseq(min(nodes$AC), ncol(data)) %in%
                                      all.nodes)) {
-        tmp=sseq(min(nodes$AC), ncol(data))
-        stop(paste0("The following variables are not listed as A-, C-, L-, or Y-nodes:\n",
+        tmp=ltmle:::sseq(min(nodes$AC), ncol(data))
+        stop(paste0("The following variables are not listed as A-, C-, D-, L-, or Y-nodes:\n",
                     paste(names(data)[tmp[!(tmp%in%all.nodes)]],collapse=", "),
                     "\n",
                     "All nodes after the first A/C node must be in A-, C-, L-, or Ynodes"))
@@ -59,13 +65,8 @@ CheckInputs <-
     }
     if (length(gform) > 0) {
         if (is.character(gform)) {
-            if (length(gform) != length(nodes$AC)){
-                stop(paste0("length(gform) != length(c(Anodes, Cnodes))",
-                            "\n   gform: ",
-                            paste0(gform,collapse = "\n          "),
-                            "\nAC nodes: ",
-                            paste0(names(data)[nodes$AC],collapse = ", ")))
-            }
+            if (length(gform) != length(nodes$AC))
+                stop("length(gform) != length(c(Anodes, Cnodes))")
             for (i in 1:length(gform)) {
                 if (LhsVars(gform[i]) != names(data)[nodes$AC[i]]) {
                     stop("The LHS of gform[", i, "] should be the name of the ",
@@ -77,9 +78,12 @@ CheckInputs <-
                            else {
                                NULL
                            }
-                if (!all(RhsVars(gform[i]) %in% parents)) {
+                if (!all(rout <- RhsVars(gform[i]) %in% parents)) {
                     stop("Some nodes in gform[", i, "] are not parents of ",
-                         LhsVars(gform[i]))
+                         LhsVars(gform[i]),".\nParents: ",
+                         paste0(parents,collapse=","),
+                         "\nUnmatched nodes:" ,
+                         paste0(RhsVars(gform[i])[!rout],collapse=","))
                 }
                 if (any(RhsVars(gform[i]) %in% names(data)[nodes$C]))
                     stop("Cnodes should not be used as RHS variables in gform (regressions are only run on uncensored observations so including a Cnode has no effect and slows down regressions)")
@@ -101,21 +105,22 @@ CheckInputs <-
                 stop("if gform is numeric, all values should be probabilities")
             if (!is.null(deterministic.Q.function) && !isTRUE(attr(data,
                                                                    "called.from.estimate.variance", exact = TRUE)))
-                warning("If gform is numeric and deterministic.Q.function is not NULL, deterministic.Q.function will only affect g based on the observed values of the Anodes, not the counterfactual values. If your deterministic.Q.function does depends on the values of the Anodes, it is recommended to not use numeric gform.")
+                warning("If gform is numeric and deterministic.Q.function is not NULL, 
+                        deterministic.Q.function will only affect g based on the observed values of the Anodes, 
+                        not the counterfactual values. If your deterministic.Q.function depends on the values of the Anodes,
+                        it is recommended to not use numeric gform.")
         }
     }
     if (length(Qform) > 0) {
         if (!is.character(Qform))
             stop("Qform should be a character vector")
         if (length(Qform) != length(nodes$LY))
-            stop(paste0("length of Qform is not equal to number of L/Y nodes\n",
-                        "  Qforms: ",paste0(names(Qform),collapse = ", "),"\n",
-                        "LY nodes: ",paste0(names(data)[nodes$LY],collapse = ", ")))
+            stop("length of Qform is not equal to number of D/L/Y nodes")
         for (i in 1:length(Qform)) {
             if (length(names(Qform[i])) == 0)
-                stop("Each element of Qform must be named. The name must match the name of the corresponding L/Y node in data.")
+                stop("Each element of Qform must be named. The name must match the name of the corresponding D/L/Y node in data.")
             if (names(Qform[i]) != names(data)[nodes$LY[i]])
-                stop("The name of each element of Q must match the name of the corresponding L/Y node in data.")
+                stop("The name of each element of Q must match the name of the corresponding D/L/Y node in data.")
             if (Qform[i] != "IDENTITY") {
                 if (LhsVars(Qform[i]) != "Q.kplus1")
                     stop("LHS of each Qform should be Q.kplus1")
@@ -125,7 +130,8 @@ CheckInputs <-
                          names(Qform[i]))
                 }
                 if (any(RhsVars(Qform[i]) %in% names(data)[nodes$C]))
-                    stop("Cnodes should not be used as RHS variables in Qform (regressions are only run on uncensored observations so including a Cnode has no effect and slows down regressions)")
+                    stop("Cnodes should not be used as RHS variables in Qform 
+                         (regressions are only run on uncensored observations so including a Cnode has no effect and slows down regressions)")
             }
         }
     }

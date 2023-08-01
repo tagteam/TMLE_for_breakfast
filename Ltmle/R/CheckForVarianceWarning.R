@@ -2,10 +2,10 @@ CheckForVarianceWarning <-
 function (inputs, g.ratio)
 {
     if (inputs$variance.method == "ic") {
-        positivity <- mean(g.ratio < 1, na.rm = TRUE) > 0.01
+        positivity <- mean(g.ratio < 1, na.rm = TRUE) > 0.0001
         rare.events <- inputs$binaryOutcome && any(colMeans(inputs$data[,
             inputs$final.Ynodes, drop = FALSE], na.rm = TRUE) <
-            0.03)
+            0.0003)
         if (positivity || rare.events) {
             variance.available.warning <- VarianceAvailableWarning(inputs)
             warning.msg <- "Variance estimate is based on influence curve only, which may be significantly anticonservative because your data appears to contain"

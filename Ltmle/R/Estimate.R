@@ -35,11 +35,11 @@ Estimate <- function(inputs,
                     m <- ltmle.glm.fit(y = Y.subset, x = X.subset,
                                        family = family, weights = observation.weights.subset,
                                        offset = offst, intercept = intercept)
-                    ## if (inputs$verbose){ message("Fitted coefs: ")
+                    if (inputs$verbose){ message("Fitted coefs: ")
                         ## browser()
                         ## print(paste("Sample size: ",m$n))
                         ## print(coef(m))
-                    ## }
+                    }
                     m$terms <- tf
                     predicted.values <- predict(m,newdata = newdata,type = type)
                 }, GetWarningsToSuppress())
@@ -47,7 +47,7 @@ Estimate <- function(inputs,
             else {
                 newX.list <- GetNewX(newdata)
                 SetSeedIfRegressionTesting()
-                if (SL.library[[1]]=="glmnet"){
+                if (!is.list(SL.library) && SL.library[[1]]=="glmnet"){
                     if (inputs$verbose){ message("Estimate: calling ltmle.glmnet ...")}
                     try.result <- try({
                         m <- ltmle.glmnet(Y=Y.subset,
@@ -58,6 +58,7 @@ Estimate <- function(inputs,
                                           id =id.subset,
                                           alpha=inputs$SL.cvControl$alpha,
                                           selector=inputs$SL.cvControl$selector,
+                                          intercept=FALSE # Force intercept to zero - should we do this?
                                           )
                     })
                     predicted.values <- ProcessSLPrediction(pred=m$predicted.values,
@@ -314,18 +315,15 @@ Estimate <- function(inputs,
         if (regime.index == first.regime || multiple.subs ||
             multiple.Qstar) {
             Y.subset <- Y[single.subs]
-            if (anyNA(Y.subset)){
-                stop("Estimate: Missing values in data.")
-            }
+            if (anyNA(Y.subset))
+                stop("NA in Estimate")
         }
         if (!all(deterministic.list.newdata$is.deterministic |
                  deterministic.g.list.newdata$is.deterministic)) {
             if (is.null(fit.and.predict) || multiple.Qstar || multiple.subs) {
-                ## if(names(data)[cur.node] == "Y_3") {
-                    ## browser()
-                    ## print(names(data)[cur.node])
-                ## }
-                if(inputs$verbose)message("Regressing ",names(data)[cur.node]," on history with ",NROW(Y.subset)," observations")
+                ## print("fit.and.predict");print(is.null(fit.and.predict))
+                ## print("multiple.Qstar");print(multiple.Qstar)
+                ## print("multiple.subs");print(multiple.subs)
                 fit.and.predict <- FitAndPredict()
                 m <- fit.and.predict$m
                 predicted.values[, regime.index] <- fit.and.predict$predicted.values

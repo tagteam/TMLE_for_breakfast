@@ -1,5 +1,5 @@
 EstimateVariance <-
-function (inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
+function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
     uncensored, alive, Qstar, Qstar.kplus1, cur.node, msm.weights,
     LYnode.index, ACnode.index, cum.g, prob.A.is.1, cum.g.meanL,
     cum.g.unbounded, cum.g.meanL.unbounded, observation.weights,
@@ -27,8 +27,9 @@ function (inputs, nodes, combined.summary.measures, regimes.with.positive.weight
         sparsity.data <- inputs$data[, 1:cur.node]
         sparsity.data[, cur.node] <- Scale(Z, 0, 1)
         temp.nodes <- lapply(nodes, function(x) x[x <= cur.node])
-        if (cur.node %in% temp.nodes$L) {
+        if (cur.node %in% c(temp.nodes$D, temp.nodes$L)) {
             temp.nodes$L <- setdiff(temp.nodes$L, cur.node)
+            temp.nodes$D <- setdiff(temp.nodes$D, cur.node)
             temp.nodes$Y <- c(temp.nodes$Y, cur.node)
         }
         stratify <- FALSE
@@ -45,7 +46,7 @@ function (inputs, nodes, combined.summary.measures, regimes.with.positive.weight
         names(Qform) <- names(sparsity.data)[temp.nodes$LY]
         attr(sparsity.data, "called.from.estimate.variance") <- TRUE
         var.tmle <- Ltmle(sparsity.data, Anodes = temp.nodes$A,
-            Cnodes = temp.nodes$C, Lnodes = temp.nodes$L, Ynodes = temp.nodes$Y,
+            Cnodes = temp.nodes$C, Dnodes = temp.nodes$D, Lnodes = temp.nodes$L, Ynodes = temp.nodes$Y,
             survivalOutcome = FALSE, Qform = Qform, gform = drop3(prob.A.is.1[,
                 1:ACnode.index, d1, drop = FALSE]), abar = GetABar(inputs$regimes,
                 d1, temp.nodes$A), gbounds = inputs$gbounds,
