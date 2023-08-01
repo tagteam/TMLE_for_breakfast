@@ -9,12 +9,12 @@ Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL, Yno
         if (length(SL.cvControl)==0)
             SL.cvControl=list(selector="undersmooth",alpha=0.5)
     require(matrixStats)
-    for (f in list.files("z:/Workdata/706582/R-packages/Ltmle/R/",pattern = ".R$",full.names = TRUE)) {
-        source(f)
-    }
-    for (f in list.files("z:/Workdata/706582/R-packages/Ltmle/Augmentation/",pattern = ".R$",full.names = TRUE)) {
-        source(f)
-    }
+    ## for (f in list.files("./R/",pattern = ".R$",full.names = TRUE)) {
+        ## source(f)
+    ## }
+    ## for (f in list.files("./augmentation",pattern = ".R$",full.names = TRUE)) {
+        ## source(f)
+    ## }
     name_comp.event = unique(unlist(lapply(Dnodes, function(x){gsub("_[^_]*$", "", x)})))
     # name_comp.event = sub("_1","",Dnodes[[1]])
     if(length(Dnodes)>0){
