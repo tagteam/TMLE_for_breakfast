@@ -1,0 +1,10 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+dgm_target_parameter|stem|9782ae6e45ed5776|5f6b507457e184a4|6269b7ed729740fc|680130960||t19621.5588869477s|a72b4e607ecebf44|222|rds|local|vector|||0.133||
+estimate_target_parameter|function|ad82011b1a975f53|||||||||||||||
+estimated_target_parameter|stem|c18d6d570f25c145|e433b777b9f25847|16f5943e5d60dddc|146819691||t19621.5691679563s|c300aeef4648a6fd|342|rds|local|vector|||0.256||
+example_data|stem|9aeee43dd2814c17|99bccd1c50ae1daf|089e2486fd642e82|-2012428454||t19613.3746053138s|1752264632ae4466|1698|rds|local|vector|||0.048||
+f|object|3d1264e84a2fa449|||||||||||||||
+simulate_data|function|c12d7c14dacb7cf6|||||||||||||||
+simulated_estimator|pattern|9f7b6f7052c8ce0a|8e072b94e67ab272||752932477||||130861|rds|local|vector||simulated_estimator_c92be37e|171.07||
+simulated_estimator_batch|stem|e7ec1e4eab47fec9|0bc268ea2d179e02|b5b3f3f1f2ebd7e9|-1994874291||t19627.2880650481s|2a8869f2435f83e9|47|rds|local|vector||simulated_estimator_batch_ccba877f|0.001||
+simulated_estimator_c92be37e|branch|30e708b57a7faa5c|8e072b94e67ab272|66e04cb38053a235|1629963937||t19627.2902900811s|63e438449f72a28a|130861|rds|local|vector|simulated_estimator||171.07||
