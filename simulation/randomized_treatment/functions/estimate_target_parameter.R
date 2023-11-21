@@ -3,9 +3,10 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Sep 21 2023 (15:34) 
 ## Version: 
-## Last-Updated: Oct 11 (13:30)
-##           By: Emilie Wessel
-##     Update #: 4
+
+## Last-Updated: Oct 16 2023 (16:02) 
+##           By: Thomas Alexander Gerds
+##     Update #: 5
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -14,6 +15,7 @@
 #----------------------------------------------------------------------
 ## 
 ### Code:
+
 estimate_target_parameter <- function(n,
                                       outcome_prevalence = c(0.1,0.1),
                                       death_prevalence = c(0.1),
@@ -65,78 +67,9 @@ estimate_target_parameter <- function(n,
       lower = sum[Target_parameter == "Risk(A=1)"]$lower,
       upper = sum[Target_parameter == "Risk(A=1)"]$upper)
   }]
+
 }
 
-
-# d = simulate_data(n = n,treatment_effect = treatment_effect,covariate_effect = covariate_effect)
-# d[,{
-#   fit.unadjusted <- Ltmle(data = d[,.(W,A,Y)],
-#                           time_horizon = 1,
-#                           estimate.time = FALSE,
-#                           gbounds = c(0,1),
-#                           Lnodes = "W",
-#                           survivalOutcome = FALSE,
-#                           Qform = c("Y" = "Q.kplus1 ~ W + A"),
-#                           gform = "A~1",
-#                           Anodes = "A",
-#                           Ynodes = "Y",
-#                           verbose = FALSE,
-#                           abar = list(1,0))
-#   fit.adjusted <- Ltmle(data = d[,.(W,A,Y)],
-#                         time_horizon = 1,
-#                         estimate.time = FALSE,
-#                         gbounds = c(0,1),
-#                         Lnodes = "W",
-#                         survivalOutcome = FALSE,
-#                         Qform = c("Y" = "Q.kplus1 ~ W + A"),
-#                         gform = "A~W",
-#                         Anodes = "A",
-#                         Ynodes = "Y",
-#                         verbose = FALSE,
-#                         abar = list(1,0))
-#   sum.unadjusted <- summary.Ltmle(fit.unadjusted)
-#   sum.adjusted <- summary.Ltmle(fit.adjusted)
-#   .(Estimate = c("Hypothetical","Naive","Propensity unadjusted","Propensity adjusted"),
-#     Risk_treated = c(mean(Y_treated),mean(Y[A == 1]),sum.unadjusted[Target_parameter == "Mean(A=1)"]$estimate,sum.adjusted[Target_parameter == "Mean(A=1)"]$estimate),
-#     Risk_untreated = c(mean(Y_untreated),mean(Y[A == 0]),sum.unadjusted[Target_parameter == "Mean(A=0)"]$estimate,sum.adjusted[Target_parameter == "Mean(A=0)"]$estimate),
-#     ATE = c(mean(Y_treated)-mean(Y_untreated),
-#             mean(Y[A == 1])-mean(Y[A == 0]),
-#             sum.unadjusted[Target_parameter == "ATE"]$estimate,
-#             sum.adjusted[Target_parameter == "ATE"]$estimate),
-#     SE_Risk_treated = c(sd(Y_treated)/sqrt(n),sd(Y[A == 1])/sqrt(n),
-#                         sum.unadjusted[Target_parameter == "Mean(A=1)"]$std.err,
-#                         sum.adjusted[Target_parameter == "Mean(A=1)"]$std.err),
-#     lower_Risk_treated = c(mean(Y_treated) - sd(Y_treated)/sqrt(n)*qnorm(.975),
-#                            mean(Y[A == 1]) - sd(Y[A == 1])/sqrt(n)*qnorm(.975),
-#                            sum.unadjusted[Target_parameter == "Mean(A=1)"]$lower,
-#                            sum.adjusted[Target_parameter == "Mean(A=1)"]$lower),
-#     upper_Risk_treated = c(mean(Y_treated) + sd(Y_treated)/sqrt(n)*qnorm(.975),
-#                            mean(Y[A == 1]) + sd(Y[A == 1])/sqrt(n)*qnorm(.975),
-#                            sum.unadjusted[Target_parameter == "Mean(A=1)"]$upper,
-#                            sum.adjusted[Target_parameter == "Mean(A=1)"]$upper),
-#     SE_Risk_untreated = c(sd(Y_untreated)/sqrt(n),sd(Y[A == 0])/sqrt(n),
-#                           sum.unadjusted[Target_parameter == "Mean(A=0)"]$std.err,
-#                           sum.adjusted[Target_parameter == "Mean(A=0)"]$std.err),
-#     lower_Risk_untreated = c(mean(Y_untreated) - sd(Y_untreated)/sqrt(n)*qnorm(.975),
-#                              mean(Y[A == 0]) - sd(Y[A == 0])/sqrt(n)*qnorm(.975),
-#                              sum.unadjusted[Target_parameter == "Mean(A=0)"]$lower,
-#                              sum.adjusted[Target_parameter == "Mean(A=0)"]$lower),
-#     upper_Risk_untreated = c(mean(Y_untreated) + sd(Y_untreated)/sqrt(n)*qnorm(.975),
-#                              mean(Y[A == 0]) + sd(Y[A == 0])/sqrt(n)*qnorm(.975),
-#                              sum.unadjusted[Target_parameter == "Mean(A=0)"]$upper,
-#                              sum.adjusted[Target_parameter == "Mean(A=0)"]$upper),
-#     SE_ATE = c(sd(Y_treated - Y_untreated)/sqrt(n),sd(Y[A == 1] - Y[A == 0])/sqrt(n),
-#                sum.unadjusted[Target_parameter == "ATE"]$std.err,
-#                sum.adjusted[Target_parameter == "ATE"]$std.err),
-#     lower_ATE = c(mean(Y_treated)-mean(Y_untreated) - sd(Y_treated - Y_untreated)/sqrt(n)*qnorm(.975),
-#                   mean(Y[A == 1])-mean(Y[A == 0]) - sd(Y[A == 1] - Y[A == 0])/sqrt(n)*qnorm(.975),
-#                   sum.unadjusted[Target_parameter == "ATE"]$lower,
-#                   sum.adjusted[Target_parameter == "ATE"]$lower),
-#     upper_ATE = c(mean(Y_treated)-mean(Y_untreated) + sd(Y_treated - Y_untreated)/sqrt(n)*qnorm(.975),
-#                   mean(Y[A == 1])-mean(Y[A == 0]) + sd(Y[A == 1] - Y[A == 0])/sqrt(n)*qnorm(.975),
-#                   sum.unadjusted[Target_parameter == "ATE"]$upper,
-#                   sum.adjusted[Target_parameter == "ATE"]$upper))
-# }]
 
 
 ######################################################################
