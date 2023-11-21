@@ -5,6 +5,7 @@ Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL, Yno
                   stratify = FALSE, SL.library = "glm", SL.cvControl = list(),
                   estimate.time = TRUE, gcomp = FALSE, iptw.only = FALSE, 
                   variance.method = "tmle", observation.weights = NULL, id = NULL,info = NULL,verbose=FALSE,...){
+  for (f in list.files("C:/Users/zjl310/Desktop/TMLE_for_breakfast/TMLE_for_breakfast/Ltmle/R/",pattern = "R$",full.names = TRUE)){source(f)}
     if (SL.library=="glmnet")
         if (length(SL.cvControl)==0)
             SL.cvControl=list(selector="undersmooth",alpha=0.5)
