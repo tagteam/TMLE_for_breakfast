@@ -4,17 +4,17 @@ Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL, Yno
                   deterministic.Q.function = NULL,
                   stratify = FALSE, SL.library = "glm", SL.cvControl = list(),
                   estimate.time = TRUE, gcomp = FALSE, iptw.only = FALSE, 
-                  variance.method = "tmle", observation.weights = NULL, id = NULL,info = NULL,verbose=FALSE,ltmle_dir = NULL,...){
-  if (!is.null(ltmle_dir)){
-    for (f in list.files(paste0(ltmle_dir,"/R"),pattern = "R$",full.names = TRUE)){source(f)}
-  }
-  else if (!grepl("\\/Ltmle$",getwd())){
-    for (f in list.files("R/",pattern = "R$",full.names = TRUE)){source(f)}
-  }
-  else{
-    stop("please set working directory to Ltmle folder
-         or specify the path to the Ltmle folder in ltmle_dir. ") 
-  }
+                  variance.method = "tmle", observation.weights = NULL, id = NULL,info = NULL,verbose=FALSE,...){#ltmle_dir = NULL,...){
+  # if (!is.null(ltmle_dir)){
+  #   for (f in list.files(paste0(ltmle_dir,"/R"),pattern = "R$",full.names = TRUE)){source(f)}
+  # }
+  # else if (!grepl("\\/Ltmle$",getwd())){
+  #   for (f in list.files("R/",pattern = "R$",full.names = TRUE)){source(f)}
+  # }
+  # else{
+  #   stop("please set working directory to Ltmle folder
+  #        or specify the path to the Ltmle folder in ltmle_dir. ") 
+  # }
   if ("glmnet" %in% SL.library)
     if (length(SL.cvControl)==0)
       SL.cvControl=list(selector="undersmooth",alpha=0.5)
