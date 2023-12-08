@@ -70,7 +70,7 @@ x=prepare_Ltmle(name_outcome="dementia",
                 timevar_data=sim_time_covariates,
                 SL.library="glm",
                 abar = list(rep(1,time_horizon), rep(0,time_horizon)),
-                verbose=TRUE, B=80,cheap.subsampling=TRUE,m=0.9)
+                verbose=TRUE, B=80,subsampling=TRUE)
 # run Ltmle
 f=do.call("Ltmle",x)
 summary(f,subsample_method = "cheap")
