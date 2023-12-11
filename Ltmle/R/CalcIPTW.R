@@ -63,7 +63,7 @@ function (inputs, cum.g, msm.weights)
                 , i, j])
             colnames(newdata) <- colnames(inputs$combined.summary.measures)
             SuppressGivenWarnings(m.beta[, i, j] <- predict(m.glm, 
-                newdata = newdata, type = "response"), "prediction from a rank-deficient fit may be misleading")
+                                                            newdata = newdata, type = "response"), "prediction from a rank-deficient fit may be misleading")
             cnt <- cnt + 1
             XY.list <- save.xy[[cnt]]
             IC[XY.list$index, ] <- IC[XY.list$index, ] + XY.list$weight * 

@@ -47,7 +47,7 @@ CheckInputs <-
         stop("Ynodes cannot be null")
     if (length(nodes$AC) > 0 && !all(sseq(min(nodes$AC), ncol(data)) %in%
                                      all.nodes)) {
-        tmp=ltmle:::sseq(min(nodes$AC), ncol(data))
+        tmp=sseq(min(nodes$AC), ncol(data))
         stop(paste0("The following variables are not listed as A-, C-, D-, L-, or Y-nodes:\n",
                     paste(names(data)[tmp[!(tmp%in%all.nodes)]],collapse=", "),
                     "\n",

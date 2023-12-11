@@ -41,7 +41,19 @@ Estimate <- function(inputs,
                         ## print(coef(m))
                     }
                     m$terms <- tf
-                    predicted.values <- predict(m,newdata = newdata,type = type)
+                    if ("fastglm" %in% class(m)){
+                      ## slow and can be significantly faster /fastglm
+                      options(na.action='na.pass')
+                      new_data <- as.data.frame(model.matrix(tf, newdata))
+                      new_data <- new_data[, names(m$coefficients)[-1]]
+                      ## add intercept to newdata
+                      new_data <- cbind(1, new_data)
+                      new_data <- as.matrix(new_data)
+                    }
+                    else {
+                      new_data <- newdata
+                    }
+                    predicted.values <- predict(m,newdata = new_data,type = type)
                 }, GetWarningsToSuppress())
             }
             else {
@@ -237,7 +249,7 @@ Estimate <- function(inputs,
                              na.action = na.pass)
     Y <- mod.frame[[1]]
     tf <- terms(f)
-    X <- model.matrix(tf, mod.frame)
+    X <- model.matrix(tf, mod.frame) #here
     offst <- model.offset(mod.frame)
     intercept <- attributes(tf)$intercept
     if (!use.glm) {
@@ -352,7 +364,7 @@ Estimate <- function(inputs,
         }
         else {
             if (use.glm) {
-                if (class(m)[1] %in% c("speedglm", "glm")) {
+                if (class(m)[1] %in% c("fastglm","speedglm", "glm")) {
                     fit[[regime.index]] <- summary(m)$coefficients
                 }
                 else {
