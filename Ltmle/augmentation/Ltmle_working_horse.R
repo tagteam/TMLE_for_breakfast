@@ -7,12 +7,6 @@ Ltmle_working_horse <- function (data, Anodes, Cnodes = NULL, Dnodes = NULL, Lno
                                  variance.method = "tmle", observation.weights = NULL, id = NULL,info = NULL,verbose=FALSE)
 {
     require(matrixStats)
-    for (f in list.files("z:/Workdata/706582/R-packages/Ltmle/R/",pattern = ".R$",full.names = TRUE)) {
-        source(f)
-    }
-    for (f in list.files("z:/Workdata/706582/R-packages/Ltmle/Augmentation/",pattern = ".R$",full.names = TRUE)) {
-        source(f)
-    }
     data <- CheckData(data)
     msm.inputs <- GetMSMInputsForLtmle(data, abar, rule, gform)
     
