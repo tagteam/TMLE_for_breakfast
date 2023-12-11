@@ -44,11 +44,10 @@ Estimate <- function(inputs,
                     if ("fastglm" %in% class(m)){
                       ## slow and can be significantly faster /fastglm
                       options(na.action='na.pass')
-                      new_data <- as.data.frame(model.matrix(tf, newdata))
+                      new_data <- model.matrix(tf, newdata)
                       new_data <- new_data[, names(m$coefficients)[-1]]
                       ## add intercept to newdata
                       new_data <- cbind(1, new_data)
-                      new_data <- as.matrix(new_data)
                     }
                     else {
                       new_data <- newdata
