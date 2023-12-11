@@ -71,9 +71,9 @@ x=prepare_Ltmle(name_outcome="dementia",
                 abar = rep(1, 8),
                 verbose=TRUE)
 # run Ltmle
-#system.time(f1<-do.call("Ltmle",x)) #fastglm
+system.time(f1<-do.call("Ltmle",x)) #fastglm
 #user  system elapsed 
-#24.400  10.912  22.785 
+#13.936  11.533  12.263 
 
 system.time(f2<-do.call("Ltmle",x)) #speedglm
 #   user  system elapsed 
