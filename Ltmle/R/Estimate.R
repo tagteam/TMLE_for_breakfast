@@ -120,31 +120,39 @@ Estimate <- function(inputs,
         return(ValuesByType(predicted.values))
     }
     PredictOnly <- function(newdata1) {
-        if (class(m)[1] == "no.Y.variation")
-            return(rep(m$Y.value, nrow(newdata1)))
-        if (use.glm) {
-            SuppressGivenWarnings(pred <- predict(m, newdata1,
-                                                  type), "prediction from a rank-deficient fit may be misleading")
+      if ("fastglm" %in% class(m)){
+        ## slow and can be significantly faster /fastglm
+        options(na.action='na.pass')
+        new_data1 <- model.matrix(tf, newdata1)
+        new_data1 <- new_data1[, names(m$coefficients)[-1]]
+        ## add intercept to newdata1
+        new_data1 <- cbind(1, new_data1)
+      }
+      else {
+        new_data1 <- newdata1
+      }
+      if (class(m)[1] == "no.Y.variation")
+        return(rep(m$Y.value, nrow(new_data1)))
+      if (use.glm) {
+        SuppressGivenWarnings(pred <- predict(m, new_data1,
+                                              type), "prediction from a rank-deficient fit may be misleading")
+      }
+      else {
+        if (inputs$verbose) print(SL.library)
+        if  (SL.library[[1]]=="glmnet"){
+          newX.list <- GetNewX(new_data1)
+          pred <- ProcessSLPrediction(pred=predict(m,newX=newX.list$newX),
+                                      new.subs=newX.list$new.subs,
+                                      try.result = NULL)
+          
+        }else{
+          newX.list <- GetNewX(new_data1)
+          pred <- ProcessSLPrediction(predict(m,newX.list$newX,X.subset,Y.subset,onlySL = TRUE)$pred,
+                                      newX.list$new.subs,
+                                      try.result = NULL)
         }
-        else {
-            if  (SL.library[[1]]=="glmnet"){
-                newX.list <- GetNewX(newdata1)
-                pred <- ProcessSLPrediction(pred=predict(m,newX=newX.list$newX),
-                                            new.subs=newX.list$new.subs,
-                                            try.result = NULL)
-
-            }else{
-                newX.list <- GetNewX(newdata1)
-                pred <- ProcessSLPrediction(predict(m,
-                                                    newX.list$newX,
-                                                    X.subset,
-                                                    Y.subset,
-                                                    onlySL = TRUE)$pred,
-                                            newX.list$new.subs,
-                                            try.result = NULL)
-            }
-        }
-        return(pred)
+      }
+      return(pred)
     }
     ValuesByType <- function(x) {
         if (type == "link") {
