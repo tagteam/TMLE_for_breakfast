@@ -19,7 +19,7 @@ library(foreach)
 library(data.table)
 # loading Ltmle functions with augmentation
 # -------------------------------------------
-#try(setwd("~/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
+try(setwd("~/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
 ## copy of functions from CRAN package ltmle
 ff <- sapply(list.files(path = "./R/",pattern = "R$",full.names = TRUE),source)
 ## our own augmentation files
@@ -31,14 +31,14 @@ source("~/TMLE_for_breakfast/Ltmle/examples/get_lava_model.R")
 
 # Create object from which we can simulate data
 # -----------------------------------------------
-time_horizon = 4
+time_horizon = 6
 m=get_lava_model(time_horizon=time_horizon)
 
 
 # Simulate data with 4 time intervals and 20000 patients
 # ----------------------------------------------------------
 set.seed(4)
-sim_data <- as.data.table(sim(m, 10000))
+sim_data <- as.data.table(sim(m, 40000))
 ## add person number
 sim_data[,pnr:=1:.N]
 ## convert integer variables to numeric 
@@ -64,7 +64,7 @@ x=prepare_Ltmle(name_outcome="dementia",
                 name_regimen="GLP1RA",
                 name_censoring = "Censored",
                 censored_label = "0",
-                name_competing_risk = "Dead",
+                name_comp.event = "Dead",
                 time_horizon=time_horizon,
                 outcome_data=sim_outcome,
                 regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
@@ -73,158 +73,142 @@ x=prepare_Ltmle(name_outcome="dementia",
                 SL.library="glm",
                 abar = rep(1, time_horizon),
                 verbose=TRUE)
-f=do.call("Ltmle",x)
+system.time(f<-do.call("Ltmle",x))
+# with speedglm
+# user  system elapsed 
+# 25.757  46.239  11.291 
+# with fastglm
+#user  system elapsed 
+# 8.829   8.232   7.638 
+
+# one time point is broken
+x=prepare_Ltmle(name_outcome="dementia",
+                name_regimen="GLP1RA",
+                name_censoring = "Censored",
+                censored_label = "0",
+                name_comp.event = "Dead",
+                time_horizon=1,
+                outcome_data=sim_outcome,
+                regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
+                baseline_data=sim_baseline_covariates,
+                timevar_data=sim_time_covariates,
+                SL.library="glm",
+                abar = 1,
+                verbose=TRUE)
+system.time(f<-do.call("Ltmle",x))
+
+# iptw option is broken
+x=prepare_Ltmle(name_outcome="dementia",
+                name_regimen="GLP1RA",
+                name_censoring = "Censored",
+                censored_label = "0",
+                name_comp.event = "Dead",
+                time_horizon=4,
+                outcome_data=sim_outcome,
+                regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
+                baseline_data=sim_baseline_covariates,
+                timevar_data=sim_time_covariates,
+                SL.library="glm",
+                iptw.only=TRUE,
+                abar = rep(1,4),
+                verbose=TRUE)
+summary(do.call("Ltmle",x))
 
 setwd("~/registerTargets/registerTargets/exercises/register_project/")
 library(targets)
 tar_load_everything() #note: run tar_make() first
-run_Ltmle(
-  name_outcome = "Dead",
+try(setwd("~/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
+## copy of functions from CRAN package ltmle
+ff <- sapply(list.files(path = "./R/",pattern = "R$",full.names = TRUE),source)
+## our own augmentation files
+ff <- sapply(list.files(path = "./augmentation/",pattern = "R$",full.names = TRUE),source)
+
+# do survival? 
+x=prepare_Ltmle(
+  name_outcome = "mace",
+  name_comp.event = "Dead",
+  name_regimen = "Drug",
   name_censoring = "Censored",
   censored_label = 0,
   time_horizon = 4,
-  outcome_data = survival_outcome_data,
-  regimen_data = list(Drug = regimen_data),
+  outcome_data = mace_outcome_data,
+  regimen_data = regimen_data,
   baseline_data = baseline_covariates,
   timevar_data = time_covariates,
-  abar = list(treat = rep(1, 4), control = rep(0, 4)),
+  abar = list(control = rep(0, 4), treat = rep(1, 4)),
   SL.library = "glm",
   verbose = TRUE
-)
-run_Ltmle(
-  name_outcome = "Dead",
+) #how to do survival?
+summary(do.call("Ltmle",x))
+
+x=prepare_Ltmle(
+  name_outcome = "mace",
+  name_comp.event = "Dead",
+  name_regimen = "Drug",
   name_censoring = "Censored",
   censored_label = 0,
-  time_horizon = 1,
-  outcome_data = survival_outcome_data,
-  regimen_data = list(Drug = regimen_data),
+  time_horizon = 4,
+  outcome_data = mace_outcome_data,
+  regimen_data = regimen_data,
   baseline_data = baseline_covariates,
   timevar_data = time_covariates,
-  abar = list(control = 0, treat = 1),
-  SL.library = c("SL.glm", "SL.glm.interaction"),
-  SL.cvControl = list(V = 2),
-  verbose = TRUE
-)
-run_Ltmle(
-  name_outcome = "Dead",
-  name_censoring = "Censored",
-  censored_label = 0,
-  time_horizon = 1,
-  outcome_data = survival_outcome_data,
-  regimen_data = list(Drug = regimen_data),
-  baseline_data = baseline_covariates,
-  timevar_data = time_covariates,
-  abar = list(control = 0, treat = 1),
+  abar = list(control = rep(0, 4), treat = rep(1, 4)),
   SL.library = "glmnet",
-  SL.cvControl = list(selector = "optimize", alpha =
-                        0.5),
   verbose = TRUE
 )
-run_Ltmle(
-  name_outcome = "Dead",
-  name_censoring = "Censored",
-  censored_label = 0,
-  time_horizon = 1,
-  outcome_data = survival_outcome_data,
-  regimen_data = list(Drug = regimen_data),
-  baseline_data = baseline_covariates,
-  timevar_data = time_covariates,
-  abar = list(control = 0, treat = 1),
-  SL.library = c("SL.glm", "SL.glm.interaction", "SL.glmnet", "SL.ranger2"),
-  #SL.ranger2 does not work
-  SL.cvControl = list(V = 2),
-  verbose = TRUE
-)
-run_Ltmle(
+summary(do.call("Ltmle",x))
+
+x=prepare_Ltmle(
   name_outcome = "mace",
-  name_competing_risk = "Dead",
+  name_comp.event = "Dead",
+  name_regimen = "Drug",
   name_censoring = "Censored",
   censored_label = 0,
   time_horizon = 4,
   outcome_data = mace_outcome_data,
-  regimen_data = list(Drug = regimen_data),
+  regimen_data = regimen_data,
   baseline_data = baseline_covariates,
   timevar_data = time_covariates,
   abar = list(control = rep(0, 4), treat = rep(1, 4)),
   SL.library = "glm",
-  verbose = TRUE
-)
-run_Ltmle(
-  name_outcome = "mace",
-  name_competing_risk = "Dead",
-  name_censoring = "Censored",
-  censored_label = 0,
-  time_horizon = 4,
-  outcome_data = mace_outcome_data,
-  regimen_data = list(Drug = regimen_data),
-  baseline_data = baseline_covariates,
-  timevar_data = time_covariates,
-  abar = list(control = rep(0, 4), treat = rep(1, 4)),
   iptw.only = TRUE,
-  SL.library = "glm",
   verbose = TRUE
 )
-run_Ltmle(
+summary(do.call("Ltmle",x)) #NAs?
+
+x=prepare_Ltmle(
   name_outcome = "mace",
-  name_competing_risk = "Dead",
+  name_comp.event = "Dead",
+  name_regimen = "Drug",
   name_censoring = "Censored",
   censored_label = 0,
   time_horizon = 4,
   outcome_data = mace_outcome_data,
-  regimen_data = list(Drug = regimen_data),
+  regimen_data = regimen_data,
   baseline_data = baseline_covariates,
   timevar_data = time_covariates,
   abar = list(control = rep(0, 4), treat = rep(1, 4)),
+  SL.library = "glm",
   gcomp = TRUE,
-  SL.library = "glm",
   verbose = TRUE
 )
-run_Ltmle(
+summary(do.call("Ltmle",x))
+
+x=prepare_Ltmle(
   name_outcome = "mace",
-  name_competing_risk = "Dead",
+  name_comp.event = "Dead",
+  name_regimen = "Drug",
   name_censoring = "Censored",
   censored_label = 0,
-  time_horizon = 4,
-  sub_set = list(data = baseline_covariates[education == "High", .(pnr)]),
+  time_horizon = 2,
   outcome_data = mace_outcome_data,
-  regimen_data = list(Drug = regimen_data),
+  regimen_data = regimen_data,
   baseline_data = baseline_covariates,
   timevar_data = time_covariates,
-  abar = list(control = rep(0, 4), treat = rep(1, 4)),
-  gcomp = TRUE,
-  SL.library = "glm",
+  abar = list(control = rep(0, 2), treat = rep(1, 2)),
+  SL.library = c("SL.glmnet","SL.glm"),
   verbose = TRUE
 )
-run_Ltmle(
-  name_outcome = "mace",
-  name_competing_risk = "Dead",
-  name_censoring = "Censored",
-  censored_label = 0,
-  time_horizon = 4,
-  sub_set = list(data = baseline_covariates[education == "High", .(pnr)]),
-  outcome_data = mace_outcome_data,
-  regimen_data = list(Drug = regimen_data),
-  baseline_data = baseline_covariates,
-  timevar_data = time_covariates,
-  abar = list(control = rep(0, 4), treat = rep(1, 4)),
-  iptw.only = TRUE,
-  SL.library = "glm",
-  verbose = TRUE
-)
-run_Ltmle(
-  name_outcome = "mace",
-  name_competing_risk = "Dead",
-  name_censoring = "Censored",
-  censored_label = 0,
-  time_horizon = 4,
-  sub_set = list(data = baseline_covariates[education == "High", .(pnr)]),
-  outcome_data = mace_outcome_data,
-  regimen_data = list(Drug = regimen_data),
-  baseline_data = baseline_covariates,
-  timevar_data = time_covariates,
-  abar = list(control = rep(0, 4), treat = rep(1, 4)),
-  SL.library = "glm",
-  verbose = TRUE
-)
-######################################################################
-### test_Ltmle.R ends here
+summary(do.call("Ltmle",x))
+
+

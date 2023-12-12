@@ -15,7 +15,7 @@ Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL, Yno
   #   stop("please set working directory to Ltmle folder
   #        or specify the path to the Ltmle folder in ltmle_dir. ") 
   # }
-  if ("glmnet" == SL.library)
+  if ("glmnet" %in% SL.library)
     if (length(SL.cvControl)==0)
       SL.cvControl=list(selector="undersmooth",alpha=0.5)
   require(matrixStats)

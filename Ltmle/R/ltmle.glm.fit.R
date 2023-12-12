@@ -11,7 +11,7 @@ ltmle.glm.fit <- function (x, y, weights, family, offset, intercept) {
                                 family = family,
                                 offset = offset,
                                 intercept = intercept,
-                                maxit = 100, method = 3)
+                                maxit = 100, method = 2)
           # m <- speedglm::speedglm.wfit(y = y,
           #                             X = x,
           #                             family = family,
