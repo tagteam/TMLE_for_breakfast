@@ -81,6 +81,34 @@ system.time(f<-do.call("Ltmle",x))
 #user  system elapsed 
 # 8.829   8.232   7.638 
 
+#survival broken
+x=prepare_Ltmle(name_outcome="dementia",
+                name_regimen="GLP1RA",
+                name_censoring = "Censored",
+                censored_label = "0",name_comp.event = NULL,
+                time_horizon=time_horizon,
+                outcome_data=sim_outcome[,grep("pnr|Censored|dementia", names(sim_outcome)), with = FALSE],
+                regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
+                baseline_data=sim_baseline_covariates,
+                timevar_data=sim_time_covariates,
+                SL.library="glm",
+                abar = rep(1, time_horizon),
+                verbose=TRUE)
+system.time(f<-do.call("Ltmle",x))
+# works in registerTargets
+# run_Ltmle(name_outcome="dementia",
+#           name_censoring = "Censored",
+#           censored_label = "0",
+#           time_horizon=time_horizon, name_competing_risk=NULL,
+#           outcome_data=sim_outcome[,grep("pnr|Censored|dementia", names(sim_outcome)), with = FALSE],
+#           regimen_data=list(GLP1RA=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE]),
+#           baseline_data=sim_baseline_covariates,
+#           timevar_data=sim_time_covariates,
+#           SL.library="glm",
+#           abar = rep(1, time_horizon),
+#           verbose=TRUE)
+
+
 # one time point is broken
 x=prepare_Ltmle(name_outcome="dementia",
                 name_regimen="GLP1RA",
