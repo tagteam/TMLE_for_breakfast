@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Jan  3 2024 (17:23) 
+## Last-Updated: Jan  3 2024 (17:41) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 9
+##     Update #: 11
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -57,6 +57,7 @@ sim_outcome <- sim_data[,grep("pnr|dementia_|Censored|Dead", names(sim_data)), w
 # }
 
 # one time point is broken
+# ANSWER: not anymore!
 x=prepare_Ltmle(name_outcome="dementia",
                 name_regimen="GLP1RA",
                 name_censoring = "Censored",
@@ -85,13 +86,17 @@ x=prepare_Ltmle(name_outcome="dementia",
                 baseline_data=sim_baseline_covariates,
                 timevar_data=sim_time_covariates,
                 SL.library="glm",
-                iptw.only=TRUE,
+                iptw.only=FALSE,
                 abar = rep(1,4),
+                reduce = FALSE,
                 verbose=TRUE)
 f<-do.call("Ltmle",x) #f$cum.g has some NAs, yet we get causal effect estimate when removing the option iptw.only=TRUE
+# ANSWER: there are NAs but they are apparently not used for the tmle update step:
+lapply(1:8,function(g){f$cum.g[f$cum.g.used[,g],g]})
 summary(f)
 
 # It can't do survival
+# ANSWER: now it can!
 # set Dead_0, ... Dead_k to 0
 sim_outcome[,paste0("Dead_",0:time_horizon):=0]
 x=prepare_Ltmle(name_outcome="dementia",
@@ -107,5 +112,4 @@ x=prepare_Ltmle(name_outcome="dementia",
                 SL.library="glm",
                 abar = rep(1,4),
                 verbose=TRUE)
-
 summary(do.call("Ltmle",x))
