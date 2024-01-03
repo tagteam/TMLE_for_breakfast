@@ -1,0 +1,286 @@
+% Created 2023-05-20 Sat 10:42
+% Intended LaTeX compiler: pdflatex
+\documentclass{beamer}\usepackage{listings}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage[T1]{fontenc}
+\usepackage{natbib}
+\lstset{
+keywordstyle=\color{blue},
+commentstyle=\color{red},stringstyle=\color[rgb]{0,.5,0},
+literate={~}{$\sim$}{1},
+basicstyle=\ttfamily\small,
+columns=fullflexible,
+breaklines=true,
+breakatwhitespace=false,
+numbers=left,
+numberstyle=\ttfamily\tiny\color{gray},
+stepnumber=1,
+numbersep=10pt,
+backgroundcolor=\color{white},
+tabsize=4,
+keepspaces=true,
+showspaces=false,
+showstringspaces=false,
+xleftmargin=.23in,
+frame=single,
+basewidth={0.5em,0.4em},
+}
+\institute{Section of Biostatistics, University of Copenhagen}
+\subtitle{}
+\RequirePackage[absolute, overlay]{textpos}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{navigation symbols}{}
+\RequirePackage{fancyvrb}
+\RequirePackage{array}
+\RequirePackage{multirow}
+\RequirePackage{tcolorbox}
+\definecolor{mygray}{rgb}{.95, 0.95, 0.95}
+\newcommand{\mybox}[1]{\vspace{.5em}\begin{tcolorbox}[boxrule=0pt,colback=mygray] #1 \end{tcolorbox}}
+\newcommand{\sfootnote}[1]{\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote{#1}\setcounter{footnote}{0}\renewcommand{\thefootnote}{\arabic{foot note}}}
+\usepackage{alphalph}
+\alphalph{\value{footnote}}
+\setbeamertemplate{itemize item}{\textbullet}
+\setbeamertemplate{itemize subitem}{-}
+\setbeamertemplate{itemize subsubitem}{}
+\setbeamertemplate{enumerate item}{\insertenumlabel.}
+\setbeamertemplate{enumerate subitem}{\insertenumlabel.\insertsubenumlabel}
+\setbeamertemplate{enumerate subsubitem}{\insertenumlabel.\insertsubenumlabel.\insertsubsubenumlabel}
+\setbeamertemplate{enumerate mini template}{\insertenumlabel}
+\makeatletter\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}\makeatother
+\newcommand{\E}{\ensuremath{\mathrm{E}}}
+\renewcommand{\P}{\ensuremath{\mathrm{P}}}
+\renewcommand{\d}{\ensuremath{\mathrm{d}}}
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+
+\renewcommand*\familydefault{\sfdefault}
+\itemsep2pt
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usetheme{default}
+\author{Thomas Alexander Gerds}
+\date{May 22, 2023}
+\title{Design of an emulated trial using modern causal inference}
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:org4c9867f}
+
+\begin{frame}[label={sec:org0abe3ef}]{The overall idea}
+In causal inference, an emulated target trial is a
+method for estimating the effects of a treatment or
+intervention.\footnote{Hernan and Robins. Am J Epi, 183(8):758--764, 2016.} \vfill
+
+To conduct an emulated target trial, researchers use observational
+data and statistical methods to construct a hypothetical trial that
+emulates the conditions of a randomized controlled trial. 
+\vfill
+
+This involves selecting a study population that is similar to a
+population that would have been eligible for the hypothetical
+randomized trial and modeling the treatment assignment process.
+\vfill
+
+The researchers then simulate the outcomes that would have been
+observed if the hypothetical trial had been conducted.
+\end{frame}
+
+\begin{frame}[label={sec:orgffc08de}]{(Limitations of) Register data}
+The most important challenges that have to be resolved are:
+\vfill
+
+\begin{enumerate}
+\item how to identify \alert{when} a person is eliglible?
+\item identify variables that were used (in the real world) to decide whether the person initiated treatment
+\item collect data to determine adherence to treatment during followup
+\item collect variables that were used to decide treatment changes
+\item collect predictors for outcome(s), censoring, and competing risks
+\item force all this information into a \alert{discrete time grid}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[label={sec:org3083828}]{The statistical analysis plan}
+\begin{block}{Design}
+\begin{enumerate}
+\item Inclusion/Exclusion \(\rightarrow\) time zero
+\item Width of time grid intervals
+\item Treatment regimens (static, stochastic, dynamic)
+\item Target parameters (estimands, contrasts)
+\end{enumerate}
+\end{block}
+
+\begin{block}{Analysis}
+\begin{itemize}
+\item Specification of nuisance parameter estimation, history adjusted:
+\begin{itemize}
+\item propensity score models
+\item censoring models
+\item outcome models
+\end{itemize}
+\item List of learners for super learning (pre-specified ands much more
+flexible than a single regression model)
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{From target population to study population}
+\label{sec:orgf2d9620}
+
+\setbeamercolor{background canvas}{bg=black}
+
+\begin{frame}[label={sec:orgd56e057}]{}
+\huge \color{white}
+
+When is time zero?
+\end{frame}
+
+\setbeamercolor{background canvas}{bg=white}  
+
+\begin{frame}[label={sec:org8a81169}]{When is time zero}
+In the trials actually designed and carried out in the \alert{real world}, a
+prespecified trial protocol defines the target population and how a
+study population would be recruited from eligible patients, and
+therefore the definition of time zero of any participant already in
+the study is obvious.  \vfill
+
+However, during the recruitment process of a \alert{hypothetical
+trial}, there always exist multiple possibilities in defining a study
+population and the associated time zeros.
+\end{frame}
+
+\begin{frame}[label={sec:orgd06534d}]{When is time zero: register data}
+\begin{description}
+\item[{Strategy 1}] include everyone in the register who passes some given
+eligibility criteria:
+\begin{description}
+\item[{a}] set time zero at the first pass and look back in time to define treatment status
+\item[{b}] grace period: set time zero x days after date of first pass. exlude previously treated. 
+treatment initiation happens in grace period
+\end{description}
+\end{description}
+\vfill\pause     
+\begin{description}
+\item[{Strategy 2}] include everyone in the register who starts 
+the treatment:
+\begin{description}
+\item[{a}] compare with patients who start a different treatment
+\item[{a}] match with other patients who could have started the treatment but did not (not yet)
+\end{description}
+\end{description}
+\end{frame}
+
+\begin{frame}[label={sec:org7923855}]{When is time zero: illustration}
+\begin{block}{Example inclusion}
+Include all outcome-free patients above 50 who have a 5 year or longer history of
+diabetes treatment when they have a recent HbA1c measurement above 58
+mmol/mol.  \vfill\pause
+\end{block}
+
+\begin{block}{Challenges}
+\begin{itemize}
+\item not all patients get their HbA1c measured regularly
+\item the register data do not contain all HbA1c measurements
+\item there can be HbA1c above 58 during the first 5 diabetes years
+\item a single patient can fulfill the eligibility criteria multiple times
+according to the registered data\footnote{A real randomized trial would not include the same patient multiple times}\textsuperscript{,}\,\footnote{Subset analyses (e.g., age > 60 or HbA1c > 65) can potentially
+include a patient who is not in this subgroup for the main analysis at
+a different date.}
+\end{itemize}
+\end{block}
+\end{frame}
+\setbeamercolor{background canvas}{bg=black}
+
+\begin{frame}[label={sec:orgb7f83fd}]{}
+\huge \color{white}
+
+Treatment regimens of the hypothetical target trial
+\end{frame}
+
+\setbeamercolor{background canvas}{bg=white}
+
+\begin{frame}[label={sec:org7eea4ec}]{Treatment regimens}
+\begin{block}{Static treatment regimen}
+A fixed treatment strategy that does not change based on individual
+patient responses/characteristics.
+\end{block}
+
+\begin{block}{Dynamic treatment regimen}
+A personalized treatment strategy that adapts treatment decisions
+based on individual patient responses over time. Used in situations
+where patients require sequential or multiple treatments, and the
+optimal treatment may depend on how the patient responded to previous
+treatments.
+\end{block}
+
+\begin{block}{Stochastic treatment regimen}
+Assigns treatments to patients with varying probabilities based on a
+probabilistic algorithm. Stochastic treatment regimens are useful when
+the optimal treatment is uncertain, and there are multiple treatments
+with similar expected outcomes.
+\end{block}
+\end{frame}
+
+\begin{frame}[label={sec:orgbc0815b},fragile]{Examples}
+ \begin{block}{Static treatment regimens}
+\begin{itemize}
+\item Patients continue treatment A for x years
+\item Patients continue to not use treatment A for x years (placebo is not an option!)
+\item Patients continue treatment A for x years but are not allowed to use treatment B
+\end{itemize}
+\end{block}
+
+\begin{block}{Dynamic treatment regimens}
+\begin{itemize}
+\item If measured \texttt{HbA1c > 60} then intensify dose of treatment A or add treatment B
+\item If patient has a diagnosis with myocardiac infarction then add treatment B
+\end{itemize}
+\end{block}
+
+\begin{block}{Stochastic treatment regimens}
+\begin{itemize}
+\item Patients add treatment B with a given probability conditional on
+patient characteristics, treatment history and comorbidity
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Outcomes}
+\label{sec:org4676376}
+\setbeamercolor{background canvas}{bg=black}
+
+\begin{frame}[label={sec:orga004107}]{}
+\huge \color{white}
+
+Target parameters
+\end{frame}
+
+\setbeamercolor{background canvas}{bg=white}  
+
+\begin{frame}[label={sec:org7a71644}]{Target parameters}
+For one treatment regimen, the expected outcome t-years after time
+zero.
+\vfill
+
+For two or multiple treatment regimens, target causal effects (estimands) include
+
+\begin{itemize}
+\item Average Treatment Effect (ATE): The average
+difference in outcomes\footnote{Competing risks affect the interpretation!} t-years after time zero
+between two treatment regimens in the eligible patients
+\item Average Treatment Effect on the Treated (ATT): same as ATE but in
+individuals who received the treatment
+\end{itemize}
+\end{frame}
+\end{document}
