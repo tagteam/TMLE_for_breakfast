@@ -23,10 +23,10 @@ function (Qstar.kplus1, logitQ, combined.summary.measures, cum.g,
         m <- "no Qstar fit because gcomp=TRUE (so no updating step)"
     }
     else {
+      # browser()
         if (any(weight.vec > 0)) {
-            m <- ltmle.glm(f, data = data.temp[weight.vec > 0, 
-                ], family = quasibinomial(), weights = as.vector(scale(weight.vec[weight.vec > 
-                0], center = FALSE)))
+            m <- ltmle.glm(f, data = data.temp[weight.vec > 0, ], family = quasibinomial(),
+                           weights = as.vector(scale(weight.vec[weight.vec > 0], center = FALSE)))
             Qstar <- matrix(predict(m, newdata = data.temp, type = "response"), 
                 nrow = nrow(logitQ))
         }

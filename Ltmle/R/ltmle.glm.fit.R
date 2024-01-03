@@ -2,26 +2,21 @@
 # Function called from Estimate (via EstimateG and FixedTimeTMLE)
 #
 ltmle.glm.fit <- function (x, y, weights, family, offset, intercept) {
+    ## print("ltmle.glm.fit")
     ## print(table(y))
-    ## print("fit")
+    ## print(unlist(apply(x,2,function(u)length(unique(u)))))
     if (all(weights==1)||is.null(weights)){
-        try.fastglm <- try({
-          m <- fastglm::fastglm(y = y,
-                                x = x,
-                                family = family,
-                                offset = offset,
-                                intercept = intercept,
-                                maxit = 100, method = 2)
-          # m <- speedglm::speedglm.wfit(y = y,
-          #                             X = x,
-          #                             family = family,
-          #                             offset = offset,
-          #                             intercept = intercept,
-          #                             maxit = 100)
-          
+        try.speedglm <- try({
+            m <- speedglm::speedglm.wfit(y = y,
+                                         X = x,
+                                         family = family,
+                                         offset = offset,
+                                         intercept = intercept,
+                                         maxit = 100)
+            class(m) <- c("speedglm", "speedlm")
         }, silent = TRUE)
-        if (inherits(try.fastglm, "try-error")) {
-            ShowGlmMessage()
+        if (inherits(try.speedglm, "try-error")) {
+            ltmle:::ShowGlmMessage()
             try.glm <- try({m <- glm.fit(x = x,
                                          y = y,
                                          family = family,

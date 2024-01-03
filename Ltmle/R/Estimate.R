@@ -35,24 +35,11 @@ Estimate <- function(inputs,
                     m <- ltmle.glm.fit(y = Y.subset, x = X.subset,
                                        family = family, weights = observation.weights.subset,
                                        offset = offst, intercept = intercept)
-                    if (inputs$verbose){ message("Fitted coefs: ")
-                        ## browser()
-                        ## print(paste("Sample size: ",m$n))
-                        ## print(coef(m))
+                    if (inputs$verbose){
+                        cat(paste("Sample size: ",m$n),"\n")
                     }
                     m$terms <- tf
-                    if ("fastglm" %in% class(m)){
-                      ## slow and can be significantly faster /fastglm
-                      options(na.action='na.pass')
-                      new_data <- model.matrix(tf, newdata)
-                      new_data <- new_data[, names(m$coefficients)[-1]]
-                      ## add intercept to newdata
-                      new_data <- cbind(1, new_data)
-                    }
-                    else {
-                      new_data <- newdata
-                    }
-                    predicted.values <- predict(m,newdata = new_data,type = type)
+                    predicted.values <- predict(m,newdata = newdata,type = type)
                 }, GetWarningsToSuppress())
             }
             else {
@@ -68,8 +55,7 @@ Estimate <- function(inputs,
                                           obsWeights=observation.weights.subset,
                                           id =id.subset,
                                           alpha=inputs$SL.cvControl$alpha,
-                                          selector=inputs$SL.cvControl$selector,
-                                          intercept=FALSE # Force intercept to zero - should we do this?
+                                          selector=inputs$SL.cvControl$selector
                                           )
                     })
                     predicted.values <- ProcessSLPrediction(pred=m$predicted.values,
@@ -120,39 +106,31 @@ Estimate <- function(inputs,
         return(ValuesByType(predicted.values))
     }
     PredictOnly <- function(newdata1) {
-      if ("fastglm" %in% class(m)){
-        ## slow and can be significantly faster /fastglm
-        options(na.action='na.pass')
-        new_data1 <- model.matrix(tf, newdata1)
-        new_data1 <- new_data1[, names(m$coefficients)[-1]]
-        ## add intercept to newdata1
-        new_data1 <- cbind(1, new_data1)
-      }
-      else {
-        new_data1 <- newdata1
-      }
-      if (class(m)[1] == "no.Y.variation")
-        return(rep(m$Y.value, nrow(new_data1)))
-      if (use.glm) {
-        SuppressGivenWarnings(pred <- predict(m, new_data1,
-                                              type), "prediction from a rank-deficient fit may be misleading")
-      }
-      else {
-        if (inputs$verbose) print(SL.library)
-        if  (SL.library[[1]]=="glmnet"){
-          newX.list <- GetNewX(new_data1)
-          pred <- ProcessSLPrediction(pred=predict(m,newX=newX.list$newX),
-                                      new.subs=newX.list$new.subs,
-                                      try.result = NULL)
-          
-        }else{
-          newX.list <- GetNewX(new_data1)
-          pred <- ProcessSLPrediction(predict(m,newX.list$newX,X.subset,Y.subset,onlySL = TRUE)$pred,
-                                      newX.list$new.subs,
-                                      try.result = NULL)
+        if (class(m)[1] == "no.Y.variation")
+            return(rep(m$Y.value, nrow(newdata1)))
+        if (use.glm) {
+            SuppressGivenWarnings(pred <- predict(m, newdata1,
+                                                  type), "prediction from a rank-deficient fit may be misleading")
         }
-      }
-      return(pred)
+        else {
+            if  (SL.library[[1]]=="glmnet"){
+                newX.list <- GetNewX(newdata1)
+                pred <- ProcessSLPrediction(pred=predict(m,newX=newX.list$newX),
+                                            new.subs=newX.list$new.subs,
+                                            try.result = NULL)
+
+            }else{
+                newX.list <- GetNewX(newdata1)
+                pred <- ProcessSLPrediction(predict(m,
+                                                    newX.list$newX,
+                                                    X.subset,
+                                                    Y.subset,
+                                                    onlySL = TRUE)$pred,
+                                            newX.list$new.subs,
+                                            try.result = NULL)
+            }
+        }
+        return(pred)
     }
     ValuesByType <- function(x) {
         if (type == "link") {
@@ -252,11 +230,12 @@ Estimate <- function(inputs,
         }
     }
     if (inputs$verbose){ message("Estimate: framing formula ",form," into Y and X...")}
+    ## if(length(grep("Censored_2",form)>0))    browser(skipCalls=1L)
     mod.frame <- model.frame(f, data = data.with.Qstar, drop.unused.levels = TRUE,
                              na.action = na.pass)
     Y <- mod.frame[[1]]
     tf <- terms(f)
-    X <- model.matrix(tf, mod.frame) #here
+    X <- model.matrix(tf, mod.frame)
     offst <- model.offset(mod.frame)
     intercept <- attributes(tf)$intercept
     if (!use.glm) {
@@ -334,8 +313,9 @@ Estimate <- function(inputs,
         if (regime.index == first.regime || multiple.subs ||
             multiple.Qstar) {
             Y.subset <- Y[single.subs]
-            if (anyNA(Y.subset))
+            if (anyNA(Y.subset)){
                 stop("NA in Estimate")
+            }
         }
         if (!all(deterministic.list.newdata$is.deterministic |
                  deterministic.g.list.newdata$is.deterministic)) {
@@ -350,11 +330,9 @@ Estimate <- function(inputs,
             else {
                 predicted.values[, regime.index] <- PredictOnly(newdata)
             }
-            ## print(calc.meanL)
             if (calc.meanL)
                 prob.A.is.1.meanL[, regime.index, ] <- PredictProbAMeanL()
-        }
-        else {
+        } else {
             m <- "all rows are deterministic, no estimation took place"
         }
         predicted.values[deterministic.g.list.newdata$is.deterministic,
@@ -371,7 +349,7 @@ Estimate <- function(inputs,
         }
         else {
             if (use.glm) {
-                if (class(m)[1] %in% c("fastglm","speedglm", "glm")) {
+                if (class(m)[1] %in% c("speedglm", "glm")) {
                     fit[[regime.index]] <- summary(m)$coefficients
                 }
                 else {

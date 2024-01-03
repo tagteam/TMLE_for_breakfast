@@ -5,6 +5,11 @@ function (data, cur.node, deterministic.Q.function, nodes, called.from.estimate.
     if (survivalOutcome && any(nodes$Y < cur.node)) {
         last.Ynode <- max(nodes$Y[nodes$Y < cur.node])
         is.deterministic <- data[, last.Ynode] %in% TRUE
+        ## Competing risks
+        ## if (length(nodes$D)>0 && any(nodes$D<cur.node)){
+            ## last.Dnode <- max(nodes$D[nodes$D < cur.node])
+            ## is.deterministic <- is.deterministic|(data[,last.Dnode]%in%TRUE)
+        ## }
     }
     else {
         is.deterministic <- rep(FALSE, nrow(data))

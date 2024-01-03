@@ -49,6 +49,7 @@ function (inputs, cum.g, msm.weights)
         return(list(beta = rep(NA, num.beta), IC = matrix(nrow = n, 
             ncol = num.beta)))
     }
+    # browser()
     m.glm <- ltmle.glm(formula(inputs$working.msm), family = quasibinomial(), 
         data = data.frame(Y = Y.vec, X.mat, weight.vec), weights = as.vector(scale(weight.vec, 
             center = FALSE)))
@@ -63,7 +64,7 @@ function (inputs, cum.g, msm.weights)
                 , i, j])
             colnames(newdata) <- colnames(inputs$combined.summary.measures)
             SuppressGivenWarnings(m.beta[, i, j] <- predict(m.glm, 
-                                                            newdata = newdata, type = "response"), "prediction from a rank-deficient fit may be misleading")
+                newdata = newdata, type = "response"), "prediction from a rank-deficient fit may be misleading")
             cnt <- cnt + 1
             XY.list <- save.xy[[cnt]]
             IC[XY.list$index, ] <- IC[XY.list$index, ] + XY.list$weight * 

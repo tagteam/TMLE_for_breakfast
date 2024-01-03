@@ -35,8 +35,8 @@ CheckInputs <-
             stop("Lnodes are not allowed after the final Y node")
     }
     if (length(nodes$D) > 0) {
-      if (max(nodes$D) > max(nodes$Y))
-        stop("Dnodes are not allowed after the final Y node")
+        if (max(nodes$D) > max(nodes$Y))
+            stop("Dnodes are not allowed after the final Y node")
     }
     all.nodes <- c(nodes$A, nodes$C, nodes$D, nodes$L, nodes$Y)
     if (length(all.nodes) > length(unique(all.nodes)))
@@ -47,7 +47,7 @@ CheckInputs <-
         stop("Ynodes cannot be null")
     if (length(nodes$AC) > 0 && !all(sseq(min(nodes$AC), ncol(data)) %in%
                                      all.nodes)) {
-        tmp=sseq(min(nodes$AC), ncol(data))
+        tmp=ltmle:::sseq(min(nodes$AC), ncol(data))
         stop(paste0("The following variables are not listed as A-, C-, D-, L-, or Y-nodes:\n",
                     paste(names(data)[tmp[!(tmp%in%all.nodes)]],collapse=", "),
                     "\n",
@@ -173,9 +173,16 @@ CheckInputs <-
         deterministic <- IsDeterministic(data, cur.node = Ynode,
                                          deterministic.Q.function = NULL, nodes, called.from.estimate.g = FALSE,
                                          survivalOutcome)$is.deterministic
-        if (anyNA(data[deterministic, Ynode]) || !all(data[deterministic,
-                                                           Ynode] == 1))
-            stop("For survival outcomes, once a Ynode jumps to 1 (e.g. death), all subsequent Ynode values should be 1.")
+        if (anyNA(data[deterministic, Ynode]))
+            stop("For survival outcomes, Ynodes can never have missing values, they have to be either 0 or 1:\n0=(no event, competing event or censored)\n1=(event has occurrred).")
+        if (length(nodes$D)>0){
+            # PLAUSIBILITY CHECK MISSING 
+                ## stop("For survival outcomes, once a Ynode jumps to 1 (e.g. death), all subsequent Ynode values should be 1")
+        }else{
+            if (!all(data[deterministic, Ynode] == 1)){
+                stop("For survival outcomes, once a Ynode jumps to 1 (e.g. death), all subsequent Ynode values should be 1")
+            }
+        }
         if (anyNA(data[uncensored, Ynode]))
             stop("Ynodes may not be NA except after censoring")
     }
