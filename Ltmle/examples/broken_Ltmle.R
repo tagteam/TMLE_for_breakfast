@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Aug  1 2023 (14:50) 
+## Last-Updated: Jan  3 2024 (14:53) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 4
+##     Update #: 5
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -20,6 +20,7 @@ library(data.table)
 # loading Ltmle functions with augmentation
 # -------------------------------------------
 try(setwd("~/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
+try(setwd("~/research/Methods/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
 ## copy of functions from CRAN package ltmle
 ff <- sapply(list.files(path = "./R/",pattern = "R$",full.names = TRUE),source)
 ## our own augmentation files
