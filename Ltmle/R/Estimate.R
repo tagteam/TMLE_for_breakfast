@@ -64,13 +64,14 @@ Estimate <- function(inputs,
                     m <- m$fit
                 }else{
                     try.result <- try({
-                        SuppressGivenWarnings(m <- SuperLearner::SuperLearner(Y = Y.subset,
-                                                                              X = X.subset, SL.library = SL.library, cvControl = inputs$SL.cvControl,
-                                                                              verbose = FALSE, family = family, newX = newX.list$newX,
-                                                                              obsWeights = observation.weights.subset,
-                                                                              id = id.subset, env = environment(SuperLearner::SuperLearner)),
-                                              c("non-integer #successes in a binomial glm!",
-                                                "prediction from a rank-deficient fit may be misleading"))
+                        SuppressGivenWarnings(
+                            m <- SuperLearner::SuperLearner(Y = Y.subset,
+                                                            X = X.subset, SL.library = SL.library, cvControl = inputs$SL.cvControl,
+                                                            verbose = FALSE, family = family, newX = newX.list$newX,
+                                                            obsWeights = observation.weights.subset,
+                                                            id = id.subset, env = environment(SuperLearner::SuperLearner)),
+                            c("non-integer #successes in a binomial glm!",
+                              "prediction from a rank-deficient fit may be misleading"))
                     })
                     predicted.values <- ProcessSLPrediction(m$SL.predict,
                                                             newX.list$new.subs, try.result)
@@ -113,6 +114,7 @@ Estimate <- function(inputs,
                                                   type), "prediction from a rank-deficient fit may be misleading")
         }
         else {
+            if (inputs$verbose) print(SL.library)
             if  (SL.library[[1]]=="glmnet"){
                 newX.list <- GetNewX(newdata1)
                 pred <- ProcessSLPrediction(pred=predict(m,newX=newX.list$newX),
@@ -121,11 +123,7 @@ Estimate <- function(inputs,
 
             }else{
                 newX.list <- GetNewX(newdata1)
-                pred <- ProcessSLPrediction(predict(m,
-                                                    newX.list$newX,
-                                                    X.subset,
-                                                    Y.subset,
-                                                    onlySL = TRUE)$pred,
+                pred <- ProcessSLPrediction(predict(m,newX.list$newX,X.subset,Y.subset,onlySL = TRUE)$pred,
                                             newX.list$new.subs,
                                             try.result = NULL)
             }
@@ -351,6 +349,7 @@ Estimate <- function(inputs,
             if (use.glm) {
                 if (class(m)[1] %in% c("speedglm", "glm")) {
                     fit[[regime.index]] <- summary(m)$coefficients
+                        ## list(logistic_regression = summary(m)$coefficients,predicted=table(cut(predicted.values,include.lowest=TRUE,breaks=c(1,.75,0.5,.25,10^{-(1:8)}))))
                 }
                 else {
                     stopifnot(class(m)[1] %in% c("no.Y.variation",
@@ -361,9 +360,11 @@ Estimate <- function(inputs,
             else {
                 if (inherits(m,"ltmle.glmnet")){
                     fit[[regime.index]] <- m$selected_beta
+                    ## list(beta=m$selected_beta,predicted=table(cut(predicted.values,include.lowest=TRUE,breaks=c(1,.75,0.5,.25,10^{-(1:8)}))))
                 } else{
                     capture.output(print.m <- print(m))
                     fit[[regime.index]] <- print.m
+                    ## list(superlearner = print.m, predicted=table(cut(predicted.values,include.lowest=TRUE,breaks=c(1,.75,0.5,.25,10^{-(1:8)}))))
                 }
             }
         }

@@ -1,6 +1,4 @@
-GetMsmWeights <-
-function (inputs) 
-{
+GetMsmWeights <- function (inputs) {
     n <- nrow(inputs$data)
     num.regimes <- dim(inputs$regimes)[3]
     stopifnot(num.regimes >= 1)

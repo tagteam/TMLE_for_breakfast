@@ -19,6 +19,9 @@ CleanData <- function(data,
     deterministic.Q.function.depends.on.called.from.estimate.g <- !is.null(deterministic.Q.function) &&
         length(grep("called.from.estimate.g", as.character(body(deterministic.Q.function)))) >
         0
+    ## the first variable may not have missing values
+    ## during the for loop the vector ua is updated
+    ## so that ua is FALSE after censoring or survival event
     for (i in 1:(ncol(data) - 1)) {
         if (anyNA(data[ua, i])){
             stop(paste0("Missing values in variable ",names(data)[i],".\n",

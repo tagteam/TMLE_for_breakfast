@@ -1,6 +1,5 @@
-CalcIC <-
-function (Qstar.kplus1, Qstar, h.g.ratio, uncensored, intervention.match, 
-    regimes.with.positive.weight) 
+CalcIC <- function (Qstar.kplus1, Qstar, h.g.ratio, uncensored, intervention.match, 
+                    regimes.with.positive.weight) 
 {
     n <- nrow(Qstar)
     num.regimes <- ncol(Qstar)
@@ -9,8 +8,7 @@ function (Qstar.kplus1, Qstar, h.g.ratio, uncensored, intervention.match,
     for (i in regimes.with.positive.weight) {
         index <- uncensored & intervention.match[, i]
         if (any(h.g.ratio[index, i, ] != 0)) {
-            IC[index, ] <- IC[index, ] + (Qstar.kplus1[index, 
-                i] - Qstar[index, i]) * h.g.ratio[index, i, ]
+            IC[index, ] <- IC[index, ] + (Qstar.kplus1[index, i] - Qstar[index, i]) * h.g.ratio[index, i, ]
         }
     }
     return(IC)

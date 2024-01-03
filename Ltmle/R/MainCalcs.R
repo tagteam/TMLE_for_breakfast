@@ -23,10 +23,10 @@ MainCalcs <- function (inputs){
     else {
         if (inputs$verbose){ message("MainCalcs: calculating fixed time TMLE  ...")}
         for (j in 1:num.final.Ynodes) {
-            fixed.tmle <- FixedTimeTMLE(inputs, nodes = SubsetNodes(inputs$all.nodes,
+            fixed.tmle <- do.call("FixedTimeTMLE",list(inputs, nodes = SubsetNodes(inputs$all.nodes,
                 final.Ynode = inputs$final.Ynodes[j]), msm.weights = drop3(all.msm.weights[,
                 , j, drop = FALSE]), combined.summary.measures = dropn(inputs$combined.summary.measures[,
-                , , j, drop = FALSE], n = 4), g.list = g.list)
+                , , j, drop = FALSE], n = 4), g.list = g.list))
             IC <- IC + fixed.tmle$IC
             IC.y[, , j] <- fixed.tmle$IC
             Qstar[, , j] <- fixed.tmle$Qstar

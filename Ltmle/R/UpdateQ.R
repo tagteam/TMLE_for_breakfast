@@ -1,8 +1,14 @@
-UpdateQ <-
-function (Qstar.kplus1, logitQ, combined.summary.measures, cum.g, 
-    working.msm, uncensored, intervention.match, is.deterministic, 
-    msm.weights, gcomp, observation.weights) 
-{
+UpdateQ <- function(Qstar.kplus1,
+                    logitQ,
+                    combined.summary.measures,
+                    cum.g, 
+                    working.msm,
+                    uncensored,
+                    intervention.match,
+                    is.deterministic, 
+                    msm.weights,
+                    gcomp,
+                    observation.weights) {
     n <- nrow(logitQ)
     num.regimes <- ncol(logitQ)
     off <- as.vector(logitQ)
