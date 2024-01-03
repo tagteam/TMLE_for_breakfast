@@ -1,6 +1,7 @@
 cut_Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL, Ynodes,
                       survivalOutcome = NULL, Qform = NULL, gform = NULL, abar, time_horizon,
                       rule = NULL, gbounds = c(0.01, 1), Yrange = NULL, deterministic.g.function = NULL,
+                      deterministic.Q.function=NULL,
                       stratify = FALSE, SL.library = "glm", SL.cvControl = list(),
                       estimate.time = TRUE, gcomp = FALSE, iptw.only = FALSE, 
                       variance.method = "tmle", observation.weights = NULL, id = NULL,info = NULL, verbose = FALSE,...){
@@ -32,6 +33,7 @@ cut_Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL,
   list(data = data, Anodes = Anodes, Cnodes = Cnodes, Dnodes = Dnodes, Lnodes = Lnodes, Ynodes = Ynodes,
        survivalOutcome = survivalOutcome, Qform = Qform, gform = gform, abar = abar,
        rule = rule, gbounds = gbounds, Yrange = Yrange, deterministic.g.function = deterministic.g.function,
+       deterministic.Q.function = deterministic.Q.function,
        stratify = stratify, SL.library = SL.library, SL.cvControl = SL.cvControl, estimate.time = estimate.time, 
        gcomp = gcomp, iptw.only = iptw.only, variance.method = variance.method, 
        observation.weights = observation.weights, id = id, info = info, verbose = verbose,...)

@@ -1,10 +1,29 @@
-Ltmle_working_horse <- function (data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL, Ynodes,
-                                 survivalOutcome = NULL, Qform = NULL, gform = NULL, abar,
-                                 rule = NULL, gbounds = c(0.01, 1), Yrange = NULL, deterministic.g.function = NULL,
-                                 deterministic.Q.function = NULL,
-                                 stratify = FALSE, SL.library = "glm", SL.cvControl = list(),
-                                 estimate.time = TRUE, gcomp = FALSE, iptw.only = FALSE, 
-                                 variance.method = "tmle", observation.weights = NULL, id = NULL,info = NULL,verbose=FALSE)
+Ltmle_working_horse <- function(data,
+                                Anodes,
+                                Cnodes = NULL,
+                                Dnodes = NULL,
+                                Lnodes = NULL,
+                                Ynodes,
+                                survivalOutcome = NULL,
+                                Qform = NULL,
+                                gform = NULL,
+                                abar,
+                                rule = NULL,
+                                gbounds = c(0, 1),
+                                Yrange = NULL,
+                                deterministic.g.function = NULL,
+                                deterministic.Q.function = NULL,
+                                stratify = FALSE,
+                                SL.library = "glm",
+                                SL.cvControl = list(),
+                                estimate.time = FALSE,
+                                gcomp = FALSE,
+                                iptw.only = FALSE,
+                                variance.method = "tmle",
+                                observation.weights = NULL,
+                                id = NULL,
+                                info = NULL,
+                                verbose=FALSE)
 {
     require(matrixStats)
     data <- CheckData(data)
@@ -25,6 +44,12 @@ Ltmle_working_horse <- function (data, Anodes, Cnodes = NULL, Dnodes = NULL, Lno
     result <- LtmleFromInputs(inputs)
     result$call <- match.call()
     result$info <- result$call$info
+    if (reduce){
+        result$call <- NULL
+        result$cum.g <- result$cum.g.used <- result$cum.g.unbounded <- NULL
+        result$Qstar <- NULL
+        result$fit$Qstar <- NULL        
+    }
     class(result) <- "Ltmle"
     return(result)
 }

@@ -14,12 +14,12 @@ get_subset_data <- function(work_data,
     # label the variables that are constant in the subset data
     same = sapply(work_data, function(x){length(unique(x))==1})
     if(sum(same)>0){
-        constant_variables <- names(work_data)[same]}
-    else{
+        constant_variables <- names(work_data)[same]
+    } else{
         constant_variables <- NULL}
     list(data = work_data[],
          subset_label = subset_label,
          name_baseline_covariates = name_baseline_covariates[name_baseline_covariates%in%names(work_data)],
-         constant_variables= constant_variables)
+         constant_variables = constant_variables)
 }
 

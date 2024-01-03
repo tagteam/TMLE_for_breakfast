@@ -7,7 +7,7 @@ get_formulas <- function(time_horizon,
                          name_time_covariates,
                          name_regimen,
                          name_censoring = NULL,
-                         name_comp.event = NULL,
+                         name_competing_risk = NULL,
                          Markov = NULL, ## Names of time varying covariates with Markov property. Note that regimen is assumed NOT to be Markov
                          constant_variables = NULL,
                          independent_regimens = FALSE){
