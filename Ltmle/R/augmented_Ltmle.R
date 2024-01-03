@@ -119,9 +119,9 @@ Ltmle <- function(data,
                   observation.weights = NULL,
                   id = NULL,
                   info = NULL,
+                  reduce = TRUE,
                   verbose=FALSE,
-                  subsampling=FALSE,
-                  ...){#ltmle_dir = NULL,...){
+                  ...){
     requireNamespace("matrixStats")
     requireNamespace("foreach")
     requireNamespace("data.table")
@@ -149,46 +149,45 @@ Ltmle <- function(data,
                 list(is.deterministic=is.deterministic, Q.value=0)
             }
         }
-    } 
-    result <- foreach(time = time_horizon, .export = "ShowGlmMessage")%do%{
-        cut <- cut_Ltmle(data = data, Anodes = Anodes, Cnodes = Cnodes, Dnodes = Dnodes, Lnodes = Lnodes, Ynodes = Ynodes,
-                         survivalOutcome = survivalOutcome, Qform = Qform, gform = gform, abar = abar, time_horizon = time,
-                         rule = rule, gbounds = gbounds, Yrange = Yrange, deterministic.g.function = deterministic.g.function,
-                         stratify = stratify, SL.library = SL.library, SL.cvControl = SL.cvControl, estimate.time = estimate.time, 
-                         gcomp = gcomp, iptw.only = iptw.only, variance.method = variance.method, 
-                         observation.weights = observation.weights, id = id, info = info, verbose = verbose,...)
-        do.call(Ltmle_working_horse, c(cut, list(deterministic.Q.function = deterministic.Q.function))) 
     }
-    if(length(time_horizon)==1){result <- result[[1]]}
-    else{names(result) <- paste0("Time horizon ", time_horizon)}
-    if (subsampling){
-        if (m <= 0 | m >= 1) stop("m must be between 0 and 1 for subsampling")
-        res_boot <- foreach(b = 1:B) %do% {
-            if (verbose) message("Bootstrap ", b, " of ", B, "...")
-            temp_boot <- NULL
-            while (inherits(temp_boot,"simpleError") || is.null(temp_boot)){
-                temp_boot <- tryCatch({foreach(time = time_horizon)%do%{
-                    dat_subsample <- data[sample(1:nrow(data), size = floor(m*nrow(data)), replace = FALSE),]
-                    cut <- cut_Ltmle(data = dat_subsample, Anodes = Anodes, Cnodes = Cnodes, Dnodes = Dnodes, Lnodes = Lnodes, Ynodes = Ynodes,
-                                     survivalOutcome = survivalOutcome, Qform = Qform, gform = gform, abar = abar, time_horizon = time,
-                                     rule = rule, gbounds = gbounds, Yrange = Yrange, deterministic.g.function = deterministic.g.function,
-                                     stratify = stratify, SL.library = SL.library, SL.cvControl = SL.cvControl, estimate.time = estimate.time, 
-                                     gcomp = gcomp, iptw.only = iptw.only, variance.method = variance.method, 
-                                     observation.weights = observation.weights, id = id, info = info, verbose = FALSE,...)
-                    do.call(Ltmle_working_horse, c(cut, list(deterministic.Q.function = deterministic.Q.function))) 
-                }}, error = function(e) e)
-                if (inherits(temp_boot,"simpleError")){
-                    message("Error in bootstrap ", b, " of ", B, ": ", temp_boot$message)
-                    message("Trying a new subsample")
-                    message("If you see a lot of these messages, consider increasing m")
-                }
-            }
-            if(length(time_horizon)==1){temp_boot <- temp_boot[[1]]}
-            else{names(temp_boot) <- paste0("Time horizon ", time_horizon)}
-            temp_boot
-        }
-        result <- list(result = result, res_boot = res_boot, m = round(m*nrow(data)), n = nrow(data))
-        class(result) <- "Ltmle_boot"
+    result <- foreach(time = time_horizon)%do%{
+        xcut <- cut_Ltmle(data = data,
+                          Anodes = Anodes,
+                          Cnodes = Cnodes,
+                          Dnodes = Dnodes,
+                          Lnodes = Lnodes,
+                          Ynodes = Ynodes,
+                          survivalOutcome = survivalOutcome,
+                          Qform = Qform,
+                          gform = gform,
+                          abar = abar,
+                          time_horizon = time,
+                          rule = rule,
+                          gbounds = gbounds,
+                          Yrange = Yrange,
+                          deterministic.g.function = deterministic.g.function,
+                          deterministic.Q.function = deterministic.Q.function,
+                          stratify = stratify,
+                          SL.library = SL.library,
+                          SL.cvControl = SL.cvControl,
+                          estimate.time = estimate.time, 
+                          gcomp = gcomp,
+                          iptw.only = iptw.only,
+                          variance.method = variance.method, 
+                          observation.weights = observation.weights,
+                          id = id,
+                          info = info,
+                          reduce = reduce,
+                          verbose = verbose,
+                          ...)
+        do.call(Ltmle_working_horse, xcut)
     }
+    if(length(time_horizon)==1){
+        result <- result[[1]]
+    } else{
+        names(result) <- paste0("Time horizon ", time_horizon)
+    }
+    result$sample_size <- NROW(data)    
+    class(result) <- "Ltmle"
     return(result)
 }

@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Jan  3 2024 (14:53) 
+## Last-Updated: Jan  3 2024 (17:23) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 5
+##     Update #: 9
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -21,11 +21,8 @@ library(data.table)
 # -------------------------------------------
 try(setwd("~/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
 try(setwd("~/research/Methods/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
-## copy of functions from CRAN package ltmle
+## copy of functions from CRAN package ltmle and own augmentation functions
 ff <- sapply(list.files(path = "./R/",pattern = "R$",full.names = TRUE),source)
-## our own augmentation files
-ff <- sapply(list.files(path = "./augmentation/",pattern = "R$",full.names = TRUE),source)
-# ff <- sapply(list.files(path = "~/registerTargets/registerTargets/exercises/Ltmle/",pattern = "R$",full.names = TRUE),source)
 
 ## loading simulation function (including prepared coefficients from Danish register data)
 source("./examples/get_lava_model.R")
@@ -64,7 +61,7 @@ x=prepare_Ltmle(name_outcome="dementia",
                 name_regimen="GLP1RA",
                 name_censoring = "Censored",
                 censored_label = "0",
-                name_comp.event = "Dead",
+                name_competing_risk = "Dead",
                 time_horizon=1,
                 outcome_data=sim_outcome,
                 regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
@@ -73,6 +70,7 @@ x=prepare_Ltmle(name_outcome="dementia",
                 SL.library="glm",
                 abar = 1,
                 verbose=TRUE)
+
 f<-do.call("Ltmle",x)
 
 # iptw option is broken
@@ -80,7 +78,7 @@ x=prepare_Ltmle(name_outcome="dementia",
                 name_regimen="GLP1RA",
                 name_censoring = "Censored",
                 censored_label = "0",
-                name_comp.event = "Dead",
+                name_competing_risk = "Dead",
                 time_horizon=4,
                 outcome_data=sim_outcome,
                 regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
@@ -100,7 +98,7 @@ x=prepare_Ltmle(name_outcome="dementia",
                 name_regimen="GLP1RA",
                 name_censoring = "Censored",
                 censored_label = "0",
-                name_comp.event = "Dead",
+                name_competing_risk = "Dead",
                 time_horizon=4,
                 outcome_data=sim_outcome,
                 regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
@@ -109,4 +107,5 @@ x=prepare_Ltmle(name_outcome="dementia",
                 SL.library="glm",
                 abar = rep(1,4),
                 verbose=TRUE)
+
 summary(do.call("Ltmle",x))

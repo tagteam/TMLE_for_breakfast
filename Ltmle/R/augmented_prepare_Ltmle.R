@@ -40,7 +40,6 @@ prepare_Ltmle <- function(regimen_data,
                                       name_censoring = name_censoring,
                                       censored_label = censored_label,
                                       name_competing_risk = name_competing_risk)
-  
   ## Subsetting the data; This returns data in correct order according to time and without constant nodes
   subset_data = get_subset_data(work_data = merged_data$data,
                                 time_horizon = time_horizon,

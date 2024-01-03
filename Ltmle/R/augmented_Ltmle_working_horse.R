@@ -23,12 +23,13 @@ Ltmle_working_horse <- function(data,
                                 observation.weights = NULL,
                                 id = NULL,
                                 info = NULL,
+                                reduce = TRUE,
                                 verbose=FALSE)
 {
     require(matrixStats)
+    if (NROW(data) == 0) stop("Argument 'data' seems empty.") 
     data <- CheckData(data)
     msm.inputs <- GetMSMInputsForLtmle(data, abar, rule, gform)
-    
     inputs <- CreateInputs(data = data, Anodes = Anodes, Cnodes = Cnodes, Dnodes = Dnodes,
                            Lnodes = Lnodes, Ynodes = Ynodes, survivalOutcome = survivalOutcome,
                            Qform = Qform, gform = msm.inputs$gform, Yrange = Yrange,

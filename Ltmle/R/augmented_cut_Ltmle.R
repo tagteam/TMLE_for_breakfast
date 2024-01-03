@@ -4,7 +4,7 @@ cut_Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL,
                       deterministic.Q.function=NULL,
                       stratify = FALSE, SL.library = "glm", SL.cvControl = list(),
                       estimate.time = TRUE, gcomp = FALSE, iptw.only = FALSE, 
-                      variance.method = "tmle", observation.weights = NULL, id = NULL,info = NULL, verbose = FALSE,...){
+                      variance.method = "tmle", observation.weights = NULL, id = NULL,info = NULL, reduce = TRUE, verbose = FALSE,...){
   if(length(Ynodes)<time_horizon){
     stop("Specified time horizon is ", time_horizon, " but data only contains ", length(Ynodes), " Ynodes")
   }
@@ -36,5 +36,5 @@ cut_Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL,
        deterministic.Q.function = deterministic.Q.function,
        stratify = stratify, SL.library = SL.library, SL.cvControl = SL.cvControl, estimate.time = estimate.time, 
        gcomp = gcomp, iptw.only = iptw.only, variance.method = variance.method, 
-       observation.weights = observation.weights, id = id, info = info, verbose = verbose,...)
+       observation.weights = observation.weights, id = id, info = info, reduce = reduce, verbose = verbose,...)
 }
