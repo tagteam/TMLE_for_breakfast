@@ -128,8 +128,8 @@ Ltmle <- function(data,
     if ("glmnet" %in% SL.library)
         if (length(SL.cvControl)==0)
             SL.cvControl=list(selector="undersmooth",alpha=0.5)
-    name_competing_risk = gsub("_[^_]*$", "", Dnodes[[1]])
     if(length(Dnodes)>0){
+        name_competing_risk = gsub("_[^_]*$", "", Dnodes[[1]])
         survivalOutcome=TRUE
         if (length(deterministic.Q.function)>0){
             stop("Cannot both specify deterministic.Q.function and Dnodes.")
@@ -149,6 +149,8 @@ Ltmle <- function(data,
                 list(is.deterministic=is.deterministic, Q.value=0)
             }
         }
+    }else{
+        if (length(Cnodes)>0) survivalOutcome <- TRUE
     }
     result <- foreach(time = time_horizon)%do%{
         xcut <- cut_Ltmle(data = data,

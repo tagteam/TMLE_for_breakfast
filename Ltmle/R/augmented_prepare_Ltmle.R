@@ -48,7 +48,8 @@ prepare_Ltmle <- function(regimen_data,
                                 name_baseline_covariates = merged_data$name_baseline_covariates)
   
   ## Change data to fit into ltmle constraints; Censored should be factor with levels "uncensored" and "censored",
-  ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
+    ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
+  
   ltmle_data = get_ltmle_data(subset_data$data,
                               time_horizon = time_horizon,
                               name_outcome = name_outcome,

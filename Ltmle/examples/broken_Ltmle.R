@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Jan  3 2024 (17:41) 
+## Last-Updated: Jan  4 2024 (10:29) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 11
+##     Update #: 13
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -79,7 +79,7 @@ x=prepare_Ltmle(name_outcome="dementia",
                 name_regimen="GLP1RA",
                 name_censoring = "Censored",
                 censored_label = "0",
-                name_competing_risk = "Dead",
+                name_competing_risk = NULL,
                 time_horizon=4,
                 outcome_data=sim_outcome,
                 regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
