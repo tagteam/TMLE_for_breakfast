@@ -98,12 +98,12 @@ summary(f)
 # It can't do survival
 # ANSWER: now it can!
 # set Dead_0, ... Dead_k to 0
-sim_outcome[,paste0("Dead_",0:time_horizon):=0]
+sim_outcome[,paste0("Dead_",0:time_horizon):=NULL]
 x=prepare_Ltmle(name_outcome="dementia",
                 name_regimen="GLP1RA",
                 name_censoring = "Censored",
                 censored_label = "0",
-                name_competing_risk = "Dead",
+                name_competing_risk = NULL,
                 time_horizon=4,
                 outcome_data=sim_outcome,
                 regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],

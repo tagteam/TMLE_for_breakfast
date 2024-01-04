@@ -150,7 +150,7 @@ Ltmle <- function(data,
             }
         }
     }else{
-        if (length(Cnodes)>0) survivalOutcome <- TRUE
+        survivalOutcome <- TRUE
     }
     result <- foreach(time = time_horizon)%do%{
         xcut <- cut_Ltmle(data = data,
