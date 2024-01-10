@@ -42,10 +42,12 @@ merge_and_sort_data <- function(time_horizon,
   work_data <- wide_data
   # add time covariates
   # first remove outcome if overlap
-  if (length((outcome_overlap <- grep(paste0(name_outcome,"_"),names(timevar_data)))>0)){
-    timevar_data <- timevar_data[,-outcome_overlap, with=FALSE]}
-  data.table::setkey(timevar_data,pnr)
-  work_data=timevar_data[work_data, on = c("pnr")]
+  if (!is.null(timevar_data)){
+    if (length((outcome_overlap <- grep(paste0(name_outcome,"_"),names(timevar_data)))>0)){
+      timevar_data <- timevar_data[,-outcome_overlap, with=FALSE]}
+    data.table::setkey(timevar_data,pnr)
+    work_data=timevar_data[work_data, on = c("pnr")]
+  }
   
   name_time_covariates = unlist(lapply(grep("_0",names(timevar_data),value=TRUE),
                                        function(x){substring(x,0,nchar(x)-2)}))
