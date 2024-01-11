@@ -12,13 +12,15 @@ MainCalcs <- function (inputs){
     if (inputs$verbose){ message("MainCalcs: estimating G ...")}
     g.list <- EstimateG(inputs)
     if (inputs$verbose){ message("MainCalcs: calculating IPTW ...")}
-    iptw <- CalcIPTW(inputs, g.list$cum.g, all.msm.weights)
     fit <- list(g = g.list$fit)
     if (inputs$iptw.only) {
+        iptw <- CalcIPTW(inputs, g.list$cum.g, all.msm.weights)
         beta <- rep(NA, length(iptw$beta))
         fitted.msm <- NULL
         variance.estimate <- NULL
         fixed.tmle <- list(cum.g.used = array(NA, dim = dim(g.list$cum.g)))
+        iptw.ic <- iptw$IC
+        iptw.beta <- iptw$beta
     }
     else {
         if (inputs$verbose){ message("MainCalcs: calculating fixed time TMLE  ...")}
@@ -33,12 +35,13 @@ MainCalcs <- function (inputs){
             new.var.y[, , j] <- fixed.tmle$est.var
         }
         fit <- c(fit, fixed.tmle$fit)
+        
         if (isTRUE(attr(inputs$data, "called.from.estimate.variance",
             exact = TRUE))) {
             return(list(IC = matrix(NA, 1, 1), msm = NULL, beta = qlogis(mean(Qstar)),
                 cum.g = g.list$cum.g, cum.g.unbounded = g.list$cum.g.unbounded,
-                fit = fit, variance.estimate = NULL, beta.iptw = iptw$beta,
-                IC.iptw = iptw$IC, Qstar = Qstar, cum.g.used = fixed.tmle$cum.g.used))
+                fit = fit, variance.estimate = NULL, beta.iptw = NULL,
+                IC.iptw = NULL, Qstar = Qstar, cum.g.used = fixed.tmle$cum.g.used))
         }
         if (inputs$verbose){ message("MainCalcs: fitting pooled MSM  ...")}
         fitted.msm <- FitPooledMSM(inputs$working.msm, Qstar,
@@ -79,9 +82,12 @@ MainCalcs <- function (inputs){
         IC <- t(safe.solve(C.old, t(IC)))
         beta <- coef(fitted.msm$m)
         names(beta) <- inputs$beta.names
+        iptw.ic <- NULL
+        iptw.beta <- NULL
+        
     }
     return(list(IC = IC, msm = fitted.msm$m, beta = beta, cum.g = g.list$cum.g,
         cum.g.unbounded = g.list$cum.g.unbounded, fit = fit,
-        variance.estimate = variance.estimate, beta.iptw = iptw$beta,
-        IC.iptw = iptw$IC, Qstar = Qstar, cum.g.used = fixed.tmle$cum.g.used))
+        variance.estimate = variance.estimate, beta.iptw = iptw.beta,
+        IC.iptw = iptw.ic, Qstar = Qstar, cum.g.used = fixed.tmle$cum.g.used))
 }
