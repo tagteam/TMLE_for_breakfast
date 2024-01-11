@@ -3,7 +3,6 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
     num.regimes <- dim(inputs$regimes)[3]
     n <- nrow(data)
     num.betas <- ncol(combined.summary.measures)
-    tmle <- rep(NA, num.regimes)
     IC <- matrix(0, nrow = n, ncol = num.betas)
     cum.g.used <- array(FALSE, dim = dim(g.list$cum.g))
     est.var <- matrix(0, num.betas, num.betas)
@@ -15,7 +14,7 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
     Qstar.kplus1 <- matrix(data[, max(nodes$Y)], nrow = n, ncol = num.regimes)
     mean.summary.measures <- apply(abs(combined.summary.measures), 2, mean)
     if (length(nodes$LY) > 0) {
-        for (LYnode.index in length(nodes$LY):1) {
+        for (LYnode.index in rev(seq_along(nodes$LY))) {
             cur.node <- nodes$LY[LYnode.index]
             deterministic.list.origdata <- IsDeterministic(data,
                                                            cur.node, inputs$deterministic.Q.function, nodes,

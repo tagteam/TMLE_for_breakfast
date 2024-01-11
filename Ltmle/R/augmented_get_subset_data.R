@@ -7,7 +7,6 @@ get_subset_data <- function(work_data,
                             name_baseline_covariates){
     time_horizon = max(time_horizon)
     time_grid = 0:time_horizon
-    K = length(time_grid)
     if(length(subset_id)>0){
         work_data = work_data[pnr%in%subset_id]
     }

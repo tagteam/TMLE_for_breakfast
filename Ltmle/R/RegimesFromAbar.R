@@ -19,7 +19,7 @@ function (data, abar, rule)
             if (nrow(data) > 10000) 
                 warning("Using a rule input may be significantly slower than using abar/regimes if your data contains censoring nodes or is otherwise not all numeric.")
             abar <- matrix(nrow = nrow(data), ncol = rule.output.length)
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 abar[i, ] <- as.numeric(rule(data[i, ]))
             }
         }

@@ -97,7 +97,6 @@ get_ltmle_data <- function(work_data, time_horizon,
   E=0
   CR=0
   C=0
-  nreg <- length(name_regimen)
   if (is.list(abar)){
       ## warning("Counting regimen adherence only for first element of abar")
       REG=sum(work_data[[A_nodes_position[[1]]]]==abar[[1]][[1]])

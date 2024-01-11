@@ -17,8 +17,6 @@ get_formulas <- function(time_horizon,
                   paste(Markov[not_found],collapse=", ")))
   
   time_horizon = max(time_horizon)
-  time_grid = 0:time_horizon
-  K = length(time_grid)
   gform = if(independent_regimens){
     c(unlist(lapply(name_regimen, function(reg){paste0(reg,"_0"," ~ ", 
                                                        get_rhs(timepoint = 0, work_data = work_data,

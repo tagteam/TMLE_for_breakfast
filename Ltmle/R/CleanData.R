@@ -4,7 +4,7 @@ CleanData <- function(data,
                       survivalOutcome,
                       showMessage = TRUE){
     is.nan.df <- function(x) {
-        y <- if (length(x)) {
+             if (length(x)) {
                  do.call("cbind", lapply(x, "is.nan"))
              }
              else {

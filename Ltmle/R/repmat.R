@@ -6,5 +6,5 @@ function (X, m, n)
     if ((m == 0) || (n == 0)) 
         return(matrix(numeric(0), nrow = mx * m, ncol = nx * 
             n))
-    return(matrix(t(matrix(X, mx, nx * n)), mx * m, nx * n, byrow = T))
+    return(matrix(t(matrix(X, mx, nx * n)), mx * m, nx * n, byrow = TRUE))
 }

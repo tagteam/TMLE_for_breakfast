@@ -31,7 +31,7 @@ function (data, msm, summary.measures, nodes)
             main.terms.summary.measures[, , i, j] <- combined.summary.measures
         }
     }
-    colnames(main.terms.summary.measures) <- paste("S", 1:ncol(main.terms.summary.measures), 
+    colnames(main.terms.summary.measures) <- paste("S", seq_along(ncol(main.terms.summary.measures)), 
         sep = "")
     main.terms.msm <- paste("Y ~ -1 +", paste(colnames(main.terms.summary.measures), 
         collapse = " + "))

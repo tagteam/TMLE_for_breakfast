@@ -2,7 +2,6 @@ CalcIC <- function (Qstar.kplus1, Qstar, h.g.ratio, uncensored, intervention.mat
                     regimes.with.positive.weight) 
 {
     n <- nrow(Qstar)
-    num.regimes <- ncol(Qstar)
     num.betas <- dim(h.g.ratio)[3]
     IC <- matrix(0, nrow = n, ncol = num.betas)
     for (i in regimes.with.positive.weight) {

@@ -95,11 +95,11 @@ Estimate <- function(inputs,
         }
         predicted.values <- rep(NA, nrow(newdata))
         predicted.values[new.subs] <- pred
-        if (max(predicted.values, na.rm = T) > 1 || min(predicted.values,
-                                                        na.rm = T) < 0) {
+        if (max(predicted.values, na.rm = TRUE) > 1 || min(predicted.values,
+                                                        na.rm = TRUE) < 0) {
             msg <- paste("SuperLearner returned predicted.values > 1 or < 0: [min, max] = [",
-                         min(predicted.values, na.rm = T), ",", max(predicted.values,
-                                                                    na.rm = T), "]. Bounding to [0,1]")
+                         min(predicted.values, na.rm = TRUE), ",", max(predicted.values,
+                                                                    na.rm = TRUE), "]. Bounding to [0,1]")
             warning(msg)
             predicted.values <- Bound(predicted.values, bounds = c(0,
                                                                    1))
@@ -145,7 +145,7 @@ Estimate <- function(inputs,
         newX.temp <- model.matrix(terms(f), new.mod.frame)
         Xnames=colnames(newX.temp)
         if (!use.glm) {
-            colnames(newX.temp) <- paste0("Xx.", 1:ncol(newX.temp))
+            colnames(newX.temp) <- paste0("Xx.", seq_len(ncol(newX.temp)))
         }
         new.subs <- !matrixStats::rowAnyMissings(newX.temp)
         newX <- as.data.frame(newX.temp[new.subs, , drop = FALSE])
@@ -163,7 +163,7 @@ Estimate <- function(inputs,
             return(probAis1.meanL)
         all.LY.nodes <- sort(union(nodes$L, nodes$Y))
         LYindex <- length(nodes$LY)
-        for (i in length(all.LY.nodes):1) {
+        for (i in rev(seq_along(all.LY.nodes))) {
             regression.node <- all.LY.nodes[i]
             L <- data[single.subs, regression.node]
             if (is.numeric(L) && !IsBinary(L)) {
@@ -173,7 +173,7 @@ Estimate <- function(inputs,
                 meanL <- Mode(L, na.rm = TRUE)
             }
             newdata.meanL[, regression.node] <- meanL
-            if (regression.node %in% nodes$LY[1:length(nodes$LY) -
+            if (regression.node %in% nodes$LY[seq_along(nodes$LY) -
                                               1]) {
                 LYindex <- LYindex - 1
                 probAis1.meanL[, LYindex] <- PredictOnly(newdata = newdata.meanL)
@@ -241,7 +241,7 @@ Estimate <- function(inputs,
             family <- binomial()
         if (!is.null(offst))
             stop("offset in formula not supported with SuperLearner")
-        colnames(X) <- paste0("Xx.", 1:ncol(X))
+        colnames(X) <- paste0("Xx.", seq_len(ncol(X)))
         X <- as.data.frame(X)
     }
     fit <- vector("list", num.regimes)
@@ -254,7 +254,6 @@ Estimate <- function(inputs,
     if (calc.meanL) {
         prob.A.is.1.meanL <- array(NaN, dim = c(nrow(inputs$data),
                                                 num.regimes, length(nodes$LY) - 1))
-        Anode.index <- which(nodes$A < cur.node)
     }
     else {
         prob.A.is.1.meanL <- NULL
@@ -262,16 +261,6 @@ Estimate <- function(inputs,
     for (regime.index in regimes.with.positive.weight) {
         newdata <- SetA(data = data.with.Qstar, regimes = inputs$regimes,
                         Anodes = nodes$A, regime.index = regime.index, cur.node = cur.node)
-        if (calc.meanL) {
-            if (!is.null(regimes.meanL)) {
-                newdata.meanL <- SetA(data = data.with.Qstar,
-                                      regimes = regimes.meanL, Anodes = nodes$A,
-                                      regime.index = regime.index, cur.node = cur.node)
-            }
-            else {
-                newdata.meanL <- newdata
-            }
-        }
         deterministic.list.newdata <- IsDeterministic(newdata,
                                                       cur.node, inputs$deterministic.Q.function, nodes,
                                                       called.from.estimate.g, inputs$survivalOutcome)
@@ -287,7 +276,7 @@ Estimate <- function(inputs,
             }
             deterministic.g.list.newdata <- IsDeterministicG(newdata.with.current,
                                                              cur.node, inputs$deterministic.g.function, nodes,
-                                                             using.newdata = T)
+                                                             using.newdata = TRUE)
         }
         else {
             deterministic.g.list.newdata <- list(is.deterministic = rep(FALSE,
@@ -306,7 +295,6 @@ Estimate <- function(inputs,
             if (any(single.subs))
                 X.subset[, colAlls(X.subset == 0)] <- 1
             observation.weights.subset <- inputs$observation.weights[single.subs]
-            offst.subset <- offst[single.subs]
         }
         if (regime.index == first.regime || multiple.subs ||
             multiple.Qstar) {

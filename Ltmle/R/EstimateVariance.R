@@ -13,7 +13,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
             stop("all Z are NA in EstimateVariance")
         if (length(Z.meanL) == 0 || all(Z == 0 | is.na(Z))) {
             Qstar <- Scale(Z, 0, 1)
-            return(list(EZd1 = mean(Z, na.rm = T), Qstar = Qstar))
+            return(list(EZd1 = mean(Z, na.rm = TRUE), Qstar = Qstar))
         }
         if (est.var.iptw) {
             index <- uncensored & intervention.match[, d1]
@@ -21,7 +21,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
             Y <- Scale(Z, 0, 1)[index]
             iptw.estimate <- sum(Y/g)/sum(1/g)
             return(list(EZd1 = iptw.estimate * diff(range(Z,
-                na.rm = T)) + min(Z, na.rm = T), Qstar = rep(NA,
+                na.rm = TRUE)) + min(Z, na.rm = TRUE), Qstar = rep(NA,
                 length(Z))))
         }
         sparsity.data <- inputs$data[, 1:cur.node]
@@ -36,7 +36,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
         Qform <- paste(GetDefaultForm(sparsity.data[, 1:cur.node],
             nodes = temp.nodes, is.Qform = TRUE, stratify = stratify,
             survivalOutcome = FALSE, showMessage = FALSE), paste0("+ sparityAdj_Z.meanL_",
-            1:length(temp.nodes$LY)))
+            seq_along(temp.nodes$LY)))
         Qform[length(Qform)] <- "IDENTITY"
         Z.meanL <- apply(AsMatrix(Z.meanL), 2, LogitScale)
         sparsity.data <- cbind(Z.meanL, sparsity.data)
@@ -52,8 +52,8 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
                 d1, temp.nodes$A), gbounds = inputs$gbounds,
             stratify = stratify, estimate.time = FALSE, deterministic.Q.function = det.q.function,
             variance.method = "ic", observation.weights = observation.weights)
-        EZd1 <- var.tmle$estimates["tmle"] * diff(range(Z, na.rm = T)) +
-            min(Z, na.rm = T)
+        EZd1 <- var.tmle$estimates["tmle"] * diff(range(Z, na.rm = TRUE)) +
+            min(Z, na.rm = TRUE)
         return(list(EZd1 = EZd1, Qstar = var.tmle$Qstar))
     }
     EqualRegimesIndex <- function(dd1, dd2) {
@@ -84,7 +84,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
             if (!any(nodes$Y < current.node))
                 return(NULL)
             prev.Y <- data[, nodes$Y[nodes$Y < current.node],
-                drop = F]
+                drop = FALSE]
             prev.Y[is.na(prev.Y)] <- 0
             is.deterministic <- rowAnys(prev.Y == 1)
             Q.value <- data[is.deterministic, max(nodes$Y)]
@@ -99,7 +99,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
     variance.estimate <- matrix(0, num.betas, num.betas)
     Sigma <- array(dim = c(n, num.regimes, num.regimes))
     if (!is.last.LYnode)
-        Q.data <- inputs$data[alive, 1:cur.node, drop = F]
+        Q.data <- inputs$data[alive, 1:cur.node, drop = FALSE]
     for (d1 in regimes.with.positive.weight) {
         if (static.treatment) {
             d2.regimes <- d1
@@ -117,7 +117,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
                   resid.sq <- (Qstar.kplus1[alive, d1] - Qstar[alive,
                     d1]) * (Qstar.kplus1[alive, d2] - Qstar[alive,
                     d2])
-                  resid.sq.range <- range(resid.sq, na.rm = T)
+                  resid.sq.range <- range(resid.sq, na.rm = TRUE)
                   if (diff(resid.sq.range) > 0.0001) {
                     Q.data[, cur.node] <- (resid.sq - resid.sq.range[1])/diff(resid.sq.range)
                     names(Q.data)[cur.node] <- "Q.kplus1"
@@ -125,7 +125,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
                       family = quasibinomial(), data = Q.data,
                       weights = NULL)
                     Q.newdata <- SetA(data = Q.data, regimes = inputs$regimes[alive,
-                      , d1, drop = F], Anodes = nodes$A, cur.node = cur.node)
+                      , d1, drop = FALSE], Anodes = nodes$A, cur.node = cur.node)
                     SuppressGivenWarnings(Q.resid.sq.pred <- predict(m,
                       newdata = Q.newdata, type = "response"),
                       "prediction from a rank-deficient fit may be misleading")
@@ -133,7 +133,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
                       diff(resid.sq.range) + resid.sq.range[1]
                   }
                   else {
-                    resid.sq.value <- min(resid.sq, na.rm = T)
+                    resid.sq.value <- min(resid.sq, na.rm = TRUE)
                     Sigma[alive, d1, d2] <- resid.sq.value
                   }
                 }
@@ -172,7 +172,7 @@ function(inputs, nodes, combined.summary.measures, regimes.with.positive.weight,
                   data = V.data, weights = NULL)
                 SuppressGivenWarnings(pred.Qstar <- predict(m,
                   type = "response", newdata = V.data) * diff(range(Z.without.sum.meas,
-                  na.rm = T)) + min(Z.without.sum.meas, na.rm = T),
+                  na.rm = TRUE)) + min(Z.without.sum.meas, na.rm = TRUE),
                   "prediction from a rank-deficient fit may be misleading")
                 variance.estimate.sum <- crossprod(combined.summary.measures[,
                   , d1], combined.summary.measures[, , d1] *

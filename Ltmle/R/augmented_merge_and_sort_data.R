@@ -27,11 +27,11 @@ merge_and_sort_data <- function(time_horizon,
     D_0 = match(paste0(name_competing_risk,"_",0),names(wide_data))
     C_0 = match(paste0(name_censoring,"_",0),names(wide_data))
     if (!is.na(Y_0)){
-        if(!is.na(D_0)&!is.na(C_0)){wide_data = wide_data[!(wide_data[[Y_0]]%in%1)&!(wide_data[[D_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)]}
+        if(!is.na(D_0)&&!is.na(C_0)){wide_data = wide_data[!(wide_data[[Y_0]]%in%1)&!(wide_data[[D_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)]}
         if(!is.na(D_0)){wide_data = wide_data[!(wide_data[[Y_0]]%in%1)&!(wide_data[[D_0]]%in%1)]}
         if(!is.na(C_0)){wide_data = wide_data[!(wide_data[[Y_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)]}
     }else{
-        if(!is.na(D_0)&!is.na(C_0)){wide_data = wide_data[!(wide_data[[D_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)]}
+        if(!is.na(D_0)&&!is.na(C_0)){wide_data = wide_data[!(wide_data[[D_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)]}
         if(!is.na(D_0)){wide_data = wide_data[!(wide_data[[D_0]]%in%1)]}
         if(!is.na(C_0)){wide_data = wide_data[!(wide_data[[C_0]]%in%censored_label)]}
     }

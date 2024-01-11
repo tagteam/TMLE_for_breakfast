@@ -11,8 +11,8 @@ cut_Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL,
   if(length(Ynodes)>time_horizon){
     Anodes <- Anodes[1:max(which(grepl(time_horizon-1, Anodes)))]
     if(length(Cnodes)>0){Cnodes <- Cnodes[1:max(which(grepl(time_horizon, Cnodes)))]}
-    if(length(Dnodes)>0&time_horizon>1){Dnodes <- Dnodes[1:max(which(grepl(time_horizon-1, Dnodes)))]}
-    if(length(Dnodes)>0&time_horizon==1){Dnodes <- NULL
+    if(length(Dnodes)>0&&time_horizon>1){Dnodes <- Dnodes[1:max(which(grepl(time_horizon-1, Dnodes)))]}
+    if(length(Dnodes)>0&&time_horizon==1){Dnodes <- NULL
     message("Dnodes have been removed as time horizon is set to 1")}
     if(length(Lnodes)>0){Lnodes <- Lnodes[1:max(which(grepl(time_horizon-1, Lnodes)))]}
     Ynodes <- Ynodes[1:max(which(grepl(time_horizon, Ynodes)))]
@@ -24,8 +24,8 @@ cut_Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL,
     gform <- gform[which(names(gform)%in%c(Anodes, Cnodes))]
     
     if(is.list(abar)){
-      for(x in 1:length(abar)){abar[[x]] <- abar[[x]][1:length(Anodes)]}
-    } else{abar <- abar[1:length(Anodes)]}
+      for(x in seq_along(abar)){abar[[x]] <- abar[[x]][seq_along(Anodes)]}
+    } else{abar <- abar[seq_along(Anodes)]}
     
     info$time_horizon <- time_horizon
   }

@@ -67,7 +67,7 @@ CheckInputs <-
         if (is.character(gform)) {
             if (length(gform) != length(nodes$AC))
                 stop("length(gform) != length(c(Anodes, Cnodes))")
-            for (i in 1:length(gform)) {
+            for (i in seq_along(gform)) {
                 if (LhsVars(gform[i]) != names(data)[nodes$AC[i]]) {
                     stop("The LHS of gform[", i, "] should be the name of the ",
                          i, "th A or C node.")
@@ -100,7 +100,7 @@ CheckInputs <-
                 stop("if gform is numeric, dim[3] should be num.regimes (gform can also be a matrix if variance.method == 'ic')")
             if (!is.null(deterministic.g.function))
                 stop("if gform is numeric, deterministic.g.function must be NULL")
-            if (max(gform, na.rm = T) > 1 || min(gform, na.rm = T) <
+            if (max(gform, na.rm = TRUE) > 1 || min(gform, na.rm = TRUE) <
                 0)
                 stop("if gform is numeric, all values should be probabilities")
             if (!is.null(deterministic.Q.function) && !isTRUE(attr(data,
@@ -116,7 +116,7 @@ CheckInputs <-
             stop("Qform should be a character vector")
         if (length(Qform) != length(nodes$LY))
             stop("length of Qform is not equal to number of D/L/Y nodes")
-        for (i in 1:length(Qform)) {
+        for (i in seq_along(Qform)) {
             if (length(names(Qform[i])) == 0)
                 stop("Each element of Qform must be named. The name must match the name of the corresponding D/L/Y node in data.")
             if (names(Qform[i]) != names(data)[nodes$LY[i]])
@@ -141,7 +141,7 @@ CheckInputs <-
         stop("deterministic.g.function should be a function or NULL")
     if (!all(unlist(data[, nodes$A]) %in% c(0, 1, NA)))
         stop("in data, all Anodes should be binary")
-    if (!all(sapply(data[, c(nodes$A, nodes$Y), drop = F], is.numeric)))
+    if (!all(sapply(data[, c(nodes$A, nodes$Y), drop = FALSE], is.numeric)))
         stop("in data, all Anodes and Ynodes should be numeric (not, for instance, logical)")
     if (any(sapply(data, is.infinite)))
         stop("infinite values are not supported in data")

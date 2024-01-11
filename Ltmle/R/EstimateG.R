@@ -46,7 +46,7 @@ EstimateG <- function (inputs)
             form <- inputs$gform[i]
             deterministic.g.list.origdata <- IsDeterministicG(inputs$data,
                                                               cur.node, inputs$deterministic.g.function, nodes,
-                                                              using.newdata = F)
+                                                              using.newdata = FALSE)
             deterministic.g.origdata <- deterministic.g.list.origdata$is.deterministic
             #
             # subsetting data at the current node

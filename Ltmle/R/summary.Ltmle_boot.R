@@ -62,7 +62,7 @@ summary.Ltmle_boot <- function(object,...,truncate=TRUE,subsample_method="cheap"
 
 ## get cheap subsampling cis and test for multiple values of B
 ## Note: inefficient implementation, but we won't use that many B values anyway
-multiple_summary_cs <- function(object,..., Bs=1:length(object$res_boot)){
+multiple_summary_cs <- function(object,..., Bs=seq_along(object$res_boot)){
   out <- list()
   for (b in Bs){
     temp <- object
@@ -74,7 +74,7 @@ multiple_summary_cs <- function(object,..., Bs=1:length(object$res_boot)){
   out
 }
 
-plot_cs_convergence <- function(object,..., subsample_methods=c("cheap","monte_carlo_se","percentile"),Bs=1:length(object$res_boot)){
+plot_cs_convergence <- function(object,..., subsample_methods=c("cheap","monte_carlo_se","percentile"),Bs=seq_along(object$res_boot)){
   require(ggplot2)
   require(gridExtra)
   require(data.table)

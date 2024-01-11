@@ -27,7 +27,7 @@ run_ltmle <- function(name_outcome,
             bsl_covariates <- copy(baseline_data)
             setkey(bsl_covariates,pnr)
             ## add baseline adjustment to subset analysis
-            if (length(sub_set)>0 & length(sub_set$adj)>0){
+            if (length(sub_set)>0 && length(sub_set$adj)>0){
                 sdat=sub_set$data[,c("pnr",sub_set$adj),with=FALSE]
                 setkey(sdat,pnr)
                 bsl_covariates <- sdat[bsl_covariates]
@@ -53,7 +53,7 @@ run_ltmle <- function(name_outcome,
             } else{
                 markov=""
             }
-            if (censor_others==TRUE&!B_0){
+            if (censor_others==TRUE&&!B_0){
                 suppressWarnings(REG_data <- copy(regimen_data[[REG]])[,B_0:=NULL])
             }else{REG_data=copy(regimen_data[[REG]])}
             setDT(REG_data)
@@ -87,7 +87,7 @@ run_ltmle <- function(name_outcome,
             if (length(SL.cvControl)>0)
                 pl$SL.cvControl <- SL.cvControl
             if (verbose)print(paste0("Fitting Ltmle"," ",REG))
-            tryfit <- try(fit <- do.call(Ltmle,pl))
+            try(fit <- do.call(Ltmle,pl))
             fit$info$estimator <- "tmle"
             if (gcomp) fit$info$estimator <- "gcomp"
             if (iptw.only) fit$info$estimator <- "iptw"
@@ -113,7 +113,7 @@ run_ltmle <- function(name_outcome,
                              SL.cvControl=SL.cvControl)))
             x
         }
-        names(loop)=names(regimen_data)[1:length(loop)]
+        names(loop)=names(regimen_data)[seq_along(loop)]
         loop
     }
     names(result)=paste0("time_horizon_",time_horizon)
@@ -157,7 +157,7 @@ targetedRegisterCourse_run_Ltmle <- function(name_outcome,
             bsl_covariates <- copy(baseline_data)
             data.table::setkey(bsl_covariates,pnr)
             ## add baseline adjustment to subset analysis
-            if (length(sub_set)>0 & length(sub_set$adj)>0){
+            if (length(sub_set)>0 && length(sub_set$adj)>0){
                 sdat=sub_set$data[,c("pnr",sub_set$adj),with=FALSE]
                 data.table::setkey(sdat,pnr)
                 bsl_covariates <- sdat[bsl_covariates]
@@ -225,7 +225,7 @@ targetedRegisterCourse_run_Ltmle <- function(name_outcome,
             if (verbose)print(paste0("Fitting Ltmle"," ",REG))
             if (gcomp) pl$gcomp <- gcomp
             if (iptw.only) pl$iptw.only <- iptw.only
-            tryfit <- try(fit <- do.call(Ltmle,pl))
+            try(fit <- do.call(Ltmle,pl))
             fit$info$estimator <- "tmle"
             if (gcomp) fit$info$estimator <- "gcomp"
             if (iptw.only) fit$info$estimator <- "iptw"
@@ -252,7 +252,7 @@ targetedRegisterCourse_run_Ltmle <- function(name_outcome,
                              SL.cvControl=SL.cvControl)))
             x
         }
-        names(loop)=names(regimen_data)[1:length(loop)]
+        names(loop)=names(regimen_data)[seq_along(loop)]
         loop
     }
     names(result)=paste0("time_horizon_",time_horizon)

@@ -12,22 +12,22 @@ function (inputs)
     small.inputs$data <- small.inputs$data[sample.index, ]
     small.inputs$data <- droplevels(small.inputs$data)
     small.inputs$regimes <- small.inputs$regimes[sample.index, 
-        , , drop = F]
+        , , drop = FALSE]
     small.inputs$observation.weights <- small.inputs$observation.weights[sample.index]
     small.inputs$uncensored <- small.inputs$uncensored[sample.index, 
-        , drop = F]
+        , drop = FALSE]
     small.inputs$intervention.match <- small.inputs$intervention.match[sample.index, 
-        , , drop = F]
+        , , drop = FALSE]
     small.inputs$combined.summary.measures <- small.inputs$combined.summary.measures[sample.index, 
-        , , , drop = F]
+        , , , drop = FALSE]
     if (!is.null(small.inputs$id)) 
         small.inputs$id <- small.inputs$id[sample.index]
     if (is.numeric(inputs$gform)) 
         small.inputs$gform <- small.inputs$gform[sample.index, 
-            , , drop = F]
+            , , drop = FALSE]
     if (length(dim(inputs$msm.weights)) == 3) 
         small.inputs$msm.weights <- small.inputs$msm.weights[sample.index, 
-            , , drop = F]
+            , , drop = FALSE]
     start.time <- Sys.time()
     try.result <- suppressWarnings(try(MainCalcs(small.inputs), 
         silent = TRUE))
