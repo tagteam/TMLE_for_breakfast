@@ -12,9 +12,14 @@ LtmleFromInputs <- function (inputs)
         return(msm.result)
     }
     names(msm.result$beta.iptw) <- names(msm.result$beta) <- NULL
-    iptw <- plogis(msm.result$beta.iptw)
-    iptw.list <- list(iptw.estimate = iptw, iptw.IC = iptw *
-        (1 - iptw) * msm.result$IC.iptw[, 1])
+    if (!is.null(msm.result$beta.iptw)){
+      iptw <- plogis(msm.result$beta.iptw)
+      iptw.list <- list(iptw.estimate = iptw, iptw.IC = iptw *
+                          (1 - iptw) * msm.result$IC.iptw[, 1])
+    }
+    else {
+      iptw <- iptw.list <- NULL
+    }
     r <- list()
     if (inputs$iptw.only) {
         tmle <- NA
