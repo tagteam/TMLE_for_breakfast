@@ -1,5 +1,4 @@
-EstimateG <- function (inputs)
-{
+EstimateG <- function (inputs){
     n <- nrow(inputs$data)
     num.regimes <- dim(inputs$regimes)[3]
     nodes <- inputs$all.nodes
