@@ -19,10 +19,8 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
             deterministic.list.origdata <- IsDeterministic(data,
                                                            cur.node, inputs$deterministic.Q.function, nodes,
                                                            called.from.estimate.g = FALSE, inputs$survivalOutcome)
-            uncensored <- IsUncensored(inputs$uncensored, nodes$C,
-                                       cur.node)
-            intervention.match <- InterventionMatch(inputs$intervention.match,
-                                                    nodes$A, cur.node)
+            uncensored <- IsUncensored(inputs$uncensored,nodes$C,cur.node)
+            intervention.match <- InterventionMatch(inputs$intervention.match,nodes$A,cur.node)
             if (inputs$stratify) {
                 subs <- uncensored & intervention.match & !deterministic.list.origdata$is.deterministic
             }
@@ -56,8 +54,7 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
                 cum.g.used[, ACnode.index, ] <- cum.g.used[, ACnode.index, ] | update.list$cum.g.used
             Qstar <- update.list$Qstar
             Qstar[Q.est$is.deterministic] <- Q.est$deterministic.Q[Q.est$is.deterministic]
-            curIC <- CalcIC(Qstar.kplus1, Qstar, update.list$h.g.ratio,
-                            uncensored, intervention.match, regimes.with.positive.weight)
+            curIC <- CalcIC(Qstar.kplus1, Qstar, update.list$h.g.ratio, uncensored, intervention.match, regimes.with.positive.weight)
             curIC.relative.error <- abs(colSums(curIC))
             curIC.relative.error[mean.summary.measures > 0] <- curIC.relative.error[mean.summary.measures > 0]/mean.summary.measures[mean.summary.measures > 0]
             if (any(curIC.relative.error > 0.001) && !inputs$gcomp) {
@@ -88,6 +85,5 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
     else {
         Qstar <- Qstar.kplus1
     }
-    return(list(IC = IC, Qstar = Qstar, est.var = est.var, fit = list(Q = ReorderFits(fit.Q),
-                                                                      Qstar = fit.Qstar), cum.g.used = cum.g.used))
+    return(list(IC = IC, Qstar = Qstar, est.var = est.var, fit = list(Q = ReorderFits(fit.Q),Qstar = fit.Qstar), cum.g.used = cum.g.used))
 }

@@ -228,7 +228,7 @@ Estimate <- function(inputs,
         }
     }
     if (inputs$verbose){ message("Estimate: framing formula ",form," into Y and X...")}
-    ## if(length(grep("Censored_2",form)>0))    browser(skipCalls=1L)
+    ## if(length(grep("Censored_1",form)>0))    browser(skipCalls=1L)
     mod.frame <- model.frame(f, data = data.with.Qstar, drop.unused.levels = TRUE,
                              na.action = na.pass)
     Y <- mod.frame[[1]]

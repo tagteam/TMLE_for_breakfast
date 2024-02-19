@@ -14,18 +14,18 @@ LtmleFromInputs <- function (inputs)
     names(msm.result$beta.iptw) <- names(msm.result$beta) <- NULL
     iptw <- plogis(msm.result$beta.iptw)
     iptw.list <- list(iptw.estimate = iptw, iptw.IC = iptw *
-        (1 - iptw) * msm.result$IC.iptw[, 1])
+                                                (1 - iptw) * msm.result$IC.iptw[, 1])
     r <- list()
     if (inputs$iptw.only) {
         tmle <- NA
         tmle.IC <- rep(NA, nrow(inputs$data))
     }
     else {
-        tmle <- plogis(msm.result$beta)
-        tmle.IC <- msm.result$IC[, 1]
+        tmle <- lapply(msm.result$beta,plogis)
+        tmle.IC <- lapply(msm.result$IC,function(x){x[, 1]})
     }
     r$estimates <- c(tmle = tmle, iptw = iptw.list$iptw.estimate)
-    r$IC <- list(tmle = tmle.IC * tmle * (1 - tmle), iptw = iptw.list$iptw.IC)
+    r$IC <- lapply(seq_along(tmle),function(j){list(tmle = tmle.IC[[j]] * tmle[[j]] * (1 - tmle[[j]]), iptw = iptw.list$iptw.IC)})
     if (!is.null(msm.result$variance.estimate)) {
         stopifnot(length(msm.result$variance.estimate) == 1)
         r$variance.estimate <- msm.result$variance.estimate[1] *
@@ -36,7 +36,7 @@ LtmleFromInputs <- function (inputs)
     }
     r$cum.g <- AsMatrix(msm.result$cum.g[, , 1])
     r$cum.g.unbounded <- AsMatrix(msm.result$cum.g.unbounded[,
-        , 1])
+                                                           , 1])
     r$cum.g.used <- AsMatrix(msm.result$cum.g.used[, , 1])
     r$gcomp <- inputs$gcomp
     r$fit <- msm.result$fit

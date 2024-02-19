@@ -48,8 +48,7 @@ UpdateQ <- function(Qstar.kplus1,
         ncol = ncol(stacked.summary.measures)) * indicator
     dim(h.g.ratio) <- c(n, num.regimes, ncol(h.g.ratio))
     for (i in 1:num.regimes) {
-        h.g.ratio[, i, ] <- h.g.ratio[, i, ] * msm.weights[, 
-            i]
+        h.g.ratio[, i, ] <- h.g.ratio[, i, ] * msm.weights[, i]
         weight.zero.index <- msm.weights[, i] == 0
         h.g.ratio[weight.zero.index, i, ] <- 0
     }

@@ -1,6 +1,4 @@
-GetMSMInputsForLtmle <-
-function (data, abar, rule, gform) 
-{
+GetMSMInputsForLtmle <- function (data, abar, rule, gform, final.Ynodes) {
     if ((!missing(abar) && is.list(abar)) || is.list(rule)) {
         if (is.list(rule)) {
             if (length(rule) != 2) 
@@ -24,15 +22,17 @@ function (data, abar, rule, gform)
         colnames(summary.measures) <- "A"
         working.msm <- "Y ~ A"
         msm.weights <- matrix(1, nrow = 2, ncol = 1)
-    }
-    else {
+    } else {
         regimes <- RegimesFromAbar(data, abar, rule)
         working.msm <- "Y ~ 1"
         msm.weights <- matrix(1, nrow = 1, ncol = 1)
-        summary.measures <- array(dim = c(1, 0, 1))
+        # TAG intervened: set 1 when length(final.Ynodes)=0 
+        summary.measures <- array(dim = c(1, 0, max(1,length(final.Ynodes))))
+        ## summary.measures <- array(dim = c(1, 0, length(final.Ynodes)))
+        ## summary.measures <- array(dim = c(1, 0, 1))
     }
     msm.inputs <- list(regimes = regimes, working.msm = working.msm, 
-        summary.measures = summary.measures, gform = gform, final.Ynodes = NULL, 
-        msm.weights = msm.weights)
+                       summary.measures = summary.measures, gform = gform, final.Ynodes = final.Ynodes, 
+                       msm.weights = msm.weights)
     return(msm.inputs)
 }

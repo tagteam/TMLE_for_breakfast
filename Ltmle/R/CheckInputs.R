@@ -208,8 +208,7 @@ CheckInputs <-
         }
     }
     num.final.Ynodes <- length(final.Ynodes)
-    if ((length(dim(summary.measures)) != 3) || !is.equal(dim(summary.measures)[c(1,
-                                                                                  3)], c(num.regimes, num.final.Ynodes)))
+    if ((length(dim(summary.measures)) != 3) || !is.equal(dim(summary.measures)[c(1, 3)], c(num.regimes, num.final.Ynodes)))
         stop("summary.measures should be an array with dimensions num.regimes x num.summary.measures x num.final.Ynodes")
     if (class(working.msm) != "character")
         stop("class(working.msm) must be 'character'")
@@ -223,7 +222,7 @@ CheckInputs <-
           is.equal(dim(msm.weights), c(nrow(data), num.regimes,
                                        num.final.Ynodes)) || is.equal(dim(msm.weights),
                                                                       c(num.regimes, num.final.Ynodes)))) {
-        stop("msm.weights must be NULL, 'empirical', or an array with dim(msm.weights) = c(n, num.regimes, num.final.Ynodes) or c(num.regimes, num.final.Ynodes)")
+        warning("msm.weights must be NULL, 'empirical', or an array with dim(msm.weights) = c(n, num.regimes, num.final.Ynodes) or c(num.regimes, num.final.Ynodes)")
     }
     if (!(is.null(id) || ((is.factor(id) || is.vector(id)) &&
                           length(id) == nrow(data))))

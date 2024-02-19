@@ -74,6 +74,8 @@ get_ltmle_data <- function(work_data, time_horizon,
       if(length(name_censoring)>0){
           for(k in C_nodes_position){
               later_nodes=(k+1):NCOL(work_data)
+              ## print(k)
+              ## print(names(work_data)[later_nodes])
               if(any(has_censored <- (work_data[[k]]%in%"censored"))){
                   for(l in later_nodes) {set(work_data,j=l,i=which(has_censored),value=NA)}
               }
@@ -82,10 +84,12 @@ get_ltmle_data <- function(work_data, time_horizon,
   }else{
       # 
       # time_horizon = 1 we set the outcome to NA in case of censored
+      #                  and same for competing risks
       #
       if(length(name_censoring)>0){
           for(k in C_nodes_position){
               later_nodes=(k+1):NCOL(work_data)
+              ## print(names(work_data)[later_nodes])
               if(any(has_censored <- (work_data[[k]]%in%"censored"))){
                   for(l in later_nodes) {set(work_data,j=l,i=which(has_censored),value=NA)}
               }

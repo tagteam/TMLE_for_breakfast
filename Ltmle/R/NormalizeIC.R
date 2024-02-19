@@ -12,11 +12,9 @@ function (IC, combined.summary.measures, m.beta, msm.weights,
     C <- array(0, dim = c(num.betas, num.betas))
     for (j in 1:num.final.Ynodes) {
         for (i in 1:num.regimes) {
-            tempC <- crossprod(combined.summary.measures[, , 
-                i, j] * g.ratio[, i, j], combined.summary.measures[, 
-                , i, j] * g.ratio[, i, j] * msm.weights[, i, 
-                j] * m.beta[, i, j] * (1 - m.beta[, i, j]) * 
-                observation.weights)
+            # hack: iterative regressions for multiple outcomes msm.weights[, i, 1] instead of msm.weights[, i, j]
+            tempC <- crossprod(combined.summary.measures[, , i, j] * g.ratio[, i, j],
+                               combined.summary.measures[, , i, j] * g.ratio[, i, j] * msm.weights[, i, 1] * m.beta[, i, j] * (1 - m.beta[, i, j]) * observation.weights)
             if (anyNA(tempC)) 
                 stop("NA in tempC")
             C <- C + tempC

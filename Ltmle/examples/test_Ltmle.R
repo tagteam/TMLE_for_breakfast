@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Aug  1 2023 (14:50) 
+## Last-Updated: Feb  6 2024 (07:11) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 4
+##     Update #: 7
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -17,6 +17,7 @@
 library(lava)
 library(foreach)
 library(data.table)
+library(targets)
 # loading Ltmle functions with augmentation
 # -------------------------------------------
 try(setwd("~/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
@@ -27,8 +28,8 @@ ff <- sapply(list.files(path = "./augmentation/",pattern = "R$",full.names = TRU
 # ff <- sapply(list.files(path = "~/registerTargets/registerTargets/exercises/Ltmle/",pattern = "R$",full.names = TRUE),source)
 
 ## loading simulation function (including prepared coefficients from Danish register data)
-source("~/TMLE_for_breakfast/Ltmle/examples/get_lava_model.R")
-
+try(source("~/TMLE_for_breakfast/Ltmle/examples/get_lava_model.R"),silent = TRUE)
+try(source("~/research/Methods/TMLE_for_breakfast/Ltmle/examples/get_lava_model.R"),silent = TRUE)
 # Create object from which we can simulate data
 # -----------------------------------------------
 time_horizon = 6
@@ -39,17 +40,7 @@ m=get_lava_model(time_horizon=time_horizon)
 # ----------------------------------------------------------
 set.seed(4)
 sim_data <- as.data.table(sim(m, 40000))
-## add person number
-sim_data[,pnr:=1:.N]
-## convert integer variables to numeric 
-isINT=sapply(names(sim_data),function(n)is.integer(sim_data[[n]]))
-sim_data[,(names(sim_data)[isINT]):=lapply(.SD, as.numeric), .SDcols = names(sim_data)[isINT]]
-## extract baseline covariates
-sim_baseline_covariates <- sim_data[,c("sexMale","agegroups","education","income","diabetes_duration","pnr"),with = FALSE]
-## extract time varying covariates
-sim_time_covariates <- sim_data[,grep(paste0(c("pnr","heart.failure","renal.disease","chronic.pulmonary.disease","any.malignancy","ischemic.heart.disease","myocardial.infarction","hypertension","stroke","bb","ccb","rasi","thiazid","loop","mra","copd_med"),collapse="|"),names(sim_data)), with = FALSE]
-## extract outcome data
-sim_outcome <- sim_data[,grep("pnr|dementia_|Censored|Dead", names(sim_data)), with = FALSE]
+
 ## fix outcome after first occurrence
 # for (i in 1:10){
 #     for (j in ((i+1):10)){

@@ -8,25 +8,24 @@ GetMsmWeights <- function (inputs) {
         for (j in 1:num.final.Ynodes) {
             final.Ynode <- inputs$final.Ynodes[j]
             regimes.subset <- inputs$regimes[, inputs$all.nodes$A < 
-                final.Ynode, , drop = FALSE]
+                                               final.Ynode, , drop = FALSE]
             if (ncol(regimes.subset) > 0) {
                 is.duplicate <- duplicated(regimes.subset, MARGIN = 3)
             }
             else {
                 is.duplicate <- c(FALSE, rep(TRUE, num.regimes - 
-                  1))
+                                                   1))
             }
             uncensored <- IsUncensored(inputs$uncensored, inputs$all.nodes$C, 
-                cur.node = final.Ynode)
+                                       cur.node = final.Ynode)
             intervention.match <- InterventionMatch(inputs$intervention.match, 
-                inputs$all.nodes$A, cur.node = final.Ynode)
+                                                    inputs$all.nodes$A, cur.node = final.Ynode)
             for (i in 1:num.regimes) {
                 if (is.duplicate[i]) {
-                  msm.weights[i, j] <- 0
+                    msm.weights[i, j] <- 0
                 }
                 else {
-                  msm.weights[i, j] <- sum(uncensored & intervention.match[, 
-                    i])/nrow(inputs$data)
+                    msm.weights[i, j] <- sum(uncensored & intervention.match[, i])/nrow(inputs$data)
                 }
             }
         }
@@ -37,9 +36,13 @@ GetMsmWeights <- function (inputs) {
     else {
         msm.weights <- inputs$msm.weights
     }
-    if (is.equal(dim(msm.weights), c(num.regimes, num.final.Ynodes))) {
-        msm.weights <- array(rep(msm.weights, each = n), dim = c(n, 
-            num.regimes, num.final.Ynodes))
+    # hack: iterative regressions for multiple outcomes
+    if ((num.final.Ynodes>1)){
+        msm.weights <- array(rep(msm.weights, each = n), dim = c(n,num.regimes,1))        
+    } else{
+        if (is.equal(dim(msm.weights), c(num.regimes, num.final.Ynodes))) {
+            msm.weights <- array(rep(msm.weights, each = n), dim = c(n,num.regimes,num.final.Ynodes))
+        }
     }
     if (anyNA(msm.weights) || any(msm.weights < 0)) 
         stop("all msm.weights must be >= 0 and not NA")

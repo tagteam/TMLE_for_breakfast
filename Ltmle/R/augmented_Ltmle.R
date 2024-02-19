@@ -97,6 +97,7 @@ Ltmle <- function(data,
                   Dnodes = NULL,
                   Lnodes = NULL,
                   Ynodes,
+                  final.Ynodes = NULL,
                   survivalOutcome = NULL,
                   Qform = NULL,
                   gform = NULL,
@@ -131,64 +132,49 @@ Ltmle <- function(data,
     if(length(Dnodes)>0){
         name_competing_risk = gsub("_[^_]*$", "", Dnodes[[1]])
         survivalOutcome=TRUE
-        if (length(deterministic.Q.function)>0){
-            stop("Cannot both specify deterministic.Q.function and Dnodes.")
-        }
-        deterministic.Q.function <- function(data, current.node, nodes, called.from.estimate.g){
-            death.index <- grep(paste0(name_competing_risk, "_"),names(data))
-            if(length(death.index)==0)stop("No death/terminal event node found")
-            hist.death.index <- death.index[death.index < current.node]
-            if(length(hist.death.index)==0)
-                return(NULL)
-            else{
-                is.deterministic <- Reduce("+",lapply(data[,hist.death.index,drop=FALSE],
-                                                      function(dd){x=dd;x[is.na(dd)] <- 0;x}))>=1
-                # should be unnecessary to exclude those who readily
-                # have a missing value for death, but it does not hurt either
-                is.deterministic[is.na(is.deterministic)] <- FALSE
-                list(is.deterministic=is.deterministic, Q.value=0)
-            }
-        }
-    }else{
-        survivalOutcome <- TRUE
     }
-    result <- foreach(time = time_horizon)%do%{
-        xcut <- cut_Ltmle(data = data,
-                          Anodes = Anodes,
-                          Cnodes = Cnodes,
-                          Dnodes = Dnodes,
-                          Lnodes = Lnodes,
-                          Ynodes = Ynodes,
-                          survivalOutcome = survivalOutcome,
-                          Qform = Qform,
-                          gform = gform,
-                          abar = abar,
-                          time_horizon = time,
-                          rule = rule,
-                          gbounds = gbounds,
-                          Yrange = Yrange,
-                          deterministic.g.function = deterministic.g.function,
-                          deterministic.Q.function = deterministic.Q.function,
-                          stratify = stratify,
-                          SL.library = SL.library,
-                          SL.cvControl = SL.cvControl,
-                          estimate.time = estimate.time, 
-                          gcomp = gcomp,
-                          iptw.only = iptw.only,
-                          variance.method = variance.method, 
-                          observation.weights = observation.weights,
-                          id = id,
-                          info = info,
-                          reduce = reduce,
-                          verbose = verbose,
-                          ...)
-        do.call(Ltmle_working_horse, xcut)
-    }
-    if(length(time_horizon)==1){
-        result <- result[[1]]
-    } else{
-        names(result) <- paste0("Time horizon ", time_horizon)
-    }
+    if (length(final.Ynodes) == 0)
+        final.Ynodes = sapply(time_horizon,function(t)grep(paste0("_",t),Ynodes,value = TRUE))
+    xcut <- cut_Ltmle(data = data,
+                      Anodes = Anodes,
+                      Cnodes = Cnodes,
+                      Dnodes = Dnodes,
+                      Lnodes = Lnodes,
+                      Ynodes = Ynodes,
+                      final.Ynodes = final.Ynodes,
+                      survivalOutcome = survivalOutcome,
+                      Qform = Qform,
+                      gform = gform,
+                      abar = abar,
+                      time_horizon = max(time_horizon),
+                      rule = rule,
+                      gbounds = gbounds,
+                      Yrange = Yrange,
+                      deterministic.g.function = deterministic.g.function,
+                      deterministic.Q.function = deterministic.Q.function,
+                      stratify = stratify,
+                      SL.library = SL.library,
+                      SL.cvControl = SL.cvControl,
+                      estimate.time = estimate.time,
+                      gcomp = gcomp,
+                      iptw.only = iptw.only,
+                      variance.method = variance.method,
+                      observation.weights = observation.weights,
+                      id = id,
+                      info = info,
+                      reduce = reduce,
+                      verbose = verbose,
+                      ...)
+    result = do.call(Ltmle_working_horse, xcut)
+    ## result <- foreach(time = time_horizon)%do%{
+    ## xcut <- cut_Ltmle(data = data,Anodes = Anodes,Cnodes = Cnodes,Dnodes = Dnodes,Lnodes = Lnodes,Ynodes = Ynodes,final.Ynodes = final.Ynodes,survivalOutcome = survivalOutcome,Qform = Qform,gform = gform,abar = abar,time_horizon = time,rule = rule,gbounds = gbounds,Yrange = Yrange,deterministic.g.function = deterministic.g.function,deterministic.Q.function = deterministic.Q.function,stratify = stratify,SL.library = SL.library,SL.cvControl = SL.cvControl,estimate.time = estimate.time,gcomp = gcomp,iptw.only = iptw.only,variance.method = variance.method,observation.weights = observation.weights,id = id,info = info,reduce = reduce,verbose = verbose,...)
+    ## do.call(Ltmle_working_horse, xcut)
+    ## }
+    ## if(length(time_horizon)==1){
+    ## result <- result[[1]]
+    ## } else{
+    ## names(result) <- paste0("Time horizon ", time_horizon)
+    ## }
     result$sample_size <- NROW(data)    
     class(result) <- "Ltmle"
     return(result)

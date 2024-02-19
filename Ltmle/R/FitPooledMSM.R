@@ -1,6 +1,4 @@
-FitPooledMSM <-
-function (working.msm, Qstar, combined.summary.measures, msm.weights) 
-{
+FitPooledMSM <- function (working.msm, Qstar, combined.summary.measures, msm.weights) {
     n <- dim(Qstar)[1]
     num.regimes <- dim(Qstar)[2]
     num.final.Ynodes <- dim(Qstar)[3]
