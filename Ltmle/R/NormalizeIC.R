@@ -1,7 +1,9 @@
-NormalizeIC <-
-function (IC, combined.summary.measures, m.beta, msm.weights, 
-    observation.weights, g.ratio) 
-{
+NormalizeIC <- function(IC,
+                        combined.summary.measures,
+                        m.beta,
+                        msm.weights, 
+                        observation.weights,
+                        g.ratio) {
     n <- dim(combined.summary.measures)[1]
     num.betas <- dim(combined.summary.measures)[2]
     num.regimes <- dim(combined.summary.measures)[3]

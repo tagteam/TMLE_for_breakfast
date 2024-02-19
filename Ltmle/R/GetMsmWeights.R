@@ -7,14 +7,12 @@ GetMsmWeights <- function (inputs) {
         msm.weights <- matrix(nrow = num.regimes, ncol = num.final.Ynodes)
         for (j in 1:num.final.Ynodes) {
             final.Ynode <- inputs$final.Ynodes[j]
-            regimes.subset <- inputs$regimes[, inputs$all.nodes$A < 
-                                               final.Ynode, , drop = FALSE]
+            regimes.subset <- inputs$regimes[, inputs$all.nodes$A < final.Ynode, , drop = FALSE]
             if (ncol(regimes.subset) > 0) {
                 is.duplicate <- duplicated(regimes.subset, MARGIN = 3)
             }
             else {
-                is.duplicate <- c(FALSE, rep(TRUE, num.regimes - 
-                                                   1))
+                is.duplicate <- c(FALSE, rep(TRUE, num.regimes - 1))
             }
             uncensored <- IsUncensored(inputs$uncensored, inputs$all.nodes$C, 
                                        cur.node = final.Ynode)

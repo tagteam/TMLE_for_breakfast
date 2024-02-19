@@ -1,23 +1,24 @@
-FinalizeIC <-
-function (IC, combined.summary.measures, Qstar, m.beta, msm.weights, 
-    observation.weights, id) 
-{
+FinalizeIC <- function(IC,
+                       combined.summary.measures,
+                       Qstar,
+                       m.beta,
+                       msm.weights,
+                       observation.weights,
+                       id){
     num.betas <- ncol(IC)
     n <- nrow(Qstar)
     num.regimes <- ncol(Qstar)
     num.final.Ynodes <- dim(Qstar)[3]
     stopifnot(num.betas == ncol(combined.summary.measures))
     finalIC <- matrix(0, nrow = n, ncol = num.betas)
-    for (j in 1:num.final.Ynodes) {
-        for (i in 1:num.regimes) {
-            # hack: iterative regressions for multiple outcomes msm.weights[, i, 1] instead of msm.weights[, i, j]
-            if (any(msm.weights[, i, 1] > 0)) {
-                m1 <- matrix(Qstar[, i, j] - m.beta[, i, j],ncol = 1)
-                for (k in 1:num.betas) {
-                    m2 <- combined.summary.measures[, k, i, j]
-                    # hack: iterative regressions for multiple outcomes msm.weights[, i, 1] instead of msm.weights[, i, j]
-                  finalIC[, k] <- finalIC[, k] + msm.weights[, i, 1] * observation.weights * (m1 * m2)
-                }
+    for (i in 1:num.regimes) {
+        # hack: iterative regressions for multiple outcomes msm.weights[, i, 1] instead of msm.weights[, i, j]
+        if (any(msm.weights[, i, 1] > 0)) {
+            m1 <- matrix(Qstar[, i, 1] - m.beta[, i, 1],ncol = 1)
+            for (k in 1:num.betas) {
+                m2 <- combined.summary.measures[, k, i, 1]
+                # hack: iterative regressions for multiple outcomes msm.weights[, i, 1] instead of msm.weights[, i, j]
+                finalIC[, k] <- finalIC[, k] + msm.weights[, i, 1] * observation.weights * (m1 * m2)
             }
         }
     }

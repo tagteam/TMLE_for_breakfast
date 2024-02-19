@@ -14,27 +14,15 @@ ConvertToMainTerms <- function (data, msm, summary.measures, nodes)  {
     n <- nrow(data)
     for (j in 1:num.final.Ynodes) {
         for (i in 1:num.regimes) {
-            combined.summary.measures <- model.matrix(as.formula(msm),
-                                                      data.frame(Y = 1,
-                                                                 baseline.data,
-                                                                 matrix(summary.measures[i, , j],
-                                                                        nrow = n,
-                                                                        ncol = num.summary.measures,
-                                                                        byrow = TRUE,
-                                                                        dimnames = list(NULL, colnames(summary.measures)))))
+            combined.summary.measures <- model.matrix(as.formula(msm),data.frame(Y = 1,baseline.data,matrix(summary.measures[i, , j],nrow = n,ncol = num.summary.measures,byrow = TRUE,dimnames = list(NULL, colnames(summary.measures)))))
             if (i == 1 && j == 1) {
-                main.terms.summary.measures <- array(dim = c(n, 
-                                                             ncol(combined.summary.measures), num.regimes, 
-                                                             num.final.Ynodes))
+                main.terms.summary.measures <- array(dim = c(n,ncol(combined.summary.measures), num.regimes,num.final.Ynodes))
                 beta.names <- colnames(combined.summary.measures)
             }
             main.terms.summary.measures[, , i, j] <- combined.summary.measures
         }
     }
-    colnames(main.terms.summary.measures) <- paste("S", seq_len(ncol(main.terms.summary.measures)), 
-                                                   sep = "")
-    main.terms.msm <- paste("Y ~ -1 +", paste(colnames(main.terms.summary.measures), 
-                                              collapse = " + "))
-    return(list(msm = main.terms.msm, summary.measures = main.terms.summary.measures, 
-                beta.names = beta.names, baseline.column.names = baseline.column.names))
+    colnames(main.terms.summary.measures) <- paste("S",seq_len(ncol(main.terms.summary.measures)),sep = "")
+    main.terms.msm <- paste("Y ~ -1 +", paste(colnames(main.terms.summary.measures),collapse = " + "))
+    return(list(msm = main.terms.msm,summary.measures = main.terms.summary.measures,beta.names = beta.names,baseline.column.names = baseline.column.names))
 }

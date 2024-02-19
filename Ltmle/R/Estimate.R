@@ -337,7 +337,7 @@ Estimate <- function(inputs,
             if (use.glm) {
                 if (class(m)[1] %in% c("speedglm", "glm")) {
                     fit[[regime.index]] <- summary(m)$coefficients
-                        ## list(logistic_regression = summary(m)$coefficients,predicted=table(cut(predicted.values,include.lowest=TRUE,breaks=c(1,.75,0.5,.25,10^{-(1:8)}))))
+                    ## list(logistic_regression = summary(m)$coefficients,predicted=table(cut(predicted.values,include.lowest=TRUE,breaks=c(1,.75,0.5,.25,10^{-(1:8)}))))
                 }
                 else {
                     stopifnot(class(m)[1] %in% c("no.Y.variation",
@@ -347,7 +347,11 @@ Estimate <- function(inputs,
             }
             else {
                 if (inherits(m,"ltmle.glmnet")){
-                    fit[[regime.index]] <- m$selected_beta
+                    ## fit[[regime.index]] <- m$selected_beta
+                    fit[[regime.index]] <- list(beta=m$selected_beta,
+                                                predicted=table(cut(predicted.values,
+                                                                    include.lowest=TRUE,
+                                                                    breaks=rev(c(Inf,2,1.5,1,.75,0.5,.25,10^{-(1:8)},0,-0.5,-1,-Inf)))))
                     ## list(beta=m$selected_beta,predicted=table(cut(predicted.values,include.lowest=TRUE,breaks=c(1,.75,0.5,.25,10^{-(1:8)}))))
                 } else{
                     capture.output(print.m <- print(m))

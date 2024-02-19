@@ -218,6 +218,7 @@ CheckInputs <-
         nrow(data) || anyNA(observation.weights) || any(observation.weights <
                                                         0) || max(observation.weights) == 0)
         stop("observation.weights must be NULL or a vector of length nrow(data) with no NAs, no negative values, and at least one positive value")
+    # comment out the next check if this fails
     if (!(is.null(msm.weights) || is.equal(msm.weights, "empirical") ||
           is.equal(dim(msm.weights), c(nrow(data), num.regimes,
                                        num.final.Ynodes)) || is.equal(dim(msm.weights),

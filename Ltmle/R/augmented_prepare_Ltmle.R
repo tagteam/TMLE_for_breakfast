@@ -40,19 +40,21 @@ prepare_Ltmle <- function(regimen_data,
                                       name_censoring = name_censoring,
                                       censored_label = censored_label,
                                       name_competing_risk = name_competing_risk)
-  ## Subsetting the data; This returns data in correct order according to time and without constant nodes
-  subset_data = get_subset_data(work_data = merged_data$data,
-                                time_horizon = time_horizon,
-                                subset_id = subset_id,
-                                subset_label = subset_label,
-                                name_baseline_covariates = merged_data$name_baseline_covariates)
+    ## Subsetting the data; This returns data in correct order according to time and without constant nodes
+    ## remove also variables which are constant (same value for all subjects) 
+    subset_data = get_subset_data(work_data = merged_data$data,
+                                  time_horizon = time_horizon,
+                                  subset_id = subset_id,
+                                  subset_label = subset_label,
+                                  name_baseline_covariates = merged_data$name_baseline_covariates)
   
   ## Change data to fit into ltmle constraints; Censored should be factor with levels "uncensored" and "censored",
-    ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
+  ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
   
   ltmle_data = get_ltmle_data(subset_data$data,
                               time_horizon = time_horizon,
                               name_outcome = name_outcome,
+                              name_baseline_covariates = subset_data$name_baseline_covariates,
                               name_time_covariates = merged_data$name_time_covariates,
                               name_regimen = unlist(name_regimen),
                               name_censoring = name_censoring,
@@ -95,11 +97,10 @@ prepare_Ltmle <- function(regimen_data,
        time_horizon = time_horizon,
        info = list(outcome = name_outcome,
                    regimen = unlist(name_regimen),
-                   abar = abar,
                    baseline = subset_data$name_baseline_covariates,
                    timevar = merged_data$name_time_covariates,
                    subset_label = subset_data$subset_label,
-                   time_horizon = max(time_horizon),
+                   time_horizon = time_horizon,
                    time_interval = time_interval,
                    event_counts= ltmle_data$event_counts,
                    constant_variables= subset_data$constant_variables,
