@@ -69,7 +69,7 @@ Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL, Yno
                            deterministic.Q.function = deterministic.Q.function,
                            variance.method = variance.method, observation.weights = observation.weights,
                            id = id, verbose = verbose)
-    result <- abgespect_LtmleFromInputs(inputs)
+    result <- abgespeckt_LtmleFromInputs(inputs)
     result <- c(result,match.call()$info)
     if (reduce){
         result$cum.g <- result$cum.g.used <- result$cum.g.unbounded <- NULL

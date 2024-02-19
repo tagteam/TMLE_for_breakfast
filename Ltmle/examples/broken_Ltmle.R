@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Feb 15 2024 (08:38) 
+## Last-Updated: Feb 19 2024 (15:08) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 14
+##     Update #: 15
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -62,22 +62,10 @@ x=prepare_Ltmle(name_outcome="dementia",name_regimen="GLP1RA",name_censoring = "
 f<-do.call("Ltmle",x)
 
 # iptw option is broken
-x=prepare_Ltmle(name_outcome="dementia",
-                name_regimen="GLP1RA",
-                name_censoring = "Censored",
-                censored_label = "0",
-                name_competing_risk = NULL,
-                time_horizon=4,
-                outcome_data=sim_outcome,
-                regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
-                baseline_data=sim_baseline_covariates,
-                timevar_data=sim_time_covariates,
-                SL.library="glm",
-                iptw.only=FALSE,
-                abar = rep(1,4),
-                reduce = FALSE,
-                verbose=TRUE)
+x=prepare_Ltmle(name_outcome="dementia",name_regimen="GLP1RA",name_censoring = "Censored",censored_label = "0",name_competing_risk = NULL,time_horizon=4,outcome_data=sim_outcome,regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],baseline_data=sim_baseline_covariates,timevar_data=sim_time_covariates,SL.library="glm",iptw.only=FALSE,abar = rep(1,4),reduce = FALSE,verbose=TRUE)
 f<-do.call("Ltmle",x) #f$cum.g has some NAs, yet we get causal effect estimate when removing the option iptw.only=TRUE
+X=prepare_Ltmle(name_outcome="dementia",name_regimen="GLP1RA",name_censoring = "Censored",censored_label = "0",name_competing_risk = NULL,time_horizon=1:4,outcome_data=sim_outcome,regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],baseline_data=sim_baseline_covariates,timevar_data=sim_time_covariates,SL.library="glm",iptw.only=FALSE,abar = rep(1,4),reduce = FALSE,verbose=TRUE)
+Fit<-do.call("Ltmle",X) #f$cum.g has some NAs, yet we get causal effect estimate when removing the option iptw.only=TRUE
 # ANSWER: there are NAs but they are apparently not used for the tmle update step:
 lapply(1:8,function(g){f$cum.g[f$cum.g.used[,g],g]})
 summary(f)
