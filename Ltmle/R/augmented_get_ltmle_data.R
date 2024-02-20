@@ -22,6 +22,9 @@ get_ltmle_data <- function(work_data, time_horizon,
   Y_nodes = unlist(lapply(time_grid[-1], function(time){paste0(name_outcome, "_", time)}))
   D_nodes = unlist(lapply(time_grid[-c(1,K)], function(time){paste0(name_competing_risk, "_", time)}))
   C_nodes = unlist(lapply(time_grid[-1], function(time){paste0(name_censoring, "_", time)}))
+  # if A,B then B_0 is obsolete because A0=1-B0
+  if (length(name_regimen) == 2)
+      A_nodes <- A_nodes[A_nodes != paste0(name_regimen[[2]],"_0")]
   A_nodes_position = match(A_nodes, names(work_data))
   Y_nodes_position = match(Y_nodes, names(work_data))
   D_nodes_position = match(D_nodes, names(work_data))

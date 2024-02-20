@@ -36,8 +36,8 @@ summary.Ltmle <- function(object,estimator,...){
                                   M=object$bootstrap_sample_size,
                                   N=object$sample_size)
                 risk[time_horizon==H,boot_se:=cheap_ci$se]
-                risk[time_horizon==H,cheap_lower:=cheap_ci$lower]
-                risk[time_horizon==H,cheap_upper:=cheap_ci$upper]
+                risk[time_horizon==H,cheap_lower:=pmax(0,cheap_ci$lower)]
+                risk[time_horizon==H,cheap_upper:=pmin(1,cheap_ci$upper)]
                 risk[time_horizon==H,cheap_pvalue:=cheap_ci$pvalue]
             }
         }
