@@ -6,7 +6,8 @@ get_rhs <- function(timepoint, work_data,
   form = NULL
   
   if(length(setdiff(name_baseline_covariates,constant_variables))>0){
-    form = paste(setdiff(name_baseline_covariates,constant_variables), collapse = " + ")}
+    form = paste(setdiff(name_baseline_covariates,constant_variables), collapse = " + ")
+  }
   
   # name_time_covariates = paste0(NULL,if(timepoint!=0){name_time_covariates}else{}) # Include if A_0 ~ V and C_1 ~ V only
   
@@ -26,6 +27,9 @@ get_rhs <- function(timepoint, work_data,
       form = paste0(form, ifelse(length(form)>0," + ", ""),
                     paste(intersect(setdiff(sapply(name_regimen, function(nt) {paste0(nt, "_", 0:max(0, (timepoint - 1)))}),
                                             constant_variables), names(work_data)), collapse = " + "))
+  }
+  if (is.null(form)){
+    form = "1"
   }
   form[]
 }

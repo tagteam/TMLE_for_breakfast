@@ -36,8 +36,9 @@ merge_and_sort_data <- function(time_horizon,
         if(!is.na(C_0)){wide_data = wide_data[!(wide_data[[C_0]]%in%censored_label)]}
     }
     # adding the baseline covariates
-  
-    wide_data=baseline_data[wide_data,on = "pnr"]
+    if (!is.null(baseline_data))
+      wide_data=baseline_data[wide_data,on = "pnr"]
+
     # subset and sort data
     work_data <- wide_data
     # add time covariates
