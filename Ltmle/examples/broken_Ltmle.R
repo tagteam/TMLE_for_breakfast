@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Feb 19 2024 (15:08) 
+## Last-Updated: Feb 20 2024 (15:12) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 15
+##     Update #: 16
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -60,6 +60,7 @@ sim_outcome <- sim_data[,grep("pnr|dementia_|Censored|Dead", names(sim_data)), w
 # ANSWER: not anymore!
 x=prepare_Ltmle(name_outcome="dementia",name_regimen="GLP1RA",name_censoring = "Censored",censored_label = "0",name_competing_risk = "Dead",time_horizon=2,outcome_data=sim_outcome,regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],baseline_data=sim_baseline_covariates,timevar_data=sim_time_covariates,SL.library="glm",abar = c(1,1),verbose=TRUE)
 f<-do.call("Ltmle",x)
+summary(f)
 
 # iptw option is broken
 x=prepare_Ltmle(name_outcome="dementia",name_regimen="GLP1RA",name_censoring = "Censored",censored_label = "0",name_competing_risk = NULL,time_horizon=4,outcome_data=sim_outcome,regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],baseline_data=sim_baseline_covariates,timevar_data=sim_time_covariates,SL.library="glm",iptw.only=FALSE,abar = rep(1,4),reduce = FALSE,verbose=TRUE)
