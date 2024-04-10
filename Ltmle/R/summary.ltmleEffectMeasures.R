@@ -1,7 +1,4 @@
-summary.ltmleEffectMeasures <-
-function (object, estimator = ifelse(object$gcomp, "gcomp", "tmle"), 
-    ...) 
-{
+summary.ltmleEffectMeasures <- function (object, estimator = ifelse(object$gcomp, "gcomp", "tmle"), ...) {
     info <- GetSummaryLtmleMSMInfo(object, estimator)
     beta <- info$estimate
     IC <- info$IC

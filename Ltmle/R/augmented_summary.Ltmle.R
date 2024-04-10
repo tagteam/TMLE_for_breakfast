@@ -43,6 +43,8 @@ summary.Ltmle <- function(object,estimator,...){
         }
         risk
     }else{
+        # FIXME: at this point we need to take care of the case with multiple time horizons
+        object$IC <- object$IC[[1]]
         x=summary.ltmleEffectMeasures(object,estimator=estimator)
         # check if outcome is continuous (else the estimate is called risk)
         if ("estimate"%in%names(x$effect.measures$treatment)){
