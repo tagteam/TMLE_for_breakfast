@@ -140,7 +140,7 @@ CheckInputs <-
     if (!(is.null(deterministic.g.function) || is.function(deterministic.g.function)))
         stop("deterministic.g.function should be a function or NULL")
     if (!all(unlist(data[, nodes$A]) %in% c(0, 1, NA)))
-        stop("in data, all Anodes should be binary")
+        stop("in data, all Anodes should be binary. allowed values are 0 or 1 or NA")
     if (!all(sapply(data[, c(nodes$A, nodes$Y), drop = FALSE], is.numeric)))
         stop("in data, all Anodes and Ynodes should be numeric (not, for instance, logical)")
     if (any(sapply(data, is.infinite)))

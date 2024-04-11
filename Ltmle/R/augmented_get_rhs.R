@@ -34,6 +34,8 @@ get_rhs <- function(timepoint, work_data,
     # add covariates if any
     if(length(included_vars)>0){
         form = paste(included_vars, collapse = " + ")
+    }else{
+        form <- "1"
     }
     form[]
 }
