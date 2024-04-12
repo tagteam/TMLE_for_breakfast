@@ -12,7 +12,7 @@ Ltmle <- function(data, Anodes, Cnodes = NULL, Dnodes = NULL, Lnodes = NULL, Yno
     if(length(Dnodes)>0){
         name_competing_risk = gsub("_[^_]*$", "", Dnodes[[1]])
         deterministic.Q.function <- function(data, current.node, nodes, called.from.estimate.g){
-            death.index <- grep(paste0("Dead", "_"),names(data))
+            death.index <- grep(paste0(name_competing_risk, "_"),names(data))
             if(length(death.index)==0){
                 message("No death/terminal event node found")
                 return(NULL)
