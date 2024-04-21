@@ -1,79 +1,47 @@
 set.seed(42)
-
+library(data.table)
+library(prodlim)
+setwd('~/github/TMLE_for_breakfast/Example/')
 # Number of patients
 n_patients <- 1000
-
 # Assigning treatment (0/1)
-treatment_assignment <- sample(c(0, 1), size = n_patients, replace = TRUE)
-
+treatment_assignment <- c(rep(1,n_patients/2),rep(0,n_patients/2))
 # Generating ages
 age <- sample(c('<60', '60-70', '>70'), size = n_patients, replace = TRUE)
-
 # Generating time from start of trial
-time <- rexp(n_patients, rate = 1/5)
-
-# Generating persistent treatment periods for half of the patients
-persistent_treatment_periods <- list()
-for (i in 1:(n_patients / 2)) {
-  if (treatment_assignment[i] == 1) {
-    n_periods <- sample(1:3, 1)  # Random number of consecutive periods
-    for (j in 1:n_periods) {
-      treatment_start <- runif(1, 0, 2) + (j - 1) * 2.5  # Consecutive periods
-      treatment_end <- treatment_start + runif(1, 0.5, 2)
-      persistent_treatment_periods[[length(persistent_treatment_periods) + 1]] <- c(i, treatment_start, treatment_end)
-    }
-  }
-}
-
-# Generating non-persistent treatment periods for the other half of the patients
-non_persistent_treatment_periods <- list()
-for (i in ((n_patients / 2) + 1):n_patients) {
-  if (treatment_assignment[i] == 1) {
-    n_periods <- sample(2:5, 1)  # Random number of non-overlapping periods
-    for (j in 1:n_periods) {
-      treatment_start <- runif(1, 0, 2) + (j - 1) * 2.5  # Consecutive periods
-      treatment_end <- treatment_start + runif(1, 0.1, 0.5)  # Non-overlapping periods
-      non_persistent_treatment_periods[[length(non_persistent_treatment_periods) + 1]] <- c(i, treatment_start, treatment_end)
-    }
-  }
-}
-
-# Combining persistent and non-persistent treatment periods
-all_treatment_periods <- c(persistent_treatment_periods, non_persistent_treatment_periods)
+time <- rexp(n_patients, rate = 1) # CTP changed from 2/5
+# Generating persistent treatment periods for half of the treated patients
+persistent_treatment_periods <- 
+  data.table(ID=1:(n_patients/4),Treatment_Start=0, Treatment_End=time[1:(n_patients/4)])
+non_persistent_treatment_periods <- 
+  data.table(ID=(1+n_patients/4):(n_patients/2),Treatment_Start=0, Treatment_End=time[(1+n_patients/4):(n_patients/2)])  
+treatment_periods <- rbind(persistent_treatment_periods,non_persistent_treatment_periods)
 
 # Generating event type (censoring=0, event=1, death=2)
-event_type <- sample(c(0, 1, 2), size = n_patients, prob = c(0.2, 0.7, 0.1), replace = TRUE)
-
-# Creating dataframe for baseline dataset
-baseline_data <- data.frame(ID = 1:n_patients,
+event_type1 <- sample(c(0, 1, 2), size = n_patients/4, prob = c(0.2, 0.3, 0.1), replace = TRUE)
+event_type2 <- sample(c(0, 1, 2), size = n_patients/4, prob = c(0.2, 0.5, 0.1), replace = TRUE)
+event_type3 <- sample(c(0, 1, 2), size = n_patients/2, prob = c(0.2, 0.7, 0.1), replace = TRUE)
+event_type <- c(event_type1,event_type2,event_type3)
+# Creating data
+time <- time*365
+baseline_data <- data.table(ID = 1:n_patients,
                             Age = age,
                             Time = time,
-                            Event_Type = event_type)
+                            Event_Type = event_type,
+                            Study_Start=0,
+                            Treatment=c(rep(1,n_patients/2),rep(0,n_patients/2)))
+# Creating data for treatment periods dataset
+treatment_data <- data.table(ID=1:(n_patients/2),treatment_periods[,ID:=NULL])
+treatment_data[Treatment_End>5,Treatment_End:=5]
 
-# Add a variable indicating if the patient started on treatment
-baseline_data$Started_On_Treatment <- ifelse(baseline_data$ID %in% unlist(lapply(all_treatment_periods, `[`, 1)), 1, 0)
+baseline_data[,Trial_Start:=as.Date("2010-01-01")]
+treatment_data[,Treatment_Start:=as.Date("2010-01-01")]
+treatment_data[,Treatment_Start:=as.Date(Treatment_Start,origin="1970-01-01")]
+treatment_data[,Treatment_End:=as.Date("2010-01-01")+365*Treatment_End]
 
-# Adjusting event outcomes based on treatment and duration of treatment
-for (i in 1:nrow(baseline_data)) {
-  if (baseline_data$Started_On_Treatment[i] == 1) {
-    # Risk reduction for those on treatment
-    event_type_prob <- c(0.2, 0.35, 0.45)
-  } else {
-    event_type_prob <- c(0.25, 0.65, 0.1)  # Higher risk for those not on treatment
-  }
-  baseline_data$Event_Type[i] <- sample(c(0, 1, 2), size = 1, prob = event_type_prob)
-}
-
-# Creating dataframe for treatment periods dataset
-treatment_data <- data.frame(matrix(unlist(all_treatment_periods), ncol = 3, byrow = TRUE))
-colnames(treatment_data) <- c('ID', 'Treatment_Start', 'Treatment_End')
-
-# Output
-cat("Baseline Dataset:\n")
-print(head(baseline_data))
-cat("\nTreatment Periods Dataset:\n")
-print(head(treatment_data))
-setDT(baseline_data)
-setDT(treatment_data)
-fit <- prodlim(Hist(Time,Event_Type)~Started_On_Treatment,data=baseline_data)
+fit <- prodlim(Hist(Time,Event_Type)~Treatment,data=baseline_data)
 plot(fit)
+saveRDS(baseline_data,file="baseline_data.rds")
+saveRDS(treatment_data,file="treatment_data.rds")
+
+
