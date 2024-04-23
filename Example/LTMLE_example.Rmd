@@ -108,7 +108,7 @@ The outcomes (event, censoring, competing risk) should be the maximal outcome fo
 
 For other variables, it is dependent on a discussion whether to choose the entry values
 for each period or choose any indication of exposure during the period. For this
-example the maximal value is chosen for each period for covariates. 
+example the first value is chosen for each period for covariates. 
 
 For the calculations, the outcomes needs to come after covariates. Depending on how the splitting is conducted then either outcomes needs to move one period later or covariates one period earlier.  The current version moves covariates.
 
@@ -156,8 +156,8 @@ time_horizon <- 5
     abar = rep(1,time_horizon),
     SL.library = "glm",
     verbose = TRUE,
-    gbounds = c(0, 1),
-    deterministic.g.function = MaintainControl ## if you are not on treatment, then you will not be on the treatment at a later data
+    gbounds = c(0, 1)#,
+    #deterministic.g.function = MaintainControl ## if you are not on treatment, then you will not be on the treatment at a later data
   )
    fit_treat <- do.call("Ltmle",x)
   x$abar <- rep(0,time_horizon)
