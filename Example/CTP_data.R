@@ -18,8 +18,8 @@ non_persistent_treatment_periods <-
 treatment_periods <- rbind(persistent_treatment_periods,non_persistent_treatment_periods)
 
 # Generating event type (censoring=0, event=1, death=2)
-event_type1 <- sample(c(0, 1, 2), size = n_patients/4, prob = c(0.2, 0.3, 0.1), replace = TRUE)
-event_type2 <- sample(c(0, 1, 2), size = n_patients/4, prob = c(0.2, 0.5, 0.1), replace = TRUE)
+event_type1 <- sample(c(0, 1, 2), size = n_patients/4, prob = c(0.2, 0.2, 0.1), replace = TRUE)
+event_type2 <- sample(c(0, 1, 2), size = n_patients/4, prob = c(0.2, 0.4, 0.1), replace = TRUE)
 event_type3 <- sample(c(0, 1, 2), size = n_patients/2, prob = c(0.2, 0.7, 0.1), replace = TRUE)
 event_type <- c(event_type1,event_type2,event_type3)
 # Creating data

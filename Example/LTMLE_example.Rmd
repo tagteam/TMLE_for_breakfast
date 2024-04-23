@@ -63,7 +63,7 @@ that change only once are held.  For the current example the only variables are 
 
 ```{r echo=TRUE}
 splitguideTwo <- baseline_data[,.(ID,Trial_Start,Event_Type,Time)]
-splitguideTwo[,eventTime:=Trial_Start+time]
+splitguideTwo[,eventTime:=Trial_Start+Time]
 splitguideTwo[event_type==0,censor:=eventTime]
 splitguideTwo[event_type==1,outcome:=eventTime]
 splitguideTwo[event_type==2,compete:=eventTime]
@@ -156,8 +156,8 @@ time_horizon <- 5
     abar = rep(1,time_horizon),
     SL.library = "glm",
     verbose = TRUE,
-    gbounds = c(0, 1)#,
-    #deterministic.g.function = MaintainControl ## if you are not on treatment, then you will not be on the treatment at a later data
+    gbounds = c(0, 1),
+    deterministic.g.function = MaintainControl ## if you are not on treatment, then you      #will not be on the treatment at a later data
   )
    fit_treat <- do.call("Ltmle",x)
   x$abar <- rep(0,time_horizon)
