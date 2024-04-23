@@ -293,7 +293,9 @@ Estimate <- function(inputs,
             id.subset <- inputs$id[single.subs]
             ## if (any(is.na(single.subs))) browser()
             if (any(single.subs))
-                X.subset[, colAlls(X.subset == 0)] <- 1
+                ## Tried to fixed bug here
+                ## X.subset[, colAlls(X.subset == 0)] <- 1
+                X.subset[, matrixStats::colAlls(X.subset == 0)] <- 1
             observation.weights.subset <- inputs$observation.weights[single.subs]
         }
         if (regime.index == first.regime || multiple.subs ||
