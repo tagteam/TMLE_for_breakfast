@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Feb  6 2024 (07:11) 
+## Last-Updated: Apr 16 2024 (13:37) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 7
+##     Update #: 8
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -21,21 +21,14 @@ library(targets)
 # loading Ltmle functions with augmentation
 # -------------------------------------------
 try(setwd("~/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
-## copy of functions from CRAN package ltmle
+try(setwd("~/research/Methods/TMLE_for_breakfast/Ltmle/"),silent = TRUE)
 ff <- sapply(list.files(path = "./R/",pattern = "R$",full.names = TRUE),source)
-## our own augmentation files
-ff <- sapply(list.files(path = "./augmentation/",pattern = "R$",full.names = TRUE),source)
-# ff <- sapply(list.files(path = "~/registerTargets/registerTargets/exercises/Ltmle/",pattern = "R$",full.names = TRUE),source)
-
 ## loading simulation function (including prepared coefficients from Danish register data)
-try(source("~/TMLE_for_breakfast/Ltmle/examples/get_lava_model.R"),silent = TRUE)
 try(source("~/research/Methods/TMLE_for_breakfast/Ltmle/examples/get_lava_model.R"),silent = TRUE)
 # Create object from which we can simulate data
 # -----------------------------------------------
 time_horizon = 6
 m=get_lava_model(time_horizon=time_horizon)
-
-
 # Simulate data with 4 time intervals and 20000 patients
 # ----------------------------------------------------------
 set.seed(4)
