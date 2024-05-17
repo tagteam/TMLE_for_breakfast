@@ -3,7 +3,8 @@ merge_and_sort_data <- function(time_horizon,
                                 outcome_data, 
                                 baseline_data,
                                 timevar_data, 
-                                name_outcome,                    
+                                name_outcome,
+                                name_id,                    
                                 name_regimen,
                                 name_censoring = NULL,
                                 censored_label = "censored",
@@ -19,8 +20,8 @@ merge_and_sort_data <- function(time_horizon,
     ## }else{
     ## outcome_data <- as.data.table(outcome_data)}
     stopifnot(inherits(regimen_data,"data.table"))
-    data.table::setkey(regimen_data,pnr)
-    data.table::setkey(outcome_data,pnr)
+    data.table::setkeyv(regimen_data,name_id)
+    data.table::setkeyv(outcome_data,name_id)
     wide_data=outcome_data[regimen_data]
     # deal with outcome/death/censored at index
     Y_0 = match(paste0(name_outcome,"_",0),names(wide_data))
@@ -37,7 +38,7 @@ merge_and_sort_data <- function(time_horizon,
     }
     # adding the baseline covariates
     if (!is.null(baseline_data))
-      wide_data=baseline_data[wide_data,on = "pnr"]
+      wide_data=baseline_data[wide_data,on = name_id]
 
     # subset and sort data
     work_data <- wide_data
@@ -46,17 +47,17 @@ merge_and_sort_data <- function(time_horizon,
     if (length(timevar_data)>0){
         if (length((outcome_overlap <- grep(paste0(name_outcome,"_"),names(timevar_data)))>0)){
             timevar_data <- timevar_data[,-outcome_overlap, with=FALSE]}
-        data.table::setkey(timevar_data,pnr)
-        work_data=timevar_data[work_data, on = c("pnr")]
+        data.table::setkeyv(timevar_data,name_id)
+        work_data=timevar_data[work_data, on = name_id]
         name_time_covariates = unlist(lapply(grep("_0",names(timevar_data),value=TRUE),
                                              function(x){substring(x,0,nchar(x)-2)}))
     }else{
         name_time_covariates <- NULL
     }
-    name_baseline_covariates = setdiff(names(baseline_data),"pnr")
+    name_baseline_covariates = setdiff(names(baseline_data),name_id)
   
   # sorting the variables for LTMLE
-  work_data = work_data[,c("pnr", intersect(c(name_baseline_covariates,unlist(sapply(time_grid, function(timepoint){
+  work_data = work_data[,c(name_id, intersect(c(name_baseline_covariates,unlist(sapply(time_grid, function(timepoint){
     if(timepoint == 0){
       paste0(c(name_time_covariates, name_regimen),"_",timepoint)
     } else{

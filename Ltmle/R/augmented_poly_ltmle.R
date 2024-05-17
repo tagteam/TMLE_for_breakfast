@@ -34,17 +34,10 @@ poly_ltmle <- function(name_outcome,
         abar <- rep(1,tk)
     }
     loop <- foreach(REG = names(regimen_data),.packages=c("data.table"))%do%{
-        ## [,.(pnr,sex,agegroups,index_heart_failure,tertile_income,education,diabetes_duration,secondline_duration,first_2ndline)]
         bsl_covariates <- copy(baseline_data)
-        setkey(bsl_covariates,pnr)
-        ## add baseline adjustment to subset analysis
-        ## if (length(sub_set)>0 & length(sub_set$adj)>0){
-        ##     sdat=sub_set$data[,c("pnr",sub_set$adj),with=FALSE]
-        ##     setkey(sdat,pnr)
-        ##     bsl_covariates <- sdat[bsl_covariates]
-        ## }
+        setkeyv(bsl_covariates,name_id)
         if (length(sub_set)>0){
-            sub_id <- sub_set$pnr
+            sub_id <- sub_set[[name_id]]
             if(length(sub_id)==0)stop("No data in subset defined by variable: ",sub_set$var)
         } else{
             sub_id <- NULL
@@ -72,12 +65,6 @@ poly_ltmle <- function(name_outcome,
             REG_data=copy(regimen_data[[REG]])[,B_0:=NULL]
         else
             REG_data=copy(regimen_data[[REG]])
-        ## make sure that baseline stroke stays as covariate
-        if (length(timevar_data)>0){
-            if (name_outcome=="stroke"){
-                bsl_covariates=timevar_data[,.(pnr,index_stroke=stroke_0)][bsl_covariates,,on="pnr"]
-            }
-        }
         if (verbose)cat("Prepareing Ltmle data\n")
         # check dimensions
         n_bsl=NROW(bsl_covariates)
@@ -143,7 +130,7 @@ poly_ltmle <- function(name_outcome,
                                        stopifnot(bootstrap_sample_size<NROW(pl$data))
                                        pl.b$data <- pl$data[sample(1:.N,replace=FALSE,size=bootstrap_sample_size)]
                                    }
-                                   pl.b$id=pl.b$data$pnr
+                                   pl.b$id=pl.b$data[[name_id]]
                                    tryfit <- try(fit.b <- do.call(Ltmle,pl.b))
                                    if (inherits(tryfit,"try-error")) return(NULL)
                                    data.table::data.table(time_horizon=time_horizon,estimate=fit.b$estimates,b=b)

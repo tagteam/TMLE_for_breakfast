@@ -1,4 +1,5 @@
 run_ltmle <- function(name_outcome,
+                      name_id = "pnr",
                       time_horizon,
                       sub_set=NULL,
                       censor_others=TRUE,
@@ -23,17 +24,16 @@ run_ltmle <- function(name_outcome,
             abar <- rep(1,tk)
         }
         loop <- foreach(REG = names(regimen_data))%do%{
-            ## [,.(pnr,sex,agegroups,index_heart_failure,tertile_income,education,diabetes_duration,secondline_duration,first_2ndline)]
             bsl_covariates <- copy(baseline_data)
-            setkey(bsl_covariates,pnr)
+            setkeyv(bsl_covariates,name_id)
             ## add baseline adjustment to subset analysis
             if (length(sub_set)>0 && length(sub_set$adj)>0){
-                sdat=sub_set$data[,c("pnr",sub_set$adj),with=FALSE]
-                setkey(sdat,pnr)
+                sdat=sub_set$data[,c(name_id,sub_set$adj),with=FALSE]
+                setkeyv(sdat,name_id)
                 bsl_covariates <- sdat[bsl_covariates]
             }
             if (length(sub_set)>0){
-                sub_id <- sub_set$data[["pnr"]]
+                sub_id <- sub_set$data[[name_id]]
                 if(length(sub_id)==0)stop("No data in subset defined by variable: ",sub_set$var)
             } else{
                 sub_id <- NULL
@@ -57,8 +57,8 @@ run_ltmle <- function(name_outcome,
                 suppressWarnings(REG_data <- copy(regimen_data[[REG]])[,B_0:=NULL])
             }else{REG_data=copy(regimen_data[[REG]])}
             setDT(REG_data)
-            setkey(REG_data,pnr)
-            setkey(outcome_data,pnr)
+            setkeyv(REG_data,name_id)
+            setkeyv(outcome_data,name_id)
             pl=prepare_Ltmle(regimen_data=REG_data,
                              outcome_data=outcome_data,
                              name_outcome=name_outcome,
@@ -153,17 +153,16 @@ targetedRegisterCourse_run_Ltmle <- function(name_outcome,
             abar <- rep(1,tk)
         }
         loop <- foreach(REG = names(regimen_data))%do%{
-            ## [,.(pnr,sex,agegroups,index_heart_failure,tertile_income,education,diabetes_duration,secondline_duration,first_2ndline)]
             bsl_covariates <- copy(baseline_data)
-            data.table::setkey(bsl_covariates,pnr)
+            data.table::setkeyv(bsl_covariates,name_id)
             ## add baseline adjustment to subset analysis
             if (length(sub_set)>0 && length(sub_set$adj)>0){
-                sdat=sub_set$data[,c("pnr",sub_set$adj),with=FALSE]
-                data.table::setkey(sdat,pnr)
+                sdat=sub_set$data[,c(name_id,sub_set$adj),with=FALSE]
+                data.table::setkeyv(sdat,name_id)
                 bsl_covariates <- sdat[bsl_covariates]
             }
             if (length(sub_set)>0){
-                sub_id <- sub_set$data[["pnr"]]
+                sub_id <- sub_set$data[[name_id]]
                 if(length(sub_id)==0)stop("No data in subset defined by variable: ",sub_set$var)
             } else{
                 sub_id <- NULL
