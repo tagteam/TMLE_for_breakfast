@@ -54,6 +54,7 @@ prepare_Ltmle <- function(regimen_data,
                                       name_competing_risk = name_competing_risk)
     ## Subsetting the data; This returns data in correct order according to time and without constant nodes
     ## remove also variables which are constant (same value for all subjects) 
+    name_baseline_covariates <- merged_data$name_baseline_covariates
     if(length(subset_id)>0){
         subset_dt = data.table(ID = subset_id)
         setnames(subset_dt,"ID",name_id)
@@ -67,8 +68,7 @@ prepare_Ltmle <- function(regimen_data,
         constant_variables <- names(work_data)[same]
     } else{
         constant_variables <- NULL}
-    
-    name_baseline_covariates = intersect(name_baseline_covariates,names(work_data))
+    name_baseline_covariates <- intersect(name_baseline_covariates,names(work_data))
     ## Change data to fit into ltmle constraints; Censored should be factor with levels "uncensored" and "censored",
     ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
     ltmle_data = get_ltmle_data(work_data,
