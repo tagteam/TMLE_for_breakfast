@@ -16,15 +16,17 @@ prepare_Ltmle <- function(regimen_data,
                           abar,
                           independent_regimens = FALSE,
                           ...) {
-    stopifnot(!missing(name_id))
+    if(missing(name_id))stop("Need to specify an 'id' variable on which to join the different datasets.")
     name_id <- name_id[[1]]
     if (!is.data.frame(outcome_data) && match(name_outcome,names(outcome_data),nomatch = FALSE)){
         outcome_data = outcome_data[[name_outcome]]
     }
-    stopifnot(name_id%in%names(outcome_data))
-    stopifnot(name_id%in%names(regimen_data))
-    stopifnot(name_id%in%names(baseline_data))
-    stopifnot(name_id%in%names(timevar_data))
+    if (NROW(outcome_data)>0) stopifnot(name_id%in%names(outcome_data))
+    else stop("Outcome data set missing or has zero rows.")
+    if (NROW(regimen_data)>0) stopifnot(name_id%in%names(regimen_data)) 
+    else stop("Regimen data set missing or has zero rows.")
+    if (NROW(baseline_data)>0) stopifnot(name_id%in%names(baseline_data))
+    if (NROW(timevar_data)>0)    stopifnot(name_id%in%names(timevar_data))
     stopifnot(length(grep(name_regimen,names(regimen_data)))>0)
     stopifnot(length(grep(name_outcome,names(outcome_data)))>0)
     if (!inherits(outcome_data,"data.frame")) {
