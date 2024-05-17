@@ -67,7 +67,7 @@ prepare_Ltmle <- function(regimen_data,
         constant_variables <- names(work_data)[same]
     } else{
         constant_variables <- NULL}
-    name_baseline_covariates = intersect(name_baseline_covariates,%in%names(work_data))
+    name_baseline_covariates = intersect(name_baseline_covariates,names(work_data))
     ## Change data to fit into ltmle constraints; Censored should be factor with levels "uncensored" and "censored",
     ## all nodes occurring after censoring should be NA, all nodes (except outcome) occurring after an event (outcome or competing) should be NA
     ltmle_data = get_ltmle_data(work_data,
