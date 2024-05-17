@@ -15,18 +15,20 @@ prepare_Ltmle <- function(regimen_data,
                           abar,
                           independent_regimens = FALSE,
                           ...) {
+    stopifnot(length(grep(name_regimen,names(regimen_data)))>0)
+    stopifnot(length(grep(name_outcome,names(outcome_data)))>0)
+    outcome_data = outcome_data[[name_outcome]]
     if (!inherits(outcome_data,"data.frame")) {
         stop("Argument 'outcome_data' must be a data.frame or data.table or tibble.")
     }
-    stopifnot(length(grep(name_regimen,names(regimen_data)))>0)
-    stopifnot(length(grep(name_outcome,names(outcome_data)))>0)
+
     if (length(name_competing_risk)>0)
         stopifnot(length(grep(name_competing_risk,names(outcome_data)))>0)
     if (length(name_censoring)>0){
         stopifnot(length(cnodes <- grep(name_censoring,names(outcome_data)))>0)
         if(is.na(match(censored_label,
                        unique(c(sapply(outcome_data[,cnodes,with = FALSE],function(x)unique(x)))))))
-            stop("Censored label does not occur in Censoring nodes")
+            warning("Censored label does not occur in Censoring nodes")
     }
     if (missing(abar))stop("abar is missing.")
     ## Merge all data and order in correct order

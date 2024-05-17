@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Feb 19 2024 (15:08) 
 ## Version: 
-## Last-Updated: Feb 19 2024 (15:55) 
+## Last-Updated: May  8 2024 (08:43) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 3
+##     Update #: 5
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -68,7 +68,21 @@ X=prepare_Ltmle(name_outcome="dementia",
                 verbose=TRUE)
 Fit<-do.call("Ltmle",X) #f$cum.g has some NAs, yet we get causal effect estimate when removing the option iptw.only=TRUE
 
-fit= run_ltmle(name_outcome="dementia",censored_label = "0",time_horizon=c(2,4),regimen_data=list("GLP1RA" = sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE]),outcome_data=list("dementia" = sim_outcome),baseline_data=sim_baseline_covariates,timevar_data=sim_time_covariates,B_bootstrap_samples=5,bootstrap_sample_size=ceiling(.632*NROW(sim_baseline_covariates)),SL.library="glm",censor_others=FALSE,Markov=NULL,verbose=FALSE,SL.cvControl=list(selector="undersmooth",alpha=0.5),gbounds=c(0,1))
+
+fit= poly_ltmle(name_outcome="dementia",
+               time_horizon=c(2,4),
+               regimen_data=list("GLP1RA" = sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE]),
+               outcome_data=list("dementia" = sim_outcome),
+               baseline_data=sim_baseline_covariates,
+               timevar_data=sim_time_covariates,
+               B_bootstrap_samples=5,
+               bootstrap_sample_size=ceiling(.632*NROW(sim_baseline_covariates)),
+               SL.library="glm",
+               censor_others=FALSE,
+               Markov=NULL,
+               verbose=FALSE,
+               SL.cvControl=list(selector="undersmooth",alpha=0.5),
+               gbounds=c(0,1))
 
 ######################################################################
 ### test_cheap_bootstrap.R ends here
