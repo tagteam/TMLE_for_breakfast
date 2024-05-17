@@ -17,7 +17,9 @@ prepare_Ltmle <- function(regimen_data,
                           ...) {
     stopifnot(length(grep(name_regimen,names(regimen_data)))>0)
     stopifnot(length(grep(name_outcome,names(outcome_data)))>0)
-    outcome_data = outcome_data[[name_outcome]]
+    if (!is.data.frame(outcome_data) && match(name_outcome,names(outcome_data),nomatch = FALSE)){
+        outcome_data = outcome_data[[name_outcome]]
+    }
     if (!inherits(outcome_data,"data.frame")) {
         stop("Argument 'outcome_data' must be a data.frame or data.table or tibble.")
     }
