@@ -13,6 +13,7 @@ Estimate <- function(inputs,
                      regimes.with.positive.weight)
 {
     FitAndPredict <- function() {
+        ## if(length(grep("Lira_1",form)>0))    browser(skipCalls=1L)
         if (length(Y.subset) < 2)
             stop("Estimation failed because there are fewer than 2 observations to fit")
         Y.subset.range <- range(Y.subset)
@@ -36,9 +37,14 @@ Estimate <- function(inputs,
                                        family = family, weights = observation.weights.subset,
                                        offset = offst, intercept = intercept)
                     if (inputs$verbose){
-                        cat(paste("Sample size: ",m$n),"\n")
+                        if (!inherits(m,"speedglm")){
+                            cat(paste("Sample size: ",length(m$y)),"\n")
+                        } else{
+                            cat(paste("Sample size: ",m$n),"\n")
+                        }
                     }
                     m$terms <- tf
+                    ## if (!called.from.estimate.g)browser()
                     predicted.values <- predict(m,newdata = newdata,type = type)
                 }, GetWarningsToSuppress())
             }
@@ -96,10 +102,10 @@ Estimate <- function(inputs,
         predicted.values <- rep(NA, nrow(newdata))
         predicted.values[new.subs] <- pred
         if (max(predicted.values, na.rm = TRUE) > 1 || min(predicted.values,
-                                                        na.rm = TRUE) < 0) {
+                                                           na.rm = TRUE) < 0) {
             msg <- paste("SuperLearner returned predicted.values > 1 or < 0: [min, max] = [",
                          min(predicted.values, na.rm = TRUE), ",", max(predicted.values,
-                                                                    na.rm = TRUE), "]. Bounding to [0,1]")
+                                                                       na.rm = TRUE), "]. Bounding to [0,1]")
             warning(msg)
             predicted.values <- Bound(predicted.values, bounds = c(0,
                                                                    1))
@@ -228,7 +234,7 @@ Estimate <- function(inputs,
         }
     }
     if (inputs$verbose){ message("Estimate: framing formula ",form," into Y and X...")}
-    ## if(length(grep("Censored_1",form)>0))    browser(skipCalls=1L)
+    ## if(length(grep("Lira_1",form)>0))    browser(skipCalls=1L)
     mod.frame <- model.frame(f, data = data.with.Qstar, drop.unused.levels = TRUE,
                              na.action = na.pass)
     Y <- mod.frame[[1]]
@@ -264,6 +270,9 @@ Estimate <- function(inputs,
         deterministic.list.newdata <- IsDeterministic(newdata,
                                                       cur.node, inputs$deterministic.Q.function, nodes,
                                                       called.from.estimate.g, inputs$survivalOutcome)
+        ## HERE
+        ## print(newdata)
+        ## print(sum(deterministic.list.newdata$is.deterministic))
         if (called.from.estimate.g && !is.null(inputs$deterministic.g.function)) {
             newdata.with.current <- newdata
             stopifnot(cur.node %in% nodes$AC)
@@ -308,11 +317,10 @@ Estimate <- function(inputs,
         if (!all(deterministic.list.newdata$is.deterministic |
                  deterministic.g.list.newdata$is.deterministic)) {
             if (is.null(fit.and.predict) || multiple.Qstar || multiple.subs) {
-                ## print("fit.and.predict");print(is.null(fit.and.predict))
-                ## print("multiple.Qstar");print(multiple.Qstar)
-                ## print("multiple.subs");print(multiple.subs)
+                ## if(length(grep("Lira_1",form)>0))    browser(skipCalls=1L)
                 fit.and.predict <- FitAndPredict()
                 m <- fit.and.predict$m
+                ## if (called.from.estimate.g == FALSE) browser(skipCalls = TRUE)
                 predicted.values[, regime.index] <- fit.and.predict$predicted.values
             }
             else {

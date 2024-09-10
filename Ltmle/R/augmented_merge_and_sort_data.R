@@ -27,18 +27,33 @@ merge_and_sort_data <- function(time_horizon,
     Y_0 = match(paste0(name_outcome,"_",0),names(wide_data))
     D_0 = match(paste0(name_competing_risk,"_",0),names(wide_data))
     C_0 = match(paste0(name_censoring,"_",0),names(wide_data))
+    included = TRUE
     if (!is.na(Y_0)){
-        if(!is.na(D_0)&!is.na(C_0)){wide_data = wide_data[!(wide_data[[Y_0]]%in%1)&!(wide_data[[D_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)]}
-        if(!is.na(D_0)){wide_data = wide_data[!(wide_data[[Y_0]]%in%1)&!(wide_data[[D_0]]%in%1)]}
-        if(!is.na(C_0)){wide_data = wide_data[!(wide_data[[Y_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)]}
+        if(!is.na(D_0)&!is.na(C_0)){
+            included = !(wide_data[[Y_0]]%in%1)&!(wide_data[[D_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)
+        }
+        if(!is.na(D_0)){
+            included = !(wide_data[[Y_0]]%in%1)&!(wide_data[[D_0]]%in%1)
+        }
+        if(!is.na(C_0)){
+            included = !(wide_data[[Y_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)
+        }
     }else{
-        if(!is.na(D_0)&!is.na(C_0)){wide_data = wide_data[!(wide_data[[D_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)]}
-        if(!is.na(D_0)){wide_data = wide_data[!(wide_data[[D_0]]%in%1)]}
-        if(!is.na(C_0)){wide_data = wide_data[!(wide_data[[C_0]]%in%censored_label)]}
+        if(!is.na(D_0)&!is.na(C_0)){
+            included = !(wide_data[[D_0]]%in%1)&!(wide_data[[C_0]]%in%censored_label)
+        }
+        if(!is.na(D_0)){
+            included = !(wide_data[[D_0]]%in%1)
+        }
+        if(!is.na(C_0)){included= !(wide_data[[C_0]]%in%censored_label)
+        }
+    }
+    if (any(!included)){
+        wide_data = wide_data[included]
     }
     # adding the baseline covariates
     if (!is.null(baseline_data))
-      wide_data=baseline_data[wide_data,on = name_id]
+        wide_data=baseline_data[wide_data,on = name_id]
 
     # subset and sort data
     work_data <- wide_data

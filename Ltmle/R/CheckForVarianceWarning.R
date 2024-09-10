@@ -1,6 +1,4 @@
-CheckForVarianceWarning <-
-function (inputs, g.ratio)
-{
+CheckForVarianceWarning <- function (inputs, g.ratio){
     if (inputs$variance.method == "ic") {
         positivity <- mean(g.ratio < 1, na.rm = TRUE) > 0.0001
         rare.events <- inputs$binaryOutcome && any(colMeans(inputs$data[,

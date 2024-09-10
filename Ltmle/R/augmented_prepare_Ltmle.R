@@ -38,7 +38,7 @@ prepare_Ltmle <- function(regimen_data,
     if (length(name_censoring)>0){
         stopifnot(length(cnodes <- grep(name_censoring,names(outcome_data)))>0)
         if(is.na(match(censored_label,
-                       unique(c(sapply(outcome_data[,cnodes,with = FALSE],function(x)unique(x)))))))
+                       unique(unlist(c(sapply(outcome_data[,cnodes,with = FALSE],function(x)unique(x))))))))
             warning("Censored label does not occur in Censoring nodes")
     }
     if (missing(abar))stop("abar is missing.")

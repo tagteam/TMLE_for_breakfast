@@ -28,6 +28,8 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
                 subs <- uncensored & !deterministic.list.origdata$is.deterministic
             }
             if (inputs$verbose){ message("FixedTimeTMLE: estimating Q for ",names(data)[cur.node]," using ", sum(subs)," observations.")}
+            ## if (names(data)[cur.node] == "mi_3") browser(skipCalls = TRUE)
+            ## print(names(data)[cur.node])
             Q.est <- Estimate(inputs, form = inputs$Qform[LYnode.index],
                               Qstar.kplus1 = if (LYnode.index == length(nodes$LY))
                                                  Qstar.kplus1[, 1]
@@ -35,9 +37,22 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
                               subs = subs, type = "link", nodes = nodes, called.from.estimate.g = FALSE,
                               calc.meanL = FALSE, cur.node = cur.node, regimes.meanL = NULL,
                               regimes.with.positive.weight = regimes.with.positive.weight)
+            ## if (LYnode.index == length(nodes$LY)) print(head(Qstar.kplus1[, 1]))
+            ## else print(head(Qstar.kplus1))
+            ## print(c(head(lava::expit(Q.est$predicted.values))))
+            ## print(Q.est$fit[[1]]$Estimate)
+            ## print(inputs$Qform[LYnode.index])
             logitQ <- Q.est$predicted.values
+            ## print(head(c(lava::expit(logitQ))))
             fit.Q[[LYnode.index]] <- Q.est$fit
             ACnode.index <- which.max(nodes$AC[nodes$AC < cur.node])
+            ## browser(skipCalls = TRUE)
+            ## print("before: k+1")
+            ## print(head(c(Qstar.kplus1)))
+            ## print("before: k")
+            ## print(head(c(lava::expit(logitQ))))
+            ## v <- list(Qstar.kplus1 = Qstar.kplus1,logitQ = logitQ,combined.summary.measures = combined.summary.measures,cum.g = g.list$cum.g[, ACnode.index, ],working.msm = inputs$working.msm,uncensored = uncensored,intervention.match = intervention.match,is.deterministic = deterministic.list.origdata$is.deterministic,msm.weights = msm.weights,gcomp = inputs$gcomp,observation.weights = inputs$observation.weights)
+            ## v <- saveRDS(v,file = "~/tmp/v.rds")
             SuppressGivenWarnings(update.list <- UpdateQ(Qstar.kplus1 = Qstar.kplus1,
                                                          logitQ = logitQ,
                                                          combined.summary.measures = combined.summary.measures,
@@ -53,8 +68,15 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
             if (length(ACnode.index) > 0)
                 cum.g.used[, ACnode.index, ] <- cum.g.used[, ACnode.index, ] | update.list$cum.g.used
             Qstar <- update.list$Qstar
+            ## print("after: Qstar")
+            ## print(head(c(update.list$Qstar)))
+            # here
+            ## if (names(data)[cur.node] == "mi_2")browser(skipCalls = TRUE)
             Qstar[Q.est$is.deterministic] <- Q.est$deterministic.Q[Q.est$is.deterministic]
-            curIC <- CalcIC(Qstar.kplus1, Qstar, update.list$h.g.ratio, uncensored, intervention.match, regimes.with.positive.weight)
+            curIC <- CalcIC(Qstar.kplus1,Qstar,update.list$h.g.ratio,
+                            uncensored,intervention.match,regimes.with.positive.weight)
+            ## print(names(data)[cur.node])
+            ## print(round(100*c(curIC),2))
             curIC.relative.error <- abs(colSums(curIC))
             curIC.relative.error[mean.summary.measures > 0] <- curIC.relative.error[mean.summary.measures > 0]/mean.summary.measures[mean.summary.measures > 0]
             if (any(curIC.relative.error > 0.001) && !inputs$gcomp) {

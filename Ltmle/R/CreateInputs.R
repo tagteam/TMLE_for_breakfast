@@ -103,8 +103,7 @@ CreateInputs <- function(data,
                                 stratify, survivalOutcome, showMessage = TRUE)
     main.terms <- ConvertToMainTerms(data, working.msm, summary.measures,
                                      all.nodes)
-    intervention.match <- CalcInterventionMatchArray(data, regimes,
-                                                     all.nodes$A)
+    intervention.match <- CalcInterventionMatchArray(data, regimes, all.nodes$A)
     inputs <- list(data = data, all.nodes = all.nodes, survivalOutcome = survivalOutcome,
                    Qform = Qform, gform = gform, gbounds = gbounds, Yrange = Yrange,
                    deterministic.g.function = deterministic.g.function,

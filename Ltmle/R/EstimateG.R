@@ -29,8 +29,7 @@ EstimateG <- function (inputs){
     }
     for (i in seq_along(nodes$AC)) {
         cur.node <- nodes$AC[i]
-        uncensored <- IsUncensored(inputs$uncensored, nodes$C,
-                                   cur.node)
+        uncensored <- IsUncensored(inputs$uncensored,nodes$C,cur.node)
         deterministic.origdata <- IsDeterministic(inputs$data,
                                                   cur.node, inputs$deterministic.Q.function, nodes,
                                                   called.from.estimate.g = TRUE, inputs$survivalOutcome)$is.deterministic
@@ -71,8 +70,7 @@ EstimateG <- function (inputs){
             fit[[i]] <- g.est$fit
         }
         if (cur.node %in% nodes$A) {
-            cur.abar <- AsMatrix(inputs$regimes[, nodes$A ==
-                cur.node, ])
+            cur.abar <- AsMatrix(inputs$regimes[, nodes$A == cur.node, ])
             if (is.null(regimes.meanL)) {
                 cur.abar.meanL <- cur.abar
             }
@@ -85,8 +83,7 @@ EstimateG <- function (inputs){
             cur.abar <- cur.abar.meanL <- matrix(1, nrow(inputs$data),
                 num.regimes)
         }
-        g[, i, ] <- CalcG(AsMatrix(prob.A.is.1[, i, ]), cur.abar,
-            g.est$is.deterministic)
+        g[, i, ] <- CalcG(AsMatrix(prob.A.is.1[, i, ]),cur.abar,g.est$is.deterministic)
         if (inputs$variance.method != "ic") {
             if (is.numeric(inputs$gform)) {
                 if (anyNA(g[, i, ]))
@@ -104,8 +101,7 @@ EstimateG <- function (inputs){
             stop("Error - NA in g. g should only be NA after censoring. If you passed numeric gform, make sure there are no NA values except after censoring. Otherwise something has gone wrong.")
     }
     for (regime.index in 1:num.regimes) {
-        cum.g.list <- CalcCumG(AsMatrix(g[, , regime.index]),
-            inputs$gbounds)
+        cum.g.list <- CalcCumG(AsMatrix(g[, , regime.index]), inputs$gbounds)
         cum.g[, , regime.index] <- cum.g.list$bounded
         cum.g.unbounded[, , regime.index] <- cum.g.list$unbounded
         if (inputs$variance.method != "ic") {

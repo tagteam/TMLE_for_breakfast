@@ -12,7 +12,9 @@ run_ltmle <- function(name_outcome,
                       SL.cvControl=list(selector="undersmooth",alpha=0.5),
                       verbose=FALSE,
                       reduce=TRUE,
-                      B_0 = FALSE,gbounds){
+                      B_0 = FALSE,
+                      gbounds = c(0,1),
+                      gcomp = FALSE){
     result <- foreach(tk=time_horizon)%do%{
         if (censor_others){
             # Because A_0 = 1-B_0 we remove B_0
@@ -72,7 +74,8 @@ run_ltmle <- function(name_outcome,
                              subset_id=sub_id,
                              SL.library=SL.library,
                              Markov=markov,
-                             abar=abar)
+                             abar=abar,
+                             gcomp = gcomp)
             if (verbose){
                 cat("Run Ltmle for regimen ",
                     paste0(regimens,collapse=","),
