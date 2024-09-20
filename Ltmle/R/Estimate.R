@@ -30,23 +30,36 @@ Estimate <- function(inputs,
             class(m) <- "no.Y.variation"
         }
         else {
-            if (use.glm) {
-                if (inputs$verbose){ message("Estimate: calling ltmle.glm.fit ...")}
-                SuppressGivenWarnings({
-                    m <- ltmle.glm.fit(y = Y.subset, x = X.subset,
-                                       family = family, weights = observation.weights.subset,
-                                       offset = offst, intercept = intercept)
-                    if (inputs$verbose){
-                        if (!inherits(m,"speedglm")){
-                            cat(paste("Sample size: ",length(m$y)),"\n")
-                        } else{
-                            cat(paste("Sample size: ",m$n),"\n")
-                        }
-                    }
-                    m$terms <- tf
-                    ## if (!called.from.estimate.g)browser()
-                    predicted.values <- predict(m,newdata = newdata,type = type)
-                }, GetWarningsToSuppress())
+          fit_glm <- function() {
+            if (inputs$verbose) {
+              message("Estimate: calling ltmle.glm.fit ...")
+            }
+            SuppressGivenWarnings({
+              m <- ltmle.glm.fit(
+                y = Y.subset,
+                x = X.subset,
+                family = family,
+                weights = observation.weights.subset,
+                offset = offst,
+                intercept = intercept
+              )
+              if (inputs$verbose) {
+                if (!inherits(m, "speedglm")) {
+                  cat(paste("Sample size: ", length(m$y)), "\n")
+                } else{
+                  cat(paste("Sample size: ", m$n), "\n")
+                }
+              }
+              m$terms <- tf
+              ## if (!called.from.estimate.g)browser()
+              predicted.values <- predict(m, newdata = newdata, type = type)
+            }, GetWarningsToSuppress())
+            return(list(m = m, predicted.values = predicted.values))
+          }
+          if (use.glm) {
+                fit <- fit_glm()
+                m <- fit$m
+                predicted.values <- fit$predicted.values
             }
             else {
                 newX.list <- GetNewX(newdata)
@@ -54,20 +67,28 @@ Estimate <- function(inputs,
                 if (!is.list(SL.library) && SL.library[[1]]=="glmnet"){
                     if (inputs$verbose){ message("Estimate: calling ltmle.glmnet ...")}
                     try.result <- try({
-                        m <- ltmle.glmnet(Y=Y.subset,
-                                          X=X.subset,
-                                          newX=newX.list$newX,
-                                          family=family,
-                                          obsWeights=observation.weights.subset,
-                                          id =id.subset,
-                                          alpha=inputs$SL.cvControl$alpha,
-                                          selector=inputs$SL.cvControl$selector
-                                          )
+                      m <- ltmle.glmnet(Y=Y.subset,
+                                        X=X.subset,
+                                        newX=newX.list$newX,
+                                        family=family,
+                                        obsWeights=observation.weights.subset,
+                                        id =id.subset,
+                                        alpha=inputs$SL.cvControl$alpha,
+                                        selector=inputs$SL.cvControl$selector
+                      )
                     })
-                    predicted.values <- ProcessSLPrediction(pred=m$predicted.values,
-                                                            new.subs=newX.list$new.subs,
-                                                            try.result=try.result)
-                    m <- m$fit
+                    if (!inherits(try.result, "try-error")) {
+                      predicted.values <- ProcessSLPrediction(pred=m$predicted.values,
+                                                              new.subs=newX.list$new.subs,
+                                                              try.result=try.result)
+                      m <- m$fit
+                    } else {
+                      warning("Error in ltmle.glmnet. Trying glm ...")
+                      fit <- fit_glm()
+                      m <- fit$m
+                      predicted.values <- fit$predicted.values
+                      use.glm <- TRUE
+                    }
                 }else{
                     try.result <- try({
                         SuppressGivenWarnings(
@@ -192,6 +213,8 @@ Estimate <- function(inputs,
     #
     # Body of function Estimate starts here
     #
+    
+
     stopifnot(type %in% c("link", "response"))
     num.regimes <- dim(inputs$regimes)[3]
     if (form == "IDENTITY") {
