@@ -8,7 +8,7 @@ abgespeckt_MainCalcs <- function (inputs){
     IC <- matrix(0, n, num.betas)
     IC.out = vector(num.final.Ynodes,mode = "list")
     if (inputs$verbose){ message("MainCalcs: estimating G ...")}
-    g.list <- EstimateG(inputs)
+    g.list <- abgespeckt_EstimateG(inputs)
     ## if (inputs$verbose){ message("MainCalcs: calculating IPTW ...")}
     ## iptw <- CalcIPTW(inputs, g.list$cum.g, all.msm.weights)
     fit <- list(g = g.list$fit)
