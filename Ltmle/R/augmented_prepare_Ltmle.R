@@ -95,7 +95,6 @@ prepare_Ltmle <- function(regimen_data,
                           Markov = Markov,
                           independent_regimens = independent_regimens,
                           constant_variables = constant_variables)
-  
   ## abar
   if (missing(abar)){
     if(length(name_regimen)==2) {

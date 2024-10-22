@@ -1,3 +1,4 @@
+# called from FixedTimeTMLE()
 UpdateQ <- function(Qstar.kplus1,
                     logitQ,
                     combined.summary.measures,
@@ -9,6 +10,7 @@ UpdateQ <- function(Qstar.kplus1,
                     msm.weights,
                     gcomp,
                     observation.weights) {
+    browser()
     n <- nrow(logitQ)
     num.regimes <- ncol(logitQ)
     off <- as.vector(logitQ)
@@ -38,7 +40,6 @@ UpdateQ <- function(Qstar.kplus1,
             ## print(head(as.vector(scale(weight.vec[weight.vec > 0], center = FALSE))))
             m <- ltmle.glm(f, data = data.temp[weight.vec > 0, ], family = quasibinomial(),
                            weights = as.vector(scale(weight.vec[weight.vec > 0], center = FALSE)))
-            ## browser(skipCalls = TRUE)
             Qstar <- matrix(predict(m, newdata = data.temp, type = "response"), 
                             nrow = nrow(logitQ))
         }
@@ -60,6 +61,8 @@ UpdateQ <- function(Qstar.kplus1,
     }
     cum.g.used <- weight.vec > 0 & msm.weights > 0
     dim(cum.g.used) <- c(n, num.regimes)
+    ## print(head(c(Qstar)))
+    ## print(mean(Qstar))
     return(list(Qstar = Qstar, h.g.ratio = h.g.ratio, X = stacked.summary.measures, 
                 off = off, fit = m, cum.g.used = cum.g.used))
 }

@@ -258,7 +258,9 @@ Estimate <- function(inputs,
     }
     if (inputs$verbose){ message("Estimate: framing formula ",form," into Y and X...")}
     ## if(length(grep("Lira_1",form)>0))    browser(skipCalls=1L)
-    mod.frame <- model.frame(f, data = data.with.Qstar, drop.unused.levels = TRUE,
+    mod.frame <- model.frame(f,
+                             data = data.with.Qstar,
+                             drop.unused.levels = TRUE,
                              na.action = na.pass)
     Y <- mod.frame[[1]]
     tf <- terms(f)
@@ -381,10 +383,8 @@ Estimate <- function(inputs,
             else {
                 if (inherits(m,"ltmle.glmnet")){
                     ## fit[[regime.index]] <- m$selected_beta
-                    fit[[regime.index]] <- list(beta=m$selected_beta,
-                                                predicted=table(cut(predicted.values,
-                                                                    include.lowest=TRUE,
-                                                                    breaks=rev(c(Inf,2,1.5,1,.75,0.5,.25,10^{-(1:8)},0,-0.5,-1,-Inf)))))
+                    fit[[regime.index]] <- list(beta=m$selected_beta,predicted=table(cut(predicted.values,include.lowest=TRUE,breaks=rev(c(Inf,2,1.5,1,.75,0.5,.25,10^{-(1:8)},0,-0.5,-1,-Inf)))))
+                    ## fit[[regime.index]] <- m
                     ## list(beta=m$selected_beta,predicted=table(cut(predicted.values,include.lowest=TRUE,breaks=c(1,.75,0.5,.25,10^{-(1:8)}))))
                 } else{
                     capture.output(print.m <- print(m))

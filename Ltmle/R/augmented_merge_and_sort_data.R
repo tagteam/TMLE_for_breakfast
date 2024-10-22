@@ -64,7 +64,7 @@ merge_and_sort_data <- function(time_horizon,
             timevar_data <- timevar_data[,-outcome_overlap, with=FALSE]}
         data.table::setkeyv(timevar_data,name_id)
         work_data=timevar_data[work_data, on = name_id]
-        name_time_covariates = unlist(lapply(grep("_0",names(timevar_data),value=TRUE),
+        name_time_covariates = unlist(lapply(grep("_1$",names(timevar_data),value=TRUE),
                                              function(x){substring(x,0,nchar(x)-2)}))
     }else{
         name_time_covariates <- NULL
