@@ -10,21 +10,17 @@ UpdateQ <- function(Qstar.kplus1,
                     msm.weights,
                     gcomp,
                     observation.weights) {
-    browser()
     n <- nrow(logitQ)
     num.regimes <- ncol(logitQ)
     off <- as.vector(logitQ)
     Y <- as.vector(Qstar.kplus1)
-    if (length(cum.g) == 0) 
-        cum.g <- 1
-    stacked.summary.measures <- apply(combined.summary.measures, 
-                                      2, rbind)
+    if (length(cum.g) == 0) cum.g <- 1
+    stacked.summary.measures <- apply(combined.summary.measures,2,rbind)
     subs.vec <- uncensored & !is.deterministic & as.vector(intervention.match)
     weight.vec <- numeric(n * num.regimes)
     weight.vec[subs.vec] <- (observation.weights * as.vector(msm.weights)/as.vector(cum.g))[subs.vec]
     ## browser(skipCalls = TRUE)
-    if (anyNA(weight.vec)) 
-        stop("NA in weight.vec")
+    if (anyNA(weight.vec)) stop("NA in weight.vec")
     f <- as.formula(paste(working.msm, "+ offset(off)"))
     data.temp <- data.frame(Y, stacked.summary.measures, off)
     if (gcomp) {
@@ -33,12 +29,11 @@ UpdateQ <- function(Qstar.kplus1,
     }
     else {
         if (any(weight.vec > 0)) {
-            ## print(f)
-            ## print(head(data.temp))
-            ## print(head(subs.vec))
-            ## print(tail(subs.vec))
-            ## print(head(as.vector(scale(weight.vec[weight.vec > 0], center = FALSE))))
-            m <- ltmle.glm(f, data = data.temp[weight.vec > 0, ], family = quasibinomial(),
+            test <- cbind(data.temp,uu = subs.vec,imatch = intervention.match,uncens = uncensored,det = is.deterministic,w = weight.vec)
+            ## print(as.vector(scale(weight.vec[weight.vec > 0], center = FALSE)))
+            m <- ltmle.glm(f,
+                           data = data.temp[weight.vec > 0, ],
+                           family = quasibinomial(),
                            weights = as.vector(scale(weight.vec[weight.vec > 0], center = FALSE)))
             Qstar <- matrix(predict(m, newdata = data.temp, type = "response"), 
                             nrow = nrow(logitQ))

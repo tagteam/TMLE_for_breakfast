@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Aug  1 2023 (13:56) 
 ## Version: 
-## Last-Updated: Feb 20 2024 (15:12) 
+## Last-Updated: Oct 25 2024 (17:09) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 16
+##     Update #: 18
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -33,7 +33,7 @@ time_horizon = 4
 m=get_lava_model(time_horizon=time_horizon)
 
 
-# Simulate data with 4 time intervals and 20000 patients
+# Simulate data with 4 time intervals and 40000 patients
 # ----------------------------------------------------------
 set.seed(4)
 sim_data <- as.data.table(sim(m, 40000))
@@ -58,7 +58,20 @@ sim_outcome <- sim_data[,grep("pnr|dementia_|Censored|Dead", names(sim_data)), w
 
 # one time point is broken
 # ANSWER: not anymore!
-x=prepare_Ltmle(name_outcome="dementia",name_regimen="GLP1RA",name_censoring = "Censored",censored_label = "0",name_competing_risk = "Dead",time_horizon=2,outcome_data=sim_outcome,regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],baseline_data=sim_baseline_covariates,timevar_data=sim_time_covariates,SL.library="glm",abar = c(1,1),verbose=TRUE)
+x=prepare_Ltmle(name_outcome="dementia",
+                name_regimen="GLP1RA",
+                name_id="pnr",
+                name_censoring = "Censored",
+                censored_label = "0",
+                name_competing_risk = "Dead",
+                time_horizon=2,
+                outcome_data=sim_outcome,
+                regimen_data=sim_data[,grep("pnr|GLP1RA", names(sim_data)), with = FALSE],
+                baseline_data=sim_baseline_covariates,
+                timevar_data=sim_time_covariates,
+                SL.library="glm",
+                abar = c(1,1),
+                verbose=TRUE)
 f<-do.call("Ltmle",x)
 summary(f)
 
