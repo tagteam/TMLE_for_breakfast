@@ -1,5 +1,5 @@
 ---
-title: "LTMLE data example"
+title: "LTMLE data example - TMLE for breakfast variant"
 date: "18-04-2024"
 ---
 
@@ -44,8 +44,8 @@ step is to fix the end time of the analysis.
 For this example, we chose five periods corresponding to times of one to five
 
 During the data preparation below, records are split into multiple records and 
-to avoid confusion with the original entry into analysis, a new variable is 
-defined informing the start date.
+to avoid confusion with the original entry into analysis, a new variables (inn/out)
+are defined and used in further data management.
 
 ```{r, echo=TRUE}
 base <- baseline_data[,.(ID,Trial_Start)]
@@ -53,7 +53,7 @@ base[,':='(inn=Trial_Start,out=Trial_Start+4*365)]
 ```
 ## Splitting
 The following steps have the purpose of defining levels of variables in each of 
-the defined time periods. To start this proces all records are split according 
+the defined time periods. To start this process all records are split according 
 to timing of change in variable status. The order of splitting is not important.
 
 The first step is splitting by all variables that change only once. 
@@ -64,9 +64,10 @@ that change only once are held.  For the current example the only variables are 
 ```{r echo=TRUE}
 splitguideTwo <- baseline_data[,.(ID,Trial_Start,Event_Type,Time)]
 splitguideTwo[,eventTime:=Trial_Start+Time]
-splitguideTwo[event_type==0,censor:=eventTime]
-splitguideTwo[event_type==1,outcome:=eventTime]
-splitguideTwo[event_type==2,compete:=eventTime]
+# use the multilevel event variable to create separate variable/time for censoring, outcome and competing risk
+splitguideTwo[Event_Type==0,censor:=eventTime]
+splitguideTwo[Event_Type==1,outcome:=eventTime]
+splitguideTwo[Event_Type==2,compete:=eventTime]
 longSplit <- splitTwo(indat=base,
                       splitdat=splitguideTwo,
                       invars=c('ID','inn','out'),
@@ -86,8 +87,8 @@ longSplit <- splitFromTo(indat=longSplit,
 
 ```
 
-Finally, the data is split by the selected time periods, in the current case
-just two periods. The new value 'period' contains the period number. This uses
+Finally, the data is split by the selected time periods, in the current example
+just five periods. The new value 'period' contains the period number. This uses
 heaven::splitSeq.
 
 ```{r echo=TRUE}
