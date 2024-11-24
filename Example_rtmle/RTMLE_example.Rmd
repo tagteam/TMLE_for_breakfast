@@ -1,0 +1,167 @@
+---
+title: "RTMLE data example"
+date: "18-04-2024"
+---
+
+This provides a simulated example to prepare what could be real data for a TMLE analysis.
+
+All analyses are based on R and primarily using data.table for data management
+
+This example is made using the same data management as was used during the Reddie Course.  The example therefore anticipates a particular range of files and uses splitting of time dependent variables followed by aggregation of information in selected time periods
+
+The assumption is that the real raw data are found in several tables representing baseline covariates, outcomes and treatment periods. The current example uses simulated data where a treatment is is given that reduces the incidence of events in the setting of both censoring and a competing risk.
+
+
+```{r, echo=FALSE}
+library(heaven) # devtools::install_github("tagteam/heaven")
+library(data.table)
+#library(ltmle)
+library(rtmle)
+library(targets)
+library(ggplot2)
+
+# source functions
+#tar_source("/home/ctp/github/TMLE_for_breakfast/Ltmle/R/")
+setwd('~/github/TMLE_for_breakfast/Example_rtmle/')
+```
+# Step 1 - Get exercise data
+
+## Baseline data
+The example has a single baseline variable (Age), Time (in study), Event_Type (0=censor, 1=event, 2=competing risk) and a variable indicating whether they started on treatment or not.
+
+```{r, echo=FALSE}
+setwd("~/github/TMLE_for_breakfast/Example/")
+baseline_data <- readRDS("baseline_data.rds")
+treatment_data <- readRDS("treatment_data.rds")
+head(baseline_data)
+```
+The other dataset has treatment periods for those allocated to treatment. In the example treatment is numerical, but it may also be dates.
+```{r, echo=FALSE}
+head(treatment_data)
+```
+# Prepare for LTMLE
+LTMLE operates with a sequence of time periods all of equal length. Even though 
+individuals may experience the event or be censored early, all individuals need
+information for variables during the whole time of follow-up. Therefore, the first
+step is to fix the end time of the analysis. 
+
+For this example, we chose five periods corresponding to times of one to five
+
+During the data preparation below, records are split into multiple records and 
+to avoid confusion with the original entry into analysis, a new variables (inn/out)
+are defined and used in further data management.
+
+```{r, echo=TRUE}
+base <- baseline_data[,.(ID,Trial_Start)]
+base[,':='(inn=Trial_Start,out=Trial_Start+4*365)]
+```
+## Splitting
+The following steps have the purpose of defining levels of variables in each of 
+the defined time periods. To start this process all records are split according 
+to timing of change in variable status. The order of splitting is not important.
+
+The first step is splitting by all variables that change only once. 
+This is performed with the heaven::splitTwo function that needs the original 
+base data and a "splitting guide" which is the dataset with dates where variables
+that change only once are held.  For the current example the only variables are censoring, outcome and competing risk nodes.  These variables are therefore defined in distinc variables. The list of variables can for realistic examples also include other time dependent variables.  Note that the content of each variable that is used for splitting needs to have value (numeric or date) at the time of change, otherwise NA.
+
+```{r echo=TRUE}
+splitguideTwo <- baseline_data[,.(ID,Trial_Start,Event_Type,Time)]
+splitguideTwo[,eventTime:=Trial_Start+Time]
+# use the multilevel event variable to create separate variable/time for censoring, outcome and competing risk
+splitguideTwo[Event_Type==0,censor:=eventTime]
+splitguideTwo[Event_Type==1,outcome:=eventTime]
+splitguideTwo[Event_Type==2,compete:=eventTime]
+longSplit <- splitTwo(indat=base,
+                      splitdat=splitguideTwo,
+                      invars=c('ID','inn','out'),
+                      splitvars = c('ID','censor','outcome','compete'))
+```
+
+Next the data is split by the time dependent variables with potentially multiple
+changes during the study. We use the function heaven::splitFromTo. A single call to the function can split on all time dependent variables representing intervals. Apart from variables indicating start and end of periods, two more variables are needed. One variable indicates a name for the condition and the other a value to assume when present. The function does not allow overlap whithin person/condition. This needs to be corrected prior to use of the function.
+
+```{r echo=TRUE}
+splitguideTime <- copy(treatment_data)
+splitguideTime[,':='(treatment="treatment",value=1)]
+longSplit <- splitFromTo(indat=longSplit,
+                         splitdat=splitguideTime,
+                         invars=c('ID','inn','out'),
+                         splitvars = c('ID','Treatment_Start','Treatment_End','value','treatment'))
+
+```
+
+Finally, the data is split by the selected time periods, in the current example
+just five periods. The new value 'period' contains the period number. This uses
+heaven::splitSeq.
+
+```{r echo=TRUE}
+longSplit <- splitSeq(indat=longSplit,
+                      invars=c('ID','inn','out'),
+                      varname = 'Trial_Start', # intervals since inclusion in study
+                      splitvector= seq(-1,5*365-1,365), # just two periods for the example
+                      format = "vector",
+                      value="period")
+```
+## Summarize in periods
+With the splitting complete, all information for each selected equally sized time period 
+(in the example five) is separated.
+
+The next step is then to summarize information by 'period'. 
+
+The outcomes (event, censoring, competing risk) should be the maximal outcome for each period since an outcome event is coded "1" as opposed to "0" when not occurring.  
+
+For other variables, it is dependent on a discussion whether to choose the entry values
+for each period or choose any indication of exposure during the period. For this
+example the first value is chosen for each period for covariates. 
+
+For the calculations, the outcomes needs to come after covariates. Depending on how the splitting is conducted then either outcomes needs to move one period later or covariates one period earlier.  The current version moves covariates.
+
+```{r echo=TRUE}
+setkeyv(longSplit,c("ID","period","inn"))
+# Max value of outcomes in each period
+longSplit[,':='(outcome=max(outcome),censor=max(censor),compete=max(compete)),
+          by=c("ID","period")] 
+setkeyv(longSplit,c("ID","inn"))
+# Choose first record for each ID/period
+aggrSplit <- longSplit[,.SD[1],by=c("ID","period")]
+aggrSplit[,treatment:=as.numeric(treatment)]
+# for rtmle:
+aggrSplit[,period:=as.Date(period,origin="2024-01-01")]
+# Make relation between censor, outcome and death possible - not relevant for REAL data
+
+# shift outcomes one period forward
+aggrSplit_cov <- aggrSplit[,.(ID,period,treatment)] # all time dependent variables, here just "treatment"
+aggrSplit_cov[,period:=period-1]
+aggrSplit_out <- aggrSplit[,.(ID,period,outcome,censor,compete)] # outcomes
+# versions for rtmle
+time_var_data <- list(
+  time_var_cov=aggrSplit_cov,
+  outcome_data=aggrSplit_out[outcome==1,.(ID,period)],
+  competing_data=aggrSplit_out[compete==1,.(ID,period)],
+  censor_data=aggrSplit_out[censor==1,.(ID,period)]
+)
+```
+
+# Run RTMLE
+```{r echo=TRUE}
+x <- rtmle_init(intervals=5,
+                name_id='ID',
+                name_time='period',
+                name_outcome='outcome',
+                name_competing='compete',
+                name_censoring='censor',
+                treatment_levels=c('0','1'),
+                censored_levels=c('1','0'),
+                censored_label="1")
+x
+```
+# Add data
+```{r echo=TRUE}
+ add_long_data(x) <- time_var_data
+ add_baseline_data(x) <- baseline_data
+ x
+```
+
+
+
