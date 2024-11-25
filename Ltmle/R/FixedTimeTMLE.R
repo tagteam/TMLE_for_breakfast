@@ -28,8 +28,7 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
                 subs <- uncensored & !deterministic.list.origdata$is.deterministic
             }
             if (inputs$verbose){ message("FixedTimeTMLE: estimating Q for ",names(data)[cur.node]," using ", sum(subs)," observations.")}
-            ## if (names(data)[cur.node] == "mi_3") browser(skipCalls = TRUE)
-            ## print(names(data)[cur.node])
+            ## if (LYnode.index == 2) browser(skipCalls=1L)
             Q.est <- Estimate(inputs, form = inputs$Qform[LYnode.index],
                               Qstar.kplus1 = if (LYnode.index == length(nodes$LY))
                                                  Qstar.kplus1[, 1]
@@ -51,6 +50,7 @@ FixedTimeTMLE <- function(inputs, nodes, msm.weights, combined.summary.measures,
             ## print(head(c(Qstar.kplus1)))
             ## print("before: k")
             ## print(head(c(lava::expit(logitQ))))
+            ## browser(skipCalls = TRUE)
             ## v <- list(Qstar.kplus1 = Qstar.kplus1,logitQ = logitQ,combined.summary.measures = combined.summary.measures,cum.g = g.list$cum.g[, ACnode.index, ],working.msm = inputs$working.msm,uncensored = uncensored,intervention.match = intervention.match,is.deterministic = deterministic.list.origdata$is.deterministic,msm.weights = msm.weights,gcomp = inputs$gcomp,observation.weights = inputs$observation.weights)
             ## v <- saveRDS(v,file = "~/tmp/v.rds")
             SuppressGivenWarnings(update.list <- UpdateQ(Qstar.kplus1 = Qstar.kplus1,
