@@ -26,8 +26,8 @@ setwd('~/github/TMLE_for_breakfast/Example_rtmle/')
 ```
 # Step 1 - Get exercise data
 
-## Baseline data
-The example has a single baseline variable (Age), Time (in study), Event_Type (0=censor, 1=event, 2=competing risk) and a variable indicating whether they started on treatment or not.
+## Baseline data and outcomes
+The example has a single baseline variable (Age), Time (of event), Event_Type (0=censor, 1=event, 2=competing risk) and a variable indicating whether they started on treatment or not.
 
 ```{r, echo=FALSE}
 setwd("~/github/TMLE_for_breakfast/Example/")
@@ -67,11 +67,10 @@ that change only once are held.  For the current example the only variables are 
 
 ```{r echo=TRUE}
 splitguideTwo <- baseline_data[,.(ID,Trial_Start,Event_Type,Time)]
-splitguideTwo[,eventTime:=Trial_Start+Time]
 # use the multilevel event variable to create separate variable/time for censoring, outcome and competing risk
-splitguideTwo[Event_Type==0,censor:=eventTime]
-splitguideTwo[Event_Type==1,outcome:=eventTime]
-splitguideTwo[Event_Type==2,compete:=eventTime]
+splitguideTwo[Event_Type==0,censor:=Time]
+splitguideTwo[Event_Type==1,outcome:=Time]
+splitguideTwo[Event_Type==2,compete:=Time]
 longSplit <- splitTwo(indat=base,
                       splitdat=splitguideTwo,
                       invars=c('ID','inn','out'),
@@ -126,20 +125,17 @@ setkeyv(longSplit,c("ID","inn"))
 # Choose first record for each ID/period
 aggrSplit <- longSplit[,.SD[1],by=c("ID","period")]
 aggrSplit[,treatment:=as.numeric(treatment)]
-# for rtmle:
-aggrSplit[,period:=as.Date(period,origin="2024-01-01")]
-# Make relation between censor, outcome and death possible - not relevant for REAL data
 
 # shift outcomes one period forward
 aggrSplit_cov <- aggrSplit[,.(ID,period,treatment)] # all time dependent variables, here just "treatment"
 aggrSplit_cov[,period:=period-1]
 aggrSplit_out <- aggrSplit[,.(ID,period,outcome,censor,compete)] # outcomes
 # versions for rtmle
-time_var_data <- list(
-  time_var_cov=aggrSplit_cov,
-  outcome_data=aggrSplit_out[outcome==1,.(ID,period)],
-  competing_data=aggrSplit_out[compete==1,.(ID,period)],
-  censor_data=aggrSplit_out[censor==1,.(ID,period)]
+datalist <- list(
+  timevar_data=aggrSplit_cov,
+  outcome=aggrSplit_out[outcome==1,.(ID,period)],
+  compete=aggrSplit_out[compete==1,.(ID,period)],
+  censor=aggrSplit_out[censor==1,.(ID,period)]
 )
 ```
 
@@ -158,7 +154,7 @@ x
 ```
 # Add data
 ```{r echo=TRUE}
- add_long_data(x) <- time_var_data
+ add_long_data(x) <- datalist
  add_baseline_data(x) <- baseline_data
  x
 ```

@@ -28,19 +28,19 @@ baseline_data <- data.table(ID = 1:n_patients,
                             Age = age,
                             Time = time,
                             Event_Type = event_type,
-                            Study_Start=0,
                             Treatment=c(rep(1,n_patients/2),rep(0,n_patients/2)))
-# Creating data for treatment periods dataset
+# Creating data for treatment periods data set
 treatment_data <- data.table(ID=1:(n_patients/2),treatment_periods[,ID:=NULL])
 treatment_data[Treatment_End>5,Treatment_End:=5]
 
 baseline_data[,Trial_Start:=as.Date("2010-01-01")]
+baseline_data[,Time:=as.Date(Trial_Start+Time)]
 treatment_data[,Treatment_Start:=as.Date("2010-01-01")]
 treatment_data[,Treatment_Start:=as.Date(Treatment_Start,origin="1970-01-01")]
 treatment_data[,Treatment_End:=as.Date("2010-01-01")+365*Treatment_End]
 
-fit <- prodlim(Hist(Time,Event_Type)~Treatment,data=baseline_data)
-plot(fit)
+# fit <- prodlim(Hist(Time,Event_Type)~Treatment,data=baseline_data)
+# plot(fit)
 saveRDS(baseline_data,file="baseline_data.rds")
 saveRDS(treatment_data,file="treatment_data.rds")
 
