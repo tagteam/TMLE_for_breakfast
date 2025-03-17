@@ -357,6 +357,7 @@ Estimate <- function(inputs,
         } else {
             m <- "all rows are deterministic, no estimation took place"
         }
+        ## if(length(grep("A_1",form)>0))    browser(skipCalls=1L)
         predicted.values[deterministic.g.list.newdata$is.deterministic,
                          regime.index] <- deterministic.g.list.newdata$prob1
         if (calc.meanL)
