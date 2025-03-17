@@ -4,39 +4,48 @@ date: "18-04-2024"
 output: pdf_document
 ---
 
-This provides a simulated example to prepare what could be real data for a TMLE analysis.
+This document uses simulated data to demonstrate the use of the
+software for an LTMLE analysis. Note, that this example uses the same
+data preparation steps that were used during the Reddie Course. The
+example therefore works with several files that contain data and uses
+splitting of time dependent variables followed by aggregation of
+information in selected time periods to prepare the data.
 
-All analyses are based on R and primarily using data.table for data management
-
-This example is made using the same data management as was used during the Reddie Course.  The example therefore anticipates a particular range of files and uses splitting of time dependent variables followed by aggregation of information in selected time periods
-
-The assumption is that the real raw data are found in several tables representing baseline covariates, outcomes and treatment periods. The current example uses simulated data where a treatment is is given that reduces the incidence of events in the setting of both censoring and a competing risk.
-
+The hope is that the real data are in similar format or can be brought
+into similar format, representing baseline covariates, time-varying
+covariates, baseline and time-varying treatment, and outcome,
+competing risks and censoring. The example below simulates data where
+a treatment is is given that reduces the incidence of events.
 
 ```{r, echo=FALSE}
 library(heaven) # devtools::install_github("tagteam/heaven")
 library(data.table)
-#library(ltmle)
+# library(ltmle)
 library(rtmle)
 library(targets)
 library(ggplot2)
-
 # source functions
-#tar_source("/home/ctp/github/TMLE_for_breakfast/Ltmle/R/")
-setwd('~/github/TMLE_for_breakfast/Example_rtmle/')
+# tar_source("/home/ctp/github/TMLE_for_breakfast/Ltmle/R/")
 ```
 # Step 1 - Get exercise data
 
 ## Baseline data and outcomes
-The example has a single baseline variable (Age), Time (of event), Event_Type (0=censor, 1=event, 2=competing risk) and a variable indicating whether they started on treatment or not.
+
+The example has a single baseline variable (Age), Time (of event),
+Event_Type (0=censor, 1=event, 2=competing risk) and a variable
+indicating whether they started on treatment or not.
 
 ```{r, echo=FALSE}
-setwd("~/github/TMLE_for_breakfast/Example/")
-baseline_data <- readRDS("baseline_data.rds")
-treatment_data <- readRDS("treatment_data.rds")
+# set working directory to TMLE_for_breakfast
+baseline_data <- readRDS("Example_rtmle/baseline_data.rds")
+treatment_data <- readRDS("Example_rtmle/treatment_data.rds")
 head(baseline_data)
 ```
-The other dataset has treatment periods for those allocated to treatment. In the example treatment is numerical, but it may also be dates.
+
+The other dataset has treatment periods for those allocated to
+treatment. In the example treatment is numerical, but it may also be
+dates.
+
 ```{r, echo=FALSE}
 head(treatment_data)
 ```
@@ -104,18 +113,25 @@ longSplit <- splitSeq(indat=longSplit,
                       value="period")
 ```
 ## Summarize in periods
-With the splitting complete, all information for each selected equally sized time period 
-(in the example five) is separated.
 
-The next step is then to summarize information by 'period'. 
+With the splitting complete, all information for each selected equally
+sized time period (in the example five) is separated.
 
-The outcomes (event, censoring, competing risk) should be the maximal outcome for each period since an outcome event is coded "1" as opposed to "0" when not occurring.  
+The next step is then to summarize information by 'period'.
 
-For other variables, it is dependent on a discussion whether to choose the entry values
-for each period or choose any indication of exposure during the period. For this
-example the first value is chosen for each period for covariates. 
+The outcomes (event, censoring, competing risk) should be the maximal
+outcome for each period since an outcome event is coded "1" as opposed
+to "0" when not occurring.
 
-For the calculations, the outcomes needs to come after covariates. Depending on how the splitting is conducted then either outcomes needs to move one period later or covariates one period earlier.  The current version moves covariates.
+For other variables, it is dependent on a discussion whether to choose
+the entry values for each period or choose any indication of exposure
+during the period. For this example the first value is chosen for each
+period for covariates.
+
+For the calculations, the outcomes needs to come after
+covariates. Depending on how the splitting is conducted then either
+outcomes needs to move one period later or covariates one period
+earlier.  The current version moves covariates.
 
 ```{r echo=TRUE}
 setkeyv(longSplit,c("ID","period","inn"))
@@ -142,9 +158,8 @@ setnames(treatment_dt,as.character(0:4),paste0("treatment_",0:4))
 ```
 ## LTMLE
 ```{r echo=TRUE}
-
 x <- rtmle_init(intervals=5,name_id='ID',name_time='period',name_outcome='outcome',
-    name_competing='compete',name_censoring='censor',treatment_levels=c('0','1'),
+    name_competing='compete',name_censoring='censor',
     censored_levels=c('1','0'),censored_label="1")
 x$data <- list(baseline_data = baseline_data[,.(ID,Age)],
                outcome_data = outcome_dt,
@@ -153,7 +168,7 @@ prepare_data(x) <- list()
 protocol(x) <- list(name = "treat",treatment_variables = "treatment",intervention = 1)
 protocol(x) <- list(name = "placebo",treatment_variables = "treatment",intervention = 0)
 target(x) <- list(name = "Risk",strategy = "additive",estimator = "tmle",protocols = c("treat","placebo"))
-x <- run_rtmle(x,time_horizon = 4)
+x <- run_rtmle(x,time_horizon = 2)
 summary(x)
 
 ```
