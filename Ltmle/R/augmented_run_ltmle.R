@@ -15,6 +15,7 @@ run_ltmle <- function(name_outcome,
                       SL.library="glmnet",
                       SL.cvControl=list(selector="undersmooth",alpha=0.5),
                       B_0 = FALSE,
+                      stratify = FALSE,
                       B_bootstrap_samples=0,
                       bootstrap_sample_size=NULL,
                       seeds,
@@ -140,13 +141,13 @@ run_ltmle <- function(name_outcome,
                                        pl.b$data <- pl$data[sample(1:.N,replace=FALSE,size=bootstrap_sample_size)]
                                    }
                                    pl.b$id=as.vector(c(pl.b$data[[name_id]]))
-                                   tryfit <- try(fit.b <- do.call(Ltmle,pl.b))
+                                   tryfit <- try(fit.b <- do.call(Ltmle,c(pl.b,stratify = stratify)))
                                    if (inherits(tryfit,"try-error")) return(NULL)
                                    data.table::data.table(time_horizon=time_horizon,estimate=fit.b$estimates,b=b)
                                }
         }
         if (verbose)cat(paste0("Fitting Ltmle"," ",REG),"\n")
-        tryfit <- try(fit <- do.call(Ltmle,pl))
+        tryfit <- try(fit <- do.call(Ltmle,c(pl,stratify = stratify)))
         ## if (inherits(tryfit,"try-error"))browser()
         if (reduce){
             fit$call <- NULL

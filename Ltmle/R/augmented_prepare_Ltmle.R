@@ -27,7 +27,9 @@ prepare_Ltmle <- function(regimen_data,
     else stop("Regimen data set missing or has zero rows.")
     if (NROW(baseline_data)>0) stopifnot(name_id%in%names(baseline_data))
     if (NROW(timevar_data)>0)    stopifnot(name_id%in%names(timevar_data))
-    stopifnot(length(grep(name_regimen,names(regimen_data)))>0)
+    for (v in length(name_regimen)){
+        stopifnot(length(grep(name_regimen[[v]],names(regimen_data)))>0)
+    }
     stopifnot(length(grep(name_outcome,names(outcome_data)))>0)
     if (!inherits(outcome_data,"data.frame")) {
         stop("Argument 'outcome_data' must be a data.frame or data.table or tibble.")
