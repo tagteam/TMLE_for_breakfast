@@ -1,0 +1,165 @@
+---
+title: "DPV-example-ltmle"
+author: "Stefanie Schmid"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r lib, echo=FALSE, message=FALSE}
+library(heaven)
+library(data.table)
+
+library(lava)
+library(foreach)
+
+library(matrixStats)
+library(SuperLearner)
+
+library(rtmle)
+```
+
+
+## Data
+
+Most of the data preperation was done in SAS.
+
+The files "test_pat.txt" and "test_visits.txt" contain 3 Dummy-Patients that could be in the DPV data.
+
+```{r data, echo=TRUE}
+
+### read datasets
+SAS_pat <- read.table("\\\\keaton.zibmt.uni-ulm.de\\SAS-DPV-Pseudo\\a-dpv-anonym\\R-Arbeitsdaten\\REDDIE\\test_pat.txt", sep="\t", header=TRUE, dec=" ")
+
+SAS_vis <- read.table("\\\\keaton.zibmt.uni-ulm.de\\SAS-DPV-Pseudo\\a-dpv-anonym\\R-Arbeitsdaten\\REDDIE\\test_visits.txt", sep="\t", header=TRUE, dec=" ")
+
+# convert SAS date-format 
+SAS_pat$baseline_dat   <- as.Date(SAS_pat$baseline_dat, origin = "1960-01-01")
+SAS_pat$tod_dat        <- as.Date(SAS_pat$TOD_DAT,      origin = "1960-01-01")
+SAS_pat$censor_dat     <- as.Date(SAS_pat$censor_dat,   origin = "1960-01-01")
+SAS_pat$hba75_dat      <- as.Date(SAS_pat$hba75_dat,    origin = "1960-01-01")
+
+SAS_vis$treatment_start <- as.Date(SAS_vis$treatment_start, origin = "1960-01-01")
+SAS_vis$treatment_end   <- as.Date(SAS_vis$treatment_end,  origin = "1960-01-01")
+
+# convert as double
+SAS_pat$baseline_age   <- as.double(SAS_pat$baseline_age)
+SAS_pat$baseline_dur   <- as.double(SAS_pat$baseline_dur)
+
+SAS_vis$value          <- as.double(SAS_vis$value)
+
+```
+
+```{r}
+head(SAS_pat)
+```
+
+In DPV we have no prescription data. The medication can be documented for each visit. So "treatment_start" is the date of the visit, the treatment was documented in the DPV Software and "treatment_end" is the date of the next visit of the patient.
+
+```{r}
+head(SAS_vis)
+```
+
+
+## Split the dataset to baseline, outcome and treatment
+
+```{r, echo=TRUE}
+baseline_data <- SAS_pat[, c("id", "baseline_dat", "sex", "baseline_age", "baseline_dur")]
+baseline_data <- as.data.table(baseline_data)
+head(baseline_data)
+```
+
+```{r, echo=TRUE}
+base <- baseline_data[,.(id, baseline_dat)]
+base[,':='(inn=baseline_dat,out=baseline_dat+4*180)]
+head(base)
+```
+
+```{r, echo=TRUE}
+outcome_data <- SAS_pat[, c("id", "tod_dat", "censor_dat", "hba75_dat")]
+setnames(outcome_data, c("id", "compete", "censor", "outcome"))
+outcome_data <- as.data.table(outcome_data)
+head(outcome_data)
+```
+
+```{r, echo=TRUE}
+treatment_data <- SAS_vis[, c("id", "treatment_start", "treatment_end", "treatment", "value")]
+treatment_data <- as.data.table(treatment_data)
+head(treatment_data)
+```
+
+
+## longsplit using the heaven-package
+
+```{r, echo=TRUE}
+longSplit <- splitTwo(indat=base,
+                      splitdat=outcome_data,
+                      invars=c('id', 'inn', 'out'),
+                      splitvars = c('id', 'outcome', 'censor', 'compete'))
+head(longSplit)
+```
+
+```{r, echo=TRUE}
+longSplit2 <- splitFromTo(indat=longSplit,
+                          splitdat=treatment_data,
+                          invars=c('id','inn','out'),
+                          splitvars = c('id','treatment_start','treatment_end', 'value', 'treatment'))
+head(longSplit2)
+```
+
+```{r, echo=TRUE}
+longSplit3 <- splitSeq(indat=longSplit2,
+                       invars=c('id','inn','out'),
+                       varname = 'baseline_dat', # intervals since inclusion in study
+                       splitvector= c(-1, 180, 360, 540, 720),
+                       format = "vector",
+                       value="period")
+head(longSplit3)
+```
+
+
+## aggregate for period
+
+```{r, echo=TRUE}
+setkeyv(longSplit3,c("id", "period", "inn"))
+
+# Max value of outcomes in each period
+longSplit3[,':='(outcome=max(outcome),censor=max(censor),compete=max(compete)), by=c("id", "period")] 
+head(longSplit3)
+```
+
+```{r, echo=TRUE}
+setkeyv(longSplit3, c("id", "inn"))
+
+# Choose first record for each ID/period
+aggrSplit <- longSplit3[,.SD[1],by=c("id","period")]
+aggrSplit[,GLPA:=as.numeric(GLPA)]
+aggrSplit[,DPP4:=as.numeric(DPP4)]
+head(aggrSplit)
+```
+
+```{r, echo=TRUE}
+# shift covariates one period back
+aggrSplit_cov <- aggrSplit[,.(id, period, DPP4, GLPA)]                 # time dependant variables
+aggrSplit_cov[,period:=period-1]
+aggrSplit_out <- aggrSplit[,.(id, period, compete, censor, outcome)]   # outcomes
+```
+
+```{r, echo=TRUE}
+# versions for rtmle
+datalist <- list(
+  timevar_data=aggrSplit_cov,
+  outcome=aggrSplit_out[outcome==1,.(id,period)],
+  compete=aggrSplit_out[compete==1,.(id,period)],
+  censor=aggrSplit_out[censor==1,.(id,period)]
+)
+```
+
+
+
+
+
