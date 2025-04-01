@@ -10,8 +10,8 @@ x <- rtmle_init(intervals=4,name_id='ID',name_time='period',name_outcome='outcom
                 censored_levels=c('1','0'),censored_label="1")
 x$data <- list(baseline_data = baseline_data[,.(ID,Age)],
                outcome_data = outcome_dt,
-               timevar_data = treatment_dt[,grep('^(ID|A_)',names(treatment_dt)),with=FALSE]
-)
+               timevar_data = list(A = timevar_data[,grep('^(ID|A_)',names(timevar_data)),with=FALSE])
+               )
 prepare_data(x) <- list()
 protocol(x) <- list(name = "treat",treatment_variables = "A",intervention = 1)
 protocol(x) <- list(name = "placebo",treatment_variables = "A",intervention = 0)
