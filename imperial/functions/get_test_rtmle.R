@@ -17,7 +17,7 @@ get_test_rtmle <- function(dummy_data){
 
 
     ## PREPARE THE DATA 
-    x <- long_to_wide(x, intervals = seq(0, 1000, 30.45*6))
+    x <- long_to_wide(x, intervals = seq(0, 2000, 30.45*6))
 
     prepare_data(x) <- list()
 
@@ -32,8 +32,6 @@ get_test_rtmle <- function(dummy_data){
     prepare_data(x) <- list()
 
 
-    #x$prepared_data$PrimaryOutcome_4[is.na(x$prepared_data$PrimaryOutcome_4)] <- 0
-
     target(x) <- list(name = "Outcome_risk",
                       strategy = "additive",
                       estimator = "tmle",
@@ -42,12 +40,12 @@ get_test_rtmle <- function(dummy_data){
 
     refProtocol <- list(Outcome_risk = "Always_Glargine_Never_Degludec")
 
-    ModelX <- run_rtmle(x,
+    x <- run_rtmle(x,
                         refit = TRUE,
                         learner = "learn_glmnet",
-                        time_horizon = 1:4,
-                        targets = "Outcome_risk",
-                        reference = refProtocol)
+                        time_horizon = 1:4)
 
-    summary(ModelX) 
+    summary(x,
+            targets = "Outcome_risk",
+            reference = refProtocol) 
 }

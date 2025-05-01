@@ -14,15 +14,15 @@ get_dummy_data <- function(filename){
     ## PREPARE & PIVOT TABLES SO THAT DATES ARE ALL IN ONE COLUMN
     ## BASELINE DATASET  ===========
     BaselineDataset <- dummydf1 |> 
-        select(ID, Age, clean_sex, start_followup_date = Date) |> 
+        select(ID, Age, clean_sex, Date) |> 
         mutate(clean_sex = case_when(clean_sex == 1 ~ 0,
-                                     clean_sex == 2 ~ 1)
+                                     clean_sex == 2 ~ 1),
                # MANAL: the start of followup date is not 0 when
                #        your data are given as calendar dates
                # start_followup_date = 0
                # I guess that the variable dummydf1$Date is
                # the correct start of followup date
-             #  start_followup_date = as.Date(Date)
+               start_followup_date = as.Date(Date)
                ) |> 
         setDT()
 
@@ -80,34 +80,10 @@ get_dummy_data <- function(filename){
     ### CENSORING DATASET 
 
     CensoredData <- dummydf1 |> 
-        select(ID, starts_with("Deglud_"), starts_with("glarg_")) |> 
-        mutate(
-            across(.cols = contains("_date"),
-                   .fns = ~as.numeric(.x)),
-            across(.cols = contains("_date"),
-                   .fns = ~as.Date(.x, origin = "1900-01-01"))
-        ) |> 
-        rowwise() |> 
-        mutate(
-            Censored = case_when(
-                all(is.na(across(Deglud_6months_date:glarg_24months_date))) ~ "uncensored",
-                sum(is.na(across(Deglud_6months_date:glarg_24months_date))) > 4 ~ "censored",
-                .default = "uncensored")) |> 
-        
-        pivot_longer(cols = -c("ID", "Censored"),
-                     names_to = "Treatment",
-                     values_to = "CensoredDate") |> 
-        mutate(EndDate = ymd("2024-12-31")) |> 
-        # filter(!is.na(TreatmentDate)) |> 
-        # filter(is.na(date)) |> 
-        group_by(ID) |>
-        mutate(date = case_when(Censored == "uncensored" ~ EndDate,
-                                Censored == "censored" ~ max(CensoredDate, na.rm = TRUE))) |> 
-        ungroup() |> 
-        distinct(ID, date) |> 
+        select(ID) |> 
+        mutate(date = ymd("2024-12-31")) |> 
         setDT()
-
-
+    
     ### OUTCOME & COMPETING EVENTS DATASET
 
     Outcome_6 <- dummydf1 |> 
