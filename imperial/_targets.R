@@ -17,12 +17,12 @@
 library(targets)
 tar_option_set(packages = c("tidyverse","data.table"))
 # Manal (adapt the path to your computer):
-try(setwd("c:/manalhome/xxx/TMLE_for_breakfast/imperial"),silent = TRUE)
+try(setwd("c:/git/TMLE_for_breakfast/imperial"),silent = TRUE)
 rtmle_code <- "C:/git/rtmle-main/R/"
 if (file.exists(rtmle_code)) tar_source(rtmle_code)
 # Thomas:
-try(setwd("~/research/Methods/TMLE_for_breakfast/imperial"),silent = TRUE)
-try(library(rtmle),silent = TRUE)
+# try(setwd("~/research/Methods/TMLE_for_breakfast/imperial"),silent = TRUE)
+# try(library(rtmle),silent = TRUE)
 # 
 tar_source("functions")
 

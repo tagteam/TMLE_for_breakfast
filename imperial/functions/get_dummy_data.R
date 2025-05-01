@@ -14,15 +14,15 @@ get_dummy_data <- function(filename){
     ## PREPARE & PIVOT TABLES SO THAT DATES ARE ALL IN ONE COLUMN
     ## BASELINE DATASET  ===========
     BaselineDataset <- dummydf1 |> 
-        select(ID, Age, clean_sex,Date) |> 
+        select(ID, Age, clean_sex, start_followup_date = Date) |> 
         mutate(clean_sex = case_when(clean_sex == 1 ~ 0,
-                                     clean_sex == 2 ~ 1),
+                                     clean_sex == 2 ~ 1)
                # MANAL: the start of followup date is not 0 when
                #        your data are given as calendar dates
                # start_followup_date = 0
                # I guess that the variable dummydf1$Date is
                # the correct start of followup date
-               start_followup_date = as.Date(Date)
+             #  start_followup_date = as.Date(Date)
                ) |> 
         setDT()
 

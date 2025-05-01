@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.log
+*.synctex.gz
+*.pdf
+*.Rproj
+meeting-may-22-23-cph.org
+meta
+org/
+meta/
+data/
+_targets/
