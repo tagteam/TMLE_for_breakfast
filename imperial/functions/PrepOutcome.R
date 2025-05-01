@@ -27,7 +27,7 @@ PrepOutComp <- function(FUdataset){
       across(.cols = contains("_date"),
              .fns = ~as.numeric(.x)),
       across(.cols = contains("_date"),
-             .fns = ~as.Date(.x, origin = "1900-01-01")),
+             .fns = ~as.Date(.x, origin = "1900-01-01"))
       ## using the second script for now 
       # across(.cols = contains("_date"),
       #        .fns = ~if_else(is.na(.), 0, 1))
