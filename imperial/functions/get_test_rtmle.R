@@ -17,7 +17,8 @@ get_test_rtmle <- function(dummy_data){
 
 
     ## PREPARE THE DATA 
-    x <- long_to_wide(x, intervals = seq(0, 2000, 30.45*6))
+    ## Intervals as 4 intervals, so from 0:930
+    x <- long_to_wide(x, intervals = seq(0, 930, 30.45*6))
 
     prepare_data(x) <- list()
 
