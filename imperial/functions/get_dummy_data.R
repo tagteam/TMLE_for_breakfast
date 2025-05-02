@@ -64,11 +64,15 @@ get_dummy_data <- function(filename){
         filter(Treatment == "Degludec")    
     
 
-    Glargine <- bind_rows(Glargine_0, Glargine_FU) |> 
+    Glargine <- 
+        Glargine_FU |> 
+        #bind_rows(Glargine_0, Glargine_FU) |> 
         select(-Treatment) |> 
         setDT()
 
-    Degludec <- bind_rows(Degludec_0, Degludec_FU) |> 
+    Degludec <- 
+        Degludec_FU |> 
+        #bind_rows(Degludec_0, Degludec_FU) |> 
         select(-Treatment) |> 
         setDT()
 
