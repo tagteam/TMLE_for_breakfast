@@ -2,14 +2,17 @@ get_dummy_data <- function(filename){
     if (FALSE){
         library(tidyverse)
         library(data.table)
-        filename <- "data/01-Dummy_data_to_share_DATES.xlsx"
+        #filename <- "data/01-Dummy_data_to_share_DATES.xlsx"
+        filename <- "data/UPDATEDATA.xlsx"
 
     }
-    dummydf1 <- readxl::read_xlsx(path = filename) |> 
+    dummydf1 <- readxl::read_xlsx(path = filename, sheet = 1) |> 
         ## FILTER TO GET TRIAL POPULATION
         ## FILTER FOR PRIMARY OUTCOME ONLY
         filter(Include_or_not == "Include", 
                CVD_related_death != "Not CVD-related") 
+    
+    HBC <- readxl::read_xlsx(path = filename, sheet = 2)
 
     ## PREPARE & PIVOT TABLES SO THAT DATES ARE ALL IN ONE COLUMN
     ## BASELINE DATASET  ===========
@@ -17,12 +20,7 @@ get_dummy_data <- function(filename){
         select(ID, Age, clean_sex, Date) |> 
         mutate(clean_sex = case_when(clean_sex == 1 ~ 0,
                                      clean_sex == 2 ~ 1),
-               # MANAL: the start of followup date is not 0 when
-               #        your data are given as calendar dates
-               # start_followup_date = 0
-               # I guess that the variable dummydf1$Date is
-               # the correct start of followup date
-               start_followup_date = as.Date(Date)
+              start_followup_date = as.Date(Date)
                ) |> 
         setDT()
 
@@ -42,10 +40,9 @@ get_dummy_data <- function(filename){
     FUDrugs <- dummydf1 |> 
         select(ID, starts_with("Deglud_"), starts_with("glarg_")) |> 
         mutate(
-            across(.cols = contains("_date"),
-                   .fns = ~as.numeric(.x)),
-            across(.cols = contains("_date"),
-                   .fns = ~as.Date(.x, origin = "1900-01-01"))) |> 
+            across(.cols = ends_with("_date"),
+                   .fns = ~ifelse(is.na(.), 0, 1))
+        ) |> 
         pivot_longer(cols = -c("ID"),
                      names_to = "Treatment",
                      values_to = "date") |> 
@@ -76,7 +73,9 @@ get_dummy_data <- function(filename){
         select(-Treatment) |> 
         setDT()
 
-    timevar_data <- list(Degludec = Degludec, Glargine = Glargine)
+    timevar_data <- list(Degludec = Degludec, 
+                         Glargine = Glargine,
+                         HBC = HBC)
 
     
     ## CENSORING & OUTCOME & COMPETING EVENTS DATASET ===========

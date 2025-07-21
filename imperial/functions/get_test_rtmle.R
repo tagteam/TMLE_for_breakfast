@@ -11,14 +11,19 @@ get_test_rtmle <- function(dummy_data){
                     censored_label = "censored")
 
 
-    x$long_data <- dummy_data[c("outcome_data","censored_data","competing_data","timevar_data")]
-
-    add_baseline_data(x) <- dummy_data$baseline_data
-
-
+    x <- add_long_data(x,
+                       outcome_data = dummy_data$outcome_data,
+                       censored_data = dummy_data$censored_data,
+                       competing_data = dummy_data$competing_data,
+                       timevar_data = dummy_data$timevar_data)
+    x <- add_baseline_data(x, data = dummy_data$baseline_data)
+    
+    
     ## PREPARE THE DATA 
-    ## Intervals as 4 intervals, so from 0:930
-    x <- long_to_wide(x, intervals = seq(0, 930, 30.45*6))
+    x <- long_to_wide(x, 
+                      intervals = seq(0, 930, 30.45*6),
+                      start_followup_date = start_followup_date)
+    
 
     prepare_data(x) <- list()
 
