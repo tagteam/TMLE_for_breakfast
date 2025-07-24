@@ -15,6 +15,9 @@ get_dummy_data <- function(filename){
     HBC <- readxl::read_xlsx(path = filename, sheet = 2)
     names(HBC) <- c("ID","date","value")
     
+    BMI <- readxl::read_xlsx(path = filename, sheet = 3)
+    names(BMI) <- c("ID","date","value")
+    
     ## PREPARE & PIVOT TABLES SO THAT DATES ARE ALL IN ONE COLUMN
     ## BASELINE DATASET  ===========
     BaselineDataset <- dummydf1 |> 
@@ -76,7 +79,8 @@ get_dummy_data <- function(filename){
 
     timevar_data <- list(Degludec = Degludec, 
                          Glargine = Glargine,
-                         HBC = HBC)
+                         HBC = HBC,
+                         BMI = BMI)
 
     
     ## CENSORING & OUTCOME & COMPETING EVENTS DATASET ===========
