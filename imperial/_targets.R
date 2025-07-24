@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: May  1 2025 (06:50) 
 ## Version: 
-## Last-Updated: May  1 2025 (08:33) 
+## Last-Updated: Jul 21 2025 (11:50) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 15
+##     Update #: 16
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -21,8 +21,8 @@ tar_option_set(packages = c("tidyverse","data.table", "riskRegression"))
 rtmle_code <- "C:/git/rtmle-main/R/"
 if (file.exists(rtmle_code)) tar_source(rtmle_code)
 # Thomas:
-#try(setwd("~/research/Methods/TMLE_for_breakfast/imperial"),silent = TRUE)
-#try(library(rtmle),silent = TRUE)
+try(setwd("~/research/Methods/TMLE_for_breakfast/imperial"),silent = TRUE)
+try(library(rtmle),silent = TRUE)
 
 tar_source("functions")
 

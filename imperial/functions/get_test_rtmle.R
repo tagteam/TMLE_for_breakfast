@@ -20,30 +20,26 @@ get_test_rtmle <- function(dummy_data){
     
     
     ## PREPARE THE DATA 
-    x <- long_to_wide(x, 
-                      intervals = seq(0, 930, 30.45*6),
-                      start_followup_date = start_followup_date)
+    x <- long_to_wide(x,intervals = seq(0, 930, 30.45*6),fun = list("HBC" = function(x){x}),start_followup_date = "start_followup_date")
     
 
-    prepare_data(x) <- list()
-
+    x <- prepare_data(x)
     #x$prepared_data |> View()
 
-    protocol(x) <- list(name = "Always_Degludec_Never_Glargine",
+    x <- protocol(x,name = "Always_Degludec_Never_Glargine",
                         intervention = data.frame("Degludec" = factor(1,levels = c(0,1)),
                                                   "Glargine" = factor(0,levels = c(0,1))))
-    protocol(x) <- list(name = "Always_Glargine_Never_Degludec",
+    x <- protocol(x,name = "Always_Glargine_Never_Degludec",
                         intervention = data.frame("Degludec" = factor(0,levels = c(0,1)),
                                                   "Glargine" = factor(1,levels = c(0,1))))
-    prepare_data(x) <- list()
 
-
-    target(x) <- list(name = "Outcome_risk",
-                      strategy = "additive",
-                      estimator = "tmle",
-                      protocols = c("Always_Degludec_Never_Glargine", 
-                                    "Always_Glargine_Never_Degludec"))
-
+    x <- target(x,name = "Outcome_risk",
+                estimator = "tmle",
+                protocols = c("Always_Degludec_Never_Glargine", 
+                              "Always_Glargine_Never_Degludec"))
+    # this is new
+    x <- model_formula(x)
+    
     refProtocol <- list(Outcome_risk = "Always_Glargine_Never_Degludec")
 
     x <- run_rtmle(x,

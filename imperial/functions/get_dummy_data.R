@@ -13,7 +13,8 @@ get_dummy_data <- function(filename){
                CVD_related_death != "Not CVD-related") 
     
     HBC <- readxl::read_xlsx(path = filename, sheet = 2)
-
+    names(HBC) <- c("ID","date","value")
+    
     ## PREPARE & PIVOT TABLES SO THAT DATES ARE ALL IN ONE COLUMN
     ## BASELINE DATASET  ===========
     BaselineDataset <- dummydf1 |> 
