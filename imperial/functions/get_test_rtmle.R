@@ -20,7 +20,11 @@ get_test_rtmle <- function(dummy_data){
     
     
     ## PREPARE THE DATA 
-    x <- long_to_wide(x,intervals = seq(0, 930, 30.45*6),fun = list("HBC" = function(x){x}),start_followup_date = "start_followup_date")
+    x <- long_to_wide(x,
+                      intervals = seq(0, 930, 30.45*6),
+                      fun = list("HBC" = function(x){x},
+                                 "BMI" = function(x){x}),
+                      start_followup_date = "start_followup_date")
     
 
     x <- prepare_data(x)
