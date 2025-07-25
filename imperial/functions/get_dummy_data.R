@@ -12,10 +12,12 @@ get_dummy_data <- function(filename){
         filter(Include_or_not == "Include", 
                CVD_related_death != "Not CVD-related") 
     
-    HBC <- readxl::read_xlsx(path = filename, sheet = 2)
+    HBC <- readxl::read_xlsx(path = filename, sheet = 2) %>% 
+      mutate(HBC_date = ymd(HBC_date))
     names(HBC) <- c("ID","date","value")
     
-    BMI <- readxl::read_xlsx(path = filename, sheet = 3)
+    BMI <- readxl::read_xlsx(path = filename, sheet = 3) %>% 
+      mutate(BMI_date = ymd(BMI_date))
     names(BMI) <- c("ID","date","value")
     
     ## PREPARE & PIVOT TABLES SO THAT DATES ARE ALL IN ONE COLUMN
@@ -43,10 +45,14 @@ get_dummy_data <- function(filename){
 
     FUDrugs <- dummydf1 |> 
         select(ID, starts_with("Deglud_"), starts_with("glarg_")) |> 
-        mutate(
-            across(.cols = ends_with("_date"),
-                   .fns = ~ifelse(is.na(.), 0, 1))
-        ) |> 
+      mutate(
+        across(.cols = contains("_date"),
+               .fns = ~as.numeric(.x)),
+        across(.cols = contains("_date"),
+               .fns = ~as.Date(.x, origin = "1900-01-01"))) |>  
+            # across(.cols = ends_with("_date"),
+            #        .fns = ~ifelse(is.na(.), 0, 1))
+       # ) |> 
         pivot_longer(cols = -c("ID"),
                      names_to = "Treatment",
                      values_to = "date") |> 
