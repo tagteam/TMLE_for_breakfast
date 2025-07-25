@@ -18,7 +18,7 @@ library(targets)
 tar_option_set(packages = c("tidyverse","data.table", "riskRegression"))
 # Manal (adapt the path to your computer):
 #try(setwd("c:/git/TMLE_for_breakfast/imperial"),silent = TRUE)
-rtmle_code <- "C:/git/rtmle-main/R/"
+rtmle_code <- "D:/gits/rtmle-main/R/"
 if (file.exists(rtmle_code)) tar_source(rtmle_code)
 # Thomas:
 try(setwd("~/research/Methods/TMLE_for_breakfast/imperial"),silent = TRUE)
