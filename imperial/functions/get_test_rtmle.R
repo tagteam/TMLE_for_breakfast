@@ -42,14 +42,14 @@ get_test_rtmle <- function(dummy_data){
                 protocols = c("Always_Degludec_Never_Glargine", 
                               "Always_Glargine_Never_Degludec"))
     # this is new
-    x <- model_formula(x)
+    x <- model_formula(x,exclude_variables = c("Date","start_followup_date"))
     
     refProtocol <- list(Outcome_risk = "Always_Glargine_Never_Degludec")
 
     x <- run_rtmle(x,
-                        refit = TRUE,
-                        learner = "learn_glmnet",
-                        time_horizon = 1:4)
+                   refit = TRUE,
+                   learner = "learn_glmnet",
+                   time_horizon = 1:4)
 
     summary(x,
             targets = "Outcome_risk",
