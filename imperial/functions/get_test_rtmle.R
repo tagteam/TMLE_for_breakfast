@@ -29,8 +29,8 @@ get_test_rtmle <- function(dummy_data){
     ## PREPARE THE DATA 
     x <- long_to_wide(x,
                       intervals = seq(0, 930, 30.45*6),
-                      fun = list("HBC" = function(x){x},
-                                 "BMI" = function(x){x}),
+                      # fun = list("HBC" = function(x){x},
+                      #            "BMI" = function(x){x}),
                       start_followup_date = "start_followup_date")
     
 
@@ -52,27 +52,16 @@ get_test_rtmle <- function(dummy_data){
     x$names$name_constant_variables <- c("Glargine_0", x$names$name_constant_variables)
     
     # this is new
-<<<<<<< Updated upstream
-    x <- model_formula(x,exclude_variables = c("Date","start_followup_date"))
-=======
-    x <- model_formula(x,
-                       exclude_variables = c("Glargine_0", "start_followup_date"))
->>>>>>> Stashed changes
+    x <- model_formula(x,exclude_variables = c("Date","Glargine_0","start_followup_date"))
     
     refProtocol <- list(Outcome_risk = "Always_Glargine_Never_Degludec")
 
     x <- run_rtmle(x,
-<<<<<<< Updated upstream
                    refit = TRUE,
                    learner = "learn_glmnet",
                    time_horizon = 1:4)
-=======
-                        refit = TRUE,
-                        learner = "learn_glmnet",
-                        time_horizon = 1:5)
->>>>>>> Stashed changes
-
-    summary(x,
-            targets = "Outcome_risk",
+                       
+   summary(object = x,
+            targets = "Outcome_risk", 
             reference = refProtocol) 
 }
