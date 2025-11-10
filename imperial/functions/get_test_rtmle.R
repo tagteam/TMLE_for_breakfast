@@ -1,8 +1,15 @@
 get_test_rtmle <- function(dummy_data){
     if (FALSE){
+        # library("tidyverse")
+        # library("data.table")
+        # library("riskRegression")
+        # library("targets")
+        
         tar_load(dummy_data)
     }
-    tau <- 4
+    
+
+    tau <- 5
     x <- rtmle_init(intervals = tau,
                     name_id = "ID",
                     name_outcome = "Y",
@@ -22,13 +29,13 @@ get_test_rtmle <- function(dummy_data){
     ## PREPARE THE DATA 
     x <- long_to_wide(x,
                       intervals = seq(0, 930, 30.45*6),
-                      fun = list("HBC" = function(x){x},
-                                 "BMI" = function(x){x}),
+                      # fun = list("HBC" = function(x){x},
+                      #            "BMI" = function(x){x}),
                       start_followup_date = "start_followup_date")
     
 
     x <- prepare_data(x)
-    #x$prepared_data |> View()
+    x$prepared_data |> View()
 
     x <- protocol(x,name = "Always_Degludec_Never_Glargine",
                         intervention = data.frame("Degludec" = factor(1,levels = c(0,1)),
@@ -41,8 +48,11 @@ get_test_rtmle <- function(dummy_data){
                 estimator = "tmle",
                 protocols = c("Always_Degludec_Never_Glargine", 
                               "Always_Glargine_Never_Degludec"))
+    
+    x$names$name_constant_variables <- c("Glargine_0", x$names$name_constant_variables)
+    
     # this is new
-    x <- model_formula(x,exclude_variables = c("Date","start_followup_date"))
+    x <- model_formula(x,exclude_variables = c("Date","Glargine_0","start_followup_date"))
     
     refProtocol <- list(Outcome_risk = "Always_Glargine_Never_Degludec")
 
@@ -50,8 +60,8 @@ get_test_rtmle <- function(dummy_data){
                    refit = TRUE,
                    learner = "learn_glmnet",
                    time_horizon = 1:4)
-
-    summary(x,
-            targets = "Outcome_risk",
+                       
+   summary(object = x,
+            targets = "Outcome_risk", 
             reference = refProtocol) 
 }
