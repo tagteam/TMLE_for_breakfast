@@ -12,7 +12,7 @@ try(library(rtmle),silent = TRUE)
 
 tar_load(dummy_data)
 
-
+set.seed(2025)
 
 tau <- 5
 x <- rtmle_init(intervals = tau,
@@ -40,7 +40,7 @@ x <- long_to_wide(x,
 
 
 x <- prepare_data(x)
-x$prepared_data |> View()
+#x$prepared_data |> View()
 
 x <- protocol(x,name = "Always_Degludec_Never_Glargine",
               intervention = data.frame("Degludec" = factor(1,levels = c(0,1)),
@@ -66,13 +66,21 @@ x <- run_rtmle(x,
                learner = "learn_glmnet",
                time_horizon = 1:4)
 
+
+## FROM here, save these parameters and we can shift to summary.rtmle() to debug
 target_name <- "Outcome_risk"
 protocol_name <- "Always_Degludec_Never_Glargine"
 tp <- 4  
-  
+reference <- refProtocol
+analysis <- "Main_analysis"
+digits <- 1
+object <- x
+
+## SE of risk difference is the same as the reference group
 summary(object = x,
         targets = "Outcome_risk", 
-        reference = refProtocol) 
+        reference = refProtocol) |> 
+View()
 
 
 
