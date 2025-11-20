@@ -14,7 +14,7 @@ tar_load(dummy_data)
 
 set.seed(2025)
 
-tau <- 5
+tau <- 4
 x <- rtmle_init(intervals = tau,
                 name_id = "ID",
                 name_outcome = "Y",
@@ -62,25 +62,13 @@ x <- model_formula(x,exclude_variables = c("Date","Glargine_0","start_followup_d
 refProtocol <- list(Outcome_risk = "Always_Glargine_Never_Degludec")
 
 x <- run_rtmle(x,
-               refit = TRUE,
-               learner = "learn_glmnet",
+               verbose = FALSE,
                time_horizon = 1:4)
 
 
-## FROM here, save these parameters and we can shift to summary.rtmle() to debug
-target_name <- "Outcome_risk"
-protocol_name <- "Always_Degludec_Never_Glargine"
-tp <- 4  
-reference <- refProtocol
-analysis <- "Main_analysis"
-digits <- 1
-object <- x
+x$models
 
-## SE of risk difference is the same as the reference group
-summary(object = x,
-        targets = "Outcome_risk", 
-        reference = refProtocol) |> 
-View()
+
 
 
 
