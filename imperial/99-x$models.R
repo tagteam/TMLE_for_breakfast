@@ -65,7 +65,7 @@ x <- run_rtmle(x,
                verbose = FALSE,
                time_horizon = 1:4)
 
-
+## Censored_ are formulas only
 x$models
 
 
