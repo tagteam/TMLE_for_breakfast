@@ -9,7 +9,8 @@ get_dummy_data <- function(filename){
     dummydf1 <- readxl::read_xlsx(path = filename, sheet = 1) |> 
         ## FILTER TO GET TRIAL POPULATION
         ## FILTER FOR PRIMARY OUTCOME ONLY
-        filter(Include_or_not == "Include", 
+        filter(
+          #Include_or_not == "Include", 
                CVD_related_death != "Not CVD-related") 
     
     HBC <- readxl::read_xlsx(path = filename, sheet = 2) %>% 
@@ -72,16 +73,25 @@ get_dummy_data <- function(filename){
     
 
     Glargine <- 
-        Glargine_FU |> 
-        #bind_rows(Glargine_0, Glargine_FU) |> 
-        select(-Treatment) |> 
-        setDT()
+      Glargine_FU |> 
+      bind_rows(Glargine_0) |> 
+      select(-Treatment) |> 
+      mutate(date = ymd(date)) |> 
+      setDT()
+    
+    #names(Glargine) <- c("id","date")
+    
 
     Degludec <- 
-        Degludec_FU |> 
-        #bind_rows(Degludec_0, Degludec_FU) |> 
-        select(-Treatment) |> 
-        setDT()
+      Degludec_FU |> 
+      bind_rows(Degludec_0) |> 
+      select(-Treatment) |> 
+      distinct(id, date) |>
+      mutate(date = ymd(date)) |> 
+      setDT()
+    
+    #names(Degludec) <- c("id","date")
+    
 
     timevar_data <- list(Degludec = Degludec, 
                          Glargine = Glargine)

@@ -34,7 +34,8 @@ AgeSub <- add_long_data(AgeSub,
 
 AgeSub <- add_baseline_data(AgeSub, 
                             data = ModelData$baseline_data |> 
-                              select(-Date))
+                              select(-Date) |> 
+                              setDT())
 
 
 AgeSub <- long_to_wide(AgeSub, 
